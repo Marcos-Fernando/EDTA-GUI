@@ -1,0 +1,127 @@
+:root{
+	--white-01:	#E9E9E9;
+	--grey-01: 	#DDD;
+	--grey-02:	#C4C4CC;
+	--grey-03: 	#121214;
+	--grey-04: 	#787878;
+	--grey-05: 	#444444;
+	--orange-01:#FBA94C;
+	--orange-02:#d4a017;
+	--orange-03:#e6be589f;
+	--black:    #29292E;
+	--red-01: 	#980000;
+	--red-02: 	#d30f0f;
+    --red-03:   #B22222;
+	
+}
+
+
+.box-checkboxs-tir.dark-theme,
+.box-checkboxs-step.dark-theme{
+	color: var(--grey-02);
+}
+
+.box-checkboxs-step.dark-theme .directory_name{
+	border: 0.0625rem solid var(--grey-02);
+}
+
+.box-checkboxs-step.dark-theme .directory_name:focus {
+	border: 0.0625rem solid var(--grey-02);
+	color: var(--grey-03);
+}
+
+.box-checkboxs-step.dark-theme .directory_name::placeholder {
+	color: var(--white-01);
+}
+
+main.dark-theme,
+.results.dark-theme,
+.container-panGenome.dark-theme{
+	background-color: var(--black);
+}
+
+.container-panGenome.dark-theme .title-add-features{
+	color: var(--grey-02);
+}
+
+.container-panGenome.dark-theme .container-main article a{
+    color: var(--orange-01);
+}
+
+.container-main.dark-theme p,
+.container-results.dark-theme article,
+.container-results.dark-theme ul p{
+	color: var(--grey-02);
+}
+
+.container-results.dark-theme p span{
+	color: var(--grey-01);
+}
+
+
+.container-results.dark-theme b,
+.container-main.dark-theme b{
+	color: var(--orange-01);
+}
+
+.container-main.dark-theme a{
+	color: var(--blue);
+}
+
+main.dark-theme .required,
+main.dark-theme .not-required{
+	color: var(--white-01);
+}
+
+main.dark-theme .title-add-features,
+.title-input.dark-theme{
+	color: var(--grey-01);
+	border-bottom: 0.125rem solid var(--orange-01);
+}
+
+main.dark-theme .checkbox-step + label::before, 
+main.dark-theme .checkbox-tir + label::before{
+	border: 0.125rem solid var(--red-01);
+}
+
+main.dark-theme  .checkbox-step:checked + label::before, 
+main.dark-theme .checkbox-tir:checked + label::before{
+	background-color: var(--red-01);
+	color: var(--grey-01);
+}
+
+.session-title.dark-theme{
+	color: var(--orange-01);
+}
+
+header.dark-theme{
+	border-bottom: 0.125rem solid var(--red-03);
+	background-color:var(--grey-05);
+}
+
+footer.dark-theme{
+	border-top: 0.125rem solid var(--red-03);
+	color: var(--grey-02);
+	background-color: var(--grey-05);
+}
+
+.documentation-edta.dark-theme h3,
+.documentation-edta.dark-theme h4{
+	color: var(--grey-01);
+}
+
+.documentation-edta.dark-theme span,
+.documentation-edta.dark-theme p b{
+	color: var(--orange-01);
+}
+
+.documentation-edta.dark-theme p,
+.documentation-edta.dark-theme ul li,
+.documentation-edta.dark-theme ol li{
+	color: var(--grey-02);
+}
+
+.documentation-edta.dark-theme ul li b,
+.documentation-edta.dark-theme ol li b{
+	color: var(--red-01);
+}
