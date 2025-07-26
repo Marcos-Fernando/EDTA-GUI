@@ -50,21 +50,26 @@ conda activate EDTA
 > <br>
 > And replace EDTA with the name of your environment
 
-**Step 3 - Integration with existing EDTA:** If you already have EDTA installed:
-* You can move the ``gui`` folder into the EDTA directory, or
-* Use the same Conda environment created earlier.
+>[!TIP]
+>**Integration with existing EDTA:** If you already have EDTA installed:
+>* You can move the ``gui folder`` into the EDTA directory, or
+>* Use the same Conda environment created earlier.
 
-In the latter case, you will only need to install the following additional packages:
-* Flask packages: ``flask`` / ``flask-email`` / ``flask-pymongo`` / ``flask-script`` / ``python-dotenv``
+>In the latter case, you will only need to install the following additional packages:
+>* Flask packages: ``flask`` / ``flask-email`` / ``flask-pymongo`` / ``flask-script`` / ``python-dotenv``
 
-**Step 4 - Graphical User Interface:**  With the Conda environment active, navigate to the ``gui folder``. Inside this folder, you can create a ``.flaskenv`` file, which defines essential Flask settings and can optionally enable the email notification feature.
+**Step 3 - Graphical User Interface:**  With the Conda environment active, navigate to the ``gui folder``. Inside this folder, you can create a ``.flaskenv`` file, which defines essential Flask settings and can optionally enable the email notification feature.
+```sh
+cd $HOME/EDTA/gui
+```
+
 * You can create the ``.flaskenv`` file with the following content:
 ```sh
 FLASK_APP = "main.py"
 FLASK_DEBUG = True
 FLASK_ENV = development
 ```
-**Step 5 - Email:** The interface architecture is designed to ensure continuous user monitoring during execution by offering an <b>optional</b> ``email notification system``. When enabled, EDTAGUI automatically sends updates about the start and completion of analyses, as well as any errors that may occur.
+**Step 4 - Email:** The interface architecture is designed to ensure continuous user monitoring during execution by offering an <b>optional</b> ``email notification system``. When enabled, EDTAGUI automatically sends updates about the start and completion of analyses, as well as any errors that may occur.
 * If you plan to use the built-in email system (for notifications), you should also include the following configuration in your ``.flaskenv`` file:
 
 ```sh
@@ -98,7 +103,7 @@ MAIL_PASSWORD=your_app_password
 > * Avoid using your primary email account. You can use a dedicated email address for application use.
 > * <b>Never share your ``.flaskenv`` file</b> or expose it in public repositories, as it contains sensitive credentials.
 
-**Step 6 - Run the Application:** Within the ``gui`` folder, and with the Conda environment activated, start the application by running the following command:
+**Step 5 - Run the Application:** Within the ``gui`` folder, and with the Conda environment activated, start the application by running the following command:
 ```sh
 flask run
 ```
@@ -114,7 +119,7 @@ If all settings are correct, you will see a message similar to this:
  * Debugger PIN: 264-075-516
 ```
 
-**Step 7 - Access the Platform:** Click on the link http://127.0.0.1:5000/, or copy and paste it into your browser to access the platform and start testing it.
+**Step 6 - Access the Platform:** Click on the link http://127.0.0.1:5000/, or copy and paste it into your browser to access the platform and start testing it.
 
 
 ## Exploring the EDTAGUI Interface
