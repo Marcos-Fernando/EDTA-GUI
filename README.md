@@ -1,308 +1,233 @@
-[![install with bioconda](https://anaconda.org/bioconda/edta/badges/platforms.svg)](https://anaconda.org/bioconda/edta) [![Anaconda-Server Badge](https://anaconda.org/bioconda/edta/badges/license.svg)](https://github.com/oushujun/EDTA/blob/master/LICENSE) [![Anaconda-Server Badge](https://anaconda.org/bioconda/edta/badges/version.svg)](https://anaconda.org/bioconda/edta) [![Anaconda-Server Badge](https://anaconda.org/bioconda/edta/badges/downloads.svg)](https://anaconda.org/bioconda/edta)
+<div align="center"> 
+    <img src="gui/static/assets/Logo.svg" alt="Logo" style="width: 45rem">
+</div><br>
 
+<div align="center">
 
-# The Extensive *de novo* TE Annotator (EDTA)
+  ![Linux version](https://img.shields.io/badge/PLATFORM-Linux_64-orange) ![InterfaceGUI](https://img.shields.io/badge/Interface-GUI-1C9997) ![Docker](https://img.shields.io/badge/Container-Docker-4682B4) ![Singularity](https://img.shields.io/badge/Container-Singularity-yellow)  ![License](https://img.shields.io/badge/LICENSE-GPL_v3.0-D3D3D3)
 
-## Table of Contents
-
-- [The Extensive *de novo* TE Annotator (EDTA)](#the-extensive-de-novo-te-annotator-edta)
-  - [Table of Contents](#table-of-contents)
-  - [Introduction](#introduction)
-  - [Installation](#installation)
-    - [Install with conda/mamba (Linux64)](#install-with-condamamba-linux64)
-    - [Install with Singularity (good for HPC users)](#install-with-singularity-good-for-hpc-users)
-    - [Install with Docker (good for root/macOS/Apple M-chip users)](#install-with-docker-good-for-rootmacosapple-m-chip-users)
-  - [Testing](#testing)
-  - [Inputs](#inputs)
-  - [Outputs](#outputs)
-  - [EDTA Usage](#edta-usage)
-    - [From head to toe](#from-head-to-toe)
-    - [Divide and conquer](#divide-and-conquer)
-    - [Protips and self-diagnosis](#protips-and-self-diagnosis)
-  - [panEDTA usage](#panedta-usage)
-  - [Benchmark](#benchmark)
-  - [Citations](#citations)
-  - [Other resources](#other-resources)
-  - [Questions and Issues](#questions-and-issues)
-  - [Acknowledgements](#acknowledgements)
-
-
-## Introduction
-This package is developed for automated whole-genome *de-novo* TE annotation and benchmarking the annotation performance of TE libraries.
-
-The EDTA package was designed to filter out false discoveries in raw TE candidates and generate a high-quality non-redundant TE library for whole-genome TE annotations. Selection of initial search programs were based on benckmarkings on the annotation performance using a manually curated TE library in the rice genome.
-
-<!-- <img width="600" alt="The EDTA workflow" src="https://github.com/oushujun/EDTA/blob/master/development/EDTA%20workflow.png?raw=true"> -->
-
-<div style="text-align:center; width: 100%">
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./development/EDTA_workflow_white.png">
-  <img style="width: 80%; max-width: 725px" alt="The EDTA workflow" src="./development/EDTA_workflow_black.png">
-</picture>
-<br><br>
 </div>
 
-To benchmark the annotation quality of a new library/method, I have provided the TE annotation with the curated rice TE library (v7.0.0) for the rice genome (TIGR7/MSU7 version). You may use the `lib-test.pl` script to compare the annotation performance of your method/library to the methods we have tested (usage shown below).
 
-For pan-genome annotations, you need to annotate each genome with EDTA, generate a pan-genome library, then reannotate each genome with the pan-genome library. Please refer to this [example](https://github.com/HuffordLab/NAM-genomes/tree/master/te-annotation) for details. A sequential version of panEDTA is also included in this package. 
+## Table of Contents
+  - [Introduction](#introduction)
+  - [Installation](#installation)
+  - [Exploring the EDTAGUI Interface](#exploring-the-edtagui-interface)
+    - [EDTA](#edta)
+    - [panEDTA](#panedta)
+    - [Results](#results)
+  - [Testing](#testing)
+  - [Outputs](#outputs)
+  - [Citations](#citations)
+
+## Introduction
+This package was developed as an extension of the [EDTA pipeline](https://github.com/oushujun/EDTA), with the aim of providing a graphical interface for users. The purpose of EDTAGUI is to make the use of EDTA more accessible, meeting the needs of researchers at different levels of experience – from beginners to experts – and facilitating the analysis and annotation of transposable elements in genomes.
 
 
 ## Installation
+**Step 1 - Prrequisites:** Ensure that Miniconda ins installed on your machine:
+* You can download it from the following link: [Miniconda3](https://docs.conda.io/projects/miniconda/en/latest/) 
+* After downloading Miniconda from the link above, run the following command in your terminal:
+ ```sh
+ bash Miniconda3-latest-Linux-x86_64.sh
+ ```
+**Step 2 - Conda Environment:** The installation of EDTAGUI is similar to that of EDTA, with the addition of a few extra packages via Conda and pip to support the graphical interface.
+```sh
+cd $HOME/EDTA
 
-There are several ways to install EDTA. You just need to find the one that works for your system. If you are not using macOS, you may try the conda approach before the Singularity approach.
-
-### Install with conda/[mamba](https://github.com/mamba-org/mamba) (Linux64)
-
-Recommend to ceate a dedicated environment for EDTA:
-
-```
-conda create -n EDTA
+conda env create -f EDTA_2.2.x.yml
 conda activate EDTA
-mamba install -c conda-forge -c bioconda edta
 ```
 
-If your `mamba` exit with dependency coflicts, you may check out your ~/.condarc file and make sure it use "flexible" solve:
->channels:  
->  \- conda-forge  
->  \- bioconda  
->channel_priority: flexible
+> [!IMPORTANT]
+> The default name of the Conda environment used is <b>EDTA</b>
+><br>
+> If you used a different name, you will need to edit the ``main.py`` file located in the ``gui`` folder.
+> <br>
+> Look for the following lines:
+> * "conda activate EDTA" or "$HOME/miniconda3/envs/EDTA/"
+> <br>
+> And replace EDTA with the name of your environment
 
-If you install on an Apple M-chip system (ARM64), you will need to use Rosetta 2 following these steps:   
-a. Use Rosetta to run your Terminal.   
-b. Install the x86_64 version of conda or arm64 version of miniforge.
-c. Install EDTA using osx-64:   
+**Step 3 - Integration with existing EDTA:** If you already have EDTA installed:
+* You can move the ``gui`` folder into the EDTA directory, or
+* Use the same Conda environment created earlier.
+
+In the latter case, you will only need to install the following additional packages:
+* Flask packages: ``flask`` / ``flask-email`` / ``flask-pymongo`` / ``flask-script`` / ``python-dotenv``
+
+**Step 4 - Graphical User Interface:**  With the Conda environment active, navigate to the ``gui folder``. Inside this folder, you can create a ``.flaskenv`` file, which defines essential Flask settings and can optionally enable the email notification feature.
+* You can create the ``.flaskenv`` file with the following content:
+```sh
+FLASK_APP = "main.py"
+FLASK_DEBUG = True
+FLASK_ENV = development
 ```
-CONDA_SUBDIR=osx-64 conda create -n EDTA -c bioconda -c conda-forge edta
+**Step 5 - Email:** The interface architecture is designed to ensure continuous user monitoring during execution by offering an <b>optional</b> ``email notification system``. When enabled, EDTAGUI automatically sends updates about the start and completion of analyses, as well as any errors that may occur.
+* If you plan to use the built-in email system (for notifications), you should also include the following configuration in your ``.flaskenv`` file:
+
+```sh
+MAIL_SERVER=smtp.example.com
+MAIL_PORT=587
+MAIL_USE_TLS=True
+MAIL_USE_SSL=True
+MAIL_USERNAME=your_email@example.com
+MAIL_PASSWORD=your_app_password
 ```
+> [!TIP]
+> <b> Email Server Settings: </b>
+> * Gmail:
+>   * Server: smtp.gmail.com 
+>   * Port: 587 (TLS) or 465 (SSL) 
+> * Outlook: 
+>   * Server: smtp.office365.com
+>   * Port: 587 (TLS)
+> <br>
+>
+> <b>App Password for Gmail:</b> <br>
+> To use Gmail securely, create an app-specific password:
+> 1. Open your Google Account settings.
+> 2. Search for "App Passwords" in the search bar.
+> 3. Generate a new app password and use it in the MAIL_PASSWORD field.
 
+<br>
 
-If you encounter PyTorch CUDA related issues during EDTA execution, you may consider installing a CPU-only PyTorch build by adding `"pytorch=*=*cpu*"` in the installation commands, e.g. `mamba install -c conda-forge -c bioconda edta "pytorch=*=*cpu*"`. You can check [Enforce PyTorch Build (CUDA or CPU-only)](https://github.com/lutianyu2001/TIR-Learner?tab=readme-ov-file#enforce-pytorch-build-cuda-or-cpu-only) for more information.
+> [!WARNING]
+> <b> Security Recommendations: </b>
+> * Avoid using your primary email account. You can use a dedicated email address for application use.
+> * <b>Never share your ``.flaskenv`` file</b> or expose it in public repositories, as it contains sensitive credentials.
 
-<details>
-<summary>Other ways to install with conda/mamba...</summary>
-
-1. Install with the yml file:
-
-Download the latest EDTA:
-
-`git clone https://github.com/oushujun/EDTA.git`
-
-Find the yml file in the EDTA folder and run:
-
-`mamba env create -f EDTA_2.2.x.yml`
-
-The default `conda env` name is `EDTA2` specified by the first line of the yml file. You may change that to different names.
-
-2. Install by specifying all dependencies:
-
-`mamba create -n EDTA2.2 -c conda-forge -c bioconda annosine2 biopython cd-hit coreutils genericrepeatfinder genometools-genometools glob2 tir-learner ltr_finder_parallel ltr_retriever mdust multiprocess muscle openjdk perl perl-text-soundex r-base r-dplyr regex repeatmodeler r-ggplot2 r-here r-tidyr tesorter samtools bedtools LTR_HARVEST_parallel HelitronScanner`
-
-</details>
-
-Usage:
-```
-conda activate EDTA
-perl EDTA.pl
-```
-
-You can use the conda ENV to execute the latest EDTA from GitHub:
-```
-git clone https://github.com/oushujun/EDTA.git
-perl ./EDTA/EDTA.pl
-```
-
-### Install with [Singularity](https://sylabs.io/docs/) (good for HPC users)
- 
-```
-SINGULARITY_CACHEDIR=./
-export SINGULARITY_CACHEDIR
-`singularity pull EDTA.sif docker://quay.io/biocontainers/edta:<tag>`
-```
-
-Visit [BioContainers](https://quay.io/repository/biocontainers/edta?tab=tags) repository for a list of available tags (e.g., `2.2.0--hdfd78af_1`).
-
-Usage:
-
-```
-export PYTHONNOUSERSITE=1
-singularity exec {path}/EDTA.sif EDTA.pl --genome genome.fa [other parameters]
+**Step 6 - Run the Application:** Within the ``gui`` folder, and with the Conda environment activated, start the application by running the following command:
+```sh
+flask run
 ```
 
-Where `{path}` is the path you build the EDTA singularity image.
+If all settings are correct, you will see a message similar to this:
+```sh
+ * Serving Flask app 'main.py' (lazy loading)
+ * Environment: development
+ * Debug mode: on
+ * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 264-075-516
+```
 
-### Install with [Docker](https://www.docker.com/) (good for root/macOS/Apple M-chip users)
+**Step 7 - Access the Platform:** Click on the link http://127.0.0.1:5000/, or copy and paste it into your browser to access the platform and start testing it.
 
-`sudo docker pull quay.io/biocontainers/edta:<tag>`
 
-Usage:
+## Exploring the EDTAGUI Interface
+The EDTAGUI interface was developed to implement, as closely as possible, all the functionalities available in the traditional EDTA pipeline, but in a more accessible way through a graphical interface.
 
-`sudo docker run -v $PWD:/in -w /in quay.io/biocontainers/edta:<tag> EDTA.pl --genome genome.fa [other parameters]`
+The interface is divided into four main sections: EDTA, panEDTA, Result, and Help.
 
-Visit [BioContainers](https://quay.io/repository/biocontainers/edta?tab=tags) repository for a list of available tags (e.g., `2.2.0--hdfd78af_1`).
+### EDTA
+This section replicates several fields from the original EDTA pipeline, organising them into subareas to facilitate the annotation process and improve the user experience.
 
-Note: Because only the current directory is mounted to the EDTA docker container, you have to copy all needed files to the current directory and provide them to EDTA without path specifications. Even providing the absolute path to the file located in this folder won't work. Softlinked files are considered "with path" and won't work. Similarily, specifying your own versions of dependency programs (i.e., repeatmasker, repeatmodeler) won't work because they have paths.
+Data input begins with the following fields:
 
+* **Email Address:** To start the annotation process, enter a valid email address. This is a optional field and is used to send notifications about the status of the analysis. While the email facilitates communication, the annotation occurs locally, so keep the system running during the process.
+* **Genome Data:** Upload the input file containing the complete genomic sequence in FASTA format. Use the "Browse" button to select the file from the local system.
+
+Next, the interface presents additional features, grouped into a subsection with advanced configuration options for the analysis.
+* **Species Specification to Identify TIR Candidates:** Allows users to specify the reference species in order to optimise the identification of TIR elements. The options include:
+  * Others: For species other than rice or maize (default).
+  * Rice: For rice genomes.
+  * Maize: For maize genomes.
+
+* **Steps to Be Executed:** Select which parts of the pipeline will be executed:
+  * All: Runs the entire pipeline (default).
+  * Filter: Starts from raw TEs to the end.
+  * Final: Begins with filtered TEs to completion.
+  * Anno: Conducts genome-wide annotation after building the TE library.
+
+  When selecting the Filter, Final, or Anno options, it is necessary to specify the name of the folder where a previous annotation step has already been executed. This folder must be located within the /EDTA/gui/results directory. This ensures that EDTAGUI can access the required files to continue the process, reusing the data already generated and avoiding the repetition of previous steps.
+
+* **Overwrite:** Decide whether existing output data should be overwritten.
+* **Sensitivity:** Control the execution of RepeatModeler to identify additional elements.
+* **Annotation:** Specify whether the genome-wide annotation of TEs should proceed after building the TE library.
+* **Evaluate:** Check if the classification of annotated TEs is consistent. The "Annotation" field must be enabled to use this feature.
+* **Force:** If no reliable TE candidates are identified, enabling this option allows the script to continue using a backup rice TE library.
+* **Neutral Mutation Rate:** Set the neutral mutation rate for calculating the age of intact LTR elements (default: 1.3e-8 bp per year, based on rice).
+* **Maximum Divergence:** Define the maximum acceptable divergence for TE fragments. For highly repetitive genomes, users are encouraged to adjust the parameter (default: 40).
+* **Threads:** Determine the number of threads to be used in running the pipeline (default: 4).
+  
+Finally, there is a section dedicated to additional input files, allowing users to include complementary files to streamline and enhance the analysis.
+* **Coding DNA Sequence:** Select a FASTA file containing the coding sequence (without introns, UTRs, or TEs) of the genome or a close relative. This helps in excluding non-transposable elements.
+* **Curate library:** Upload a curated library to maintain consistent TE naming and classification. Only manually validated TEs should be provided. This file is optional.
+* **Exclusion of masked regions:** Define regions to be ignored during TE masking. The "Annotation" field must be enabled to use this option.
+* **RepeatModeler library:** Upload a classified RepeatModeler library to enhance analysis sensitivity, particularly for LINEs. If not provided, one will be generated automatically.
+* **RepeatMasker library:** Provide your own homology-based TE annotation in RepeatMasker .out format. This file will be merged with the structure-based annotation. The "Annotation" field must be enabled.
+
+
+### panEDTA
+This section provides the interface for panEDTA, a new feature of the EDTA pipeline that enables sequential annotation of multiple genomes.
+
+Data input begins with the following fields:
+* **Email Address:** To start the annotation process, enter a valid email address. This is a optional field and is used to send notifications about the status of the analysis. While the email facilitates communication, the annotation occurs locally, so keep the system running during the process.
+
+* **Genome Data:** Upload the input file containing the complete genome sequence in FASTA format, along with a corresponding CDS file (optional). You must provide at least one genome file. The optional CDS file will only be considered if it is linked to a genome; otherwise, it will be ignored. Use the Browse button to select files from your local system. By clicking the "+" icon, you can add more fields to upload additional genome and CDS files.
+
+Next, the interface presents additional features, this subsection provides advanced configuration options for the analysis.
+* **Coding DNA Sequence:** Required. A coding sequence file in FASTA format. The CDS file provided in this field will be used to fill in any missing CDS files from the Genome Data list. If no CDS files are specified in the genome list, this CDS file will be applied to all genomes.
+
+* **Non-redundant library:** Optional. A manually curated non-redundant library following the RepeatMasker naming convention.
+
+* **Threads:** Specify the number of threads to be used when running panEDTA (default: 10).
+
+* **Minimum number of full-length TE copies in individual genomes:** Defines the minimum number of full-length TE copies required in individual genomes for them to be considered as candidate TEs for the pangenome. Lower values are more inclusive, resulting in a larger library, higher sensitivity, but increased inconsistency. Higher values are more stringent, leading to a smaller library, reduced sensitivity, and greater consistency. (default: 3).
+
+### Results
+After completing all necessary fields, click "Submit" to start the analysis. Ensure that all configurations are correct for efficient and accurate processing.
+
+If you have provided a valid email address, you will receive a notification once the annotation process has started. Upon completion, a second email will be sent, indicating whether the process was successful or if any issues occurred. This final email will include a detailed log file outlining the outcome.
+
+You can also monitor the progress of the annotation by accessing the "Results" tab. This section displays key information such as:
+  * The name of the generated output file;
+  * Start and end timestamps (when available);
+  * The current status of the annotation (e.g., in progress, completed, failed);
+  * The last 20 lines of the annotation log.
+
+**Note 1:** all results and output files will be stored in the Docker volume you specified as the output directory. Ensure this path is correctly mounted to access the generated data.
+
+**Note 2:** Errors may occasionally occur during the annotation process, so it is important to pay attention to two key stages:
+
+**1.** Start of annotation: After uploading a file, ensure that the annotation process has actually begun. Sometimes, the file may not be properly recognised by the system, and in such cases, you will need to re-upload the file and restart the process.
+
+**2.** Completion of annotation: Even if the process runs, the annotation may not be successfully finalised in the Results section. Therefore, it is important to check the following:
+
+  * Look out for any prolonged error messages.
+  * Confirm whether the message <i>"Evaluation of TE annotation finished! ..."</i> or <i>"panEDTA annotation of genome_${date}.cds.list is finished!"</i> appears — this message indicates that the annotation has been successfully completed.
+
+### Help
+Provides a brief guide explaining each option available in the annotation sections.
 
 ## Testing
 You should test the EDTA pipeline with a 1-Mb toy genome, which takes about five mins. If your test finishs without any errors (warnings are OK), then EDTA should be correctly installed. If the test is OK but you encounter errors with your data, you should check your own data for any formating/naming mistakes.
 
-```
-cd ./EDTA/test
-perl ../EDTA.pl --genome genome.fa --cds genome.cds.fa --curatedlib ../database/rice7.0.0.liban --exclude genome.exclude.bed --overwrite 1 --sensitive 1 --anno 1 --threads 10
-```
+Step-by-step:
 
-If your test fails, you may check out this [collection of issues](https://github.com/oushujun/EDTA/wiki/Installations,-builds,-and-tests-Q&A) for possible reasons and solutions. If none works, you may open a new issue.
+**1.** Genome data: Select the genome.fa file located in the /EDTA/test folder.
 
+**2.** Activate the options: Overwrite, Annotation, and Sensitivity (These options are enabled by default in the graphical interface).
 
-## Inputs
-Required: The genome file [FASTA]. Please make sure sequence names are short (<=13 characters) and simple (i.e, letters, numbers, and underscore).
+**3.** Threads: Define the number of threads you wish to use for processing.
 
-Optional: 
-1. Coding sequence of the species or a closely related species [FASTA]. This file helps to purge gene sequences in the TE library.
-2. Known gene positions of this version of the genome assembly [BED]. Coordinates specified in this file will be excluded from TE annotation to avoid over-masking.
-3. Curated TE library of the species [FASTA]. This file is trusted 100%. Please make sure it's curated. If you only have a couple of curated sequences, that's also good. It doesn't need to be complete. Providing curated TE sequences, especially for those under-annotated TE types (i.e., SINEs and LINEs), will greatly improve the annotation quality. For more information, please visit this wiki page: [How to prepare a curated library to maximize the efficacy of EDTA](https://github.com/oushujun/EDTA/wiki/How-to-prepare-a-curated-library-to-maximize-the-efficacy-of-EDTA)
+**4.** Coding DNA Sequence (CDS): Add the genome.cds.fa file, also located in /EDTA/test.
 
+**5.** Curate library: Select the rice7.0.0.liban file, available in the /EDTA/database folder.
+
+**6.** Exclusion of masked regions: Specify the genome.exclude.bed file, also found in /EDTA/test.
+
+**7.** After completing all fields, click <b>Submit</b> to start the pipeline execution.
 
 ## Outputs
-A non-redundant TE library: $genome.mod.EDTA.TElib.fa. The curated library will be included in this file if provided. The [rice library](./database/rice7.0.0.liban) will be (partially) included if `--force 1` is specified. TEs are classified into the superfamily level and using the three-letter naming system reported in [Wicker et al. (2007)](https://www.nature.com/articles/nrg2165). Each sequence can be considered as a TE family. To convert between classification systems, please refer to the [TE sequence ontology file](./bin/TE_Sequence_Ontology.txt).
+After completion, all results are organised in the /EDTA/gui/results directory. The folders generated by the annotation process in the EDTA section are named according to the genome name, the date (year, month, day), and the time (hour, minute, second) of execution. The folder generated by the panEDTA section follows the same naming pattern but starts with the prefix panGenome.
 
-Optional 1:
-1. Novel TE families: $genome.mod.EDTA.TElib.novel.fa. This file contains TE sequences that are not included in the curated library (`--curatedlib` required).
-
-Optional 2, when you specify the `--anno 1` parameter, you will get:  
-2. Whole-genome TE annotation: $genome.mod.EDTA.TEanno.gff3. This file contains both structurally intact and fragmented TE annotations.  
-3. Summary of whole-genome TE annotation: $genome.mod.EDTA.TEanno.sum.   
-4. Low-threshold TE masking: $genome.mod.MAKER.masked. This is a genome file with only long TEs (>=1 kb) being masked. You may use this for de novo gene annotations. In practice, this approach will reduce overmasking for genic regions, which can improve gene prediction quality. However, initial gene models should contain TEs and need further filtering.   
-5. Annotation inconsistency for simple TEs: $genome.mod.EDTA.TE.fa.stat.redun.sum.  
-6. Annotation inconsistency for nested TEs: $genome.mod.EDTA.TE.fa.stat.nested.sum.   
-7. Oveall annotation inconsistency: $genome.mod.EDTA.TE.fa.stat.all.sum.
-
-
-## EDTA Usage
-
-### From head to toe
-*You got a genome and you want to get a high-quality TE annotation:*
-
-    perl EDTA.pl [options]
-      --genome [File]		The genome FASTA file. Required.
-      --species [Rice|Maize|others]	Specify the species for identification of TIR candidates. Default: others
-      --step [all|filter|final|anno]	Specify which steps you want to run EDTA.
-					 all: run the entire pipeline (default)
-					 filter: start from raw TEs to the end.
-					 final: start from filtered TEs to finalizing the run.
-					 anno: perform whole-genome annotation/analysis after TE library construction.
-      --overwrite [0|1]		If previous results are found, decide to overwrite (1, rerun) or not (0, default).
-      --cds [File]		Provide a FASTA file containing the coding sequence (no introns, UTRs, nor TEs) of this genome or its close relative.
-      --curatedlib [file]	Provided a curated library to keep consistant naming and classification for known TEs.
-				All TEs in this file will be trusted 100%, so please ONLY provide MANUALLY CURATED ones here.
-				 This option is not mandatory. It's totally OK if no file is provided (default).
-      --rmlib	[File]	Provide the RepeatModeler library containing classified TEs to enhance
-			the sensitivity especially for LINEs. If no file is provided (default),
-			EDTA will generate such file for you.
-      --sensitive [0|1]	Use RepeatModeler to identify remaining TEs (1) or not (0,
-			default). This step may help to recover some TEs.
-      --anno [0|1]	Perform (1) or not perform (0, default) whole-genome TE annotation after TE library construction.
-      --rmout [File]	Provide your own homology-based TE annotation instead of using the EDTA library for masking.
-			File is in RepeatMasker .out format. This file will be merged with the structural-based TE annotation. (--anno 1 required).
-			Default: use the EDTA library for annotation.
-      --maxdiv [0-100]	Maximum divergence (0-100%, default: 40) of repeat fragments comparing to 
-			library sequences.
-      --evaluate [0|1]	Evaluate (1) classification consistency of the TE annotation. (--anno 1 required). Default: 0.
-			 This step is slow and does not affect the annotation result.
-      --exclude	[File]	Exclude regions (bed format) from TE masking in the MAKER.masked output. Default: undef. (--anno 1 required).
-      --force	[0|1]	When no confident TE candidates are found: 0, interrupt and exit
-			(default); 1, use rice TEs to continue.
-      --u [float]	Neutral mutation rate to calculate the age of intact LTR elements.
-			 Intact LTR age is found in this file: *EDTA_raw/LTR/*.pass.list. Default: 1.3e-8 (per bp per year, from rice).
-      --threads|-t	[int]	Number of theads to run this script (default: 4)
-      --help|-h	Display this help info
-
-### Divide and conquer
-*Identify intact elements of a paticular TE type*:
-
-1.Get raw TEs from a genome (specify `-type ltr|tir|helitron` in different runs)
-
-    perl EDTA_raw.pl [options]
-      --genome	[File]	The genome FASTA
-      --species [Rice|Maize|others]	Specify the species for identification of TIR candidates. Default: others
-      --type	[ltr|sine|line|tir|helitron|all] Specify which type of raw TE candidates you want to get. Default: all
-      --rmlib	[FASTA] The RepeatModeler library, classified output.
-      --u [float]	Neutral mutation rate to calculate the age of intact LTR elements.
-			Intact LTR age is found in this file: *EDTA_raw/LTR/*.pass.list.
-                        Default: 1.3e-8 (per bp per year, from rice).
-      --overwrite	[0|1]	If previous results are found, decide to overwrite (1, rerun) or not (0, default).
-      --threads|-t	[int]	Number of theads to run this script
-      --help|-h	Display this help info
-
-2.Finish the rest of the EDTA analysis (specifying `--overwrite 0` and it will automatically pick up existing results in the work folder)
-
-    perl EDTA.pl --overwrite 0 [options]
-
-### Protips and self-diagnosis
-1. It's never said enough. You should tidy up all your sequence names before ANY analysis. Keep them short, simple, and unique.
-2. Run it in a fast drive (i.e., SSD) because RepeatMasker/RepeatModeler is I/O intense.
-3. Check out the [Wiki page](https://github.com/oushujun/EDTA/wiki) for more information and frequently asked questions.
-
-## panEDTA usage
-This is the serial version of panEDTA. Each genome will be annotated sequentially and then combined with the panEDTA functionality. Existing EDTA annotation of genomes (EDTA run with --anno 1) will be recognized and reused. A way to acclerate the pan-genome annotation is to execute EDTA annotation of each genomes separately and in parallel, then execute panEDTA to finish the remaining of the runs. You may want to save the GFF files and the sum file of the EDTA results of each genome because they will be overwritten by panEDTA. To help filtering out gene-related sequences, at least one CDS file is required. Please read [wiki](https://github.com/oushujun/EDTA/wiki/Making-sense-of-EDTA-usage-and-outputs---Q&A) for the CDS requirement. You may want to check out the toy example in the ./test folder to get familiarized.
-
-    sh panEDTA.sh -g genome_list.txt -c cds.fasta -t 10
-        -g	A list of genome files with paths accessible from the working directory.
-                    Required: You can provide only a list of genomes in this file (one column, one genome each row).
-                    Optional: You can also provide both genomes and CDS files in this file (two columns, one genome and one CDS each row).
-                        Missing of CDS files (eg, for some or all genomes) is allowed.
-        -c	Required. Coding sequence files in fasta format.
-                    The CDS file provided via this parameter will fill in the missing CDS files in the genome list.
-                    If no CDS files are provided in the genome list, then this CDS file will be used on all genomes.
-        -l	Optional. A manually curated, non-redundant library following the RepeatMasker naming format.
-        -f	Minimum number of full-length TE copies in individual genomes to be kept as candidate TEs for the pangenome.
-                    Lower is more inclusive, and will ↑ library size, ↑ sensitivity, and ↑ inconsistency.
-                    Higher is more stringent, and will ↓ library size, ↓ sensitivity, and ↓ inconsistency.
-                    Default: 3.
-        -t	Number of CPUs to run panEDTA. Default: 10.
-
-
-## Benchmark
-If you developed a new TE method/got a TE library and want to compare it's annotation performance to the methods we have tested, you can:
-
-1.annotate the rice genome with your test library:
-
-    RepeatMasker -e ncbi -pa 36 -q -no_is -norna -nolow -div 40 -lib custom.TE.lib.fasta -cutoff 225 rice_genome.fasta
-
-2.Test the annotation performance of a particular TE category.
-
-    perl lib-test.pl -genome genome.fasta -std genome.stdlib.RM.out -tst genome.testlib.RM.out -cat [options]
-        -genome	[file]	FASTA format genome sequence
-        -std	[file]	RepeatMasker .out file of the standard library
-        -tst	[file]	RepeatMasker .out file of the test library
-        -cat	[string]	Testing TE category. Use one of LTR|nonLTR|LINE|SINE|TIR|MITE|Helitron|Total|Classified
-        -N	[0|1]	Include Ns in total length of the genome. Defaule: 0 (not include Ns).
-        -unknown	[0|1]	Include unknown annotations to the testing category. This should be used when
-                        the test library has no classification and you assume they all belong to the
-                        target category specified by -cat. Default: 0 (not include unknowns)
-
-eg.
-
-    perl lib-test.pl -genome rice_genome.fasta -std ./EDTA/database/Rice_MSU7.fasta.std7.0.0.out -tst rice_genome.fasta.test.out -cat LTR
-
-Note: the -std and -tst files should be named differently even they are placed in different folders.
 
 ## Citations
-Please cite our paper if you find EDTA useful:
+This work is an extension of the EDTA tool. Therefore, when using EDTAGUI in publications or projects, please cite the following original articles:
 
 Ou S., Su W., Liao Y., Chougule K., Agda J. R. A., Hellinga A. J., Lugo C. S. B., Elliott T. A., Ware D., Peterson T., Jiang N.✉, Hirsch C. N.✉ and Hufford M. B.✉ (2019). Benchmarking Transposable Element Annotation Methods for Creation of a Streamlined, Comprehensive Pipeline. [Genome Biol. 20(1): 275.](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1905-y)
 
-Please cite the panEDTA paper if you are using the pan-genome functionality:
-
 Ou S., Scheben A., Collins T., Qiu Y., Seetharam A., Menard C., Manchanda N., Gent J., Schatz M., Anderson S., Hufford M.✉, Hirsch C.✉ (2024). Differences in activity and stability drive transposable element variation in tropical and temperate maize. [Genome Research](https://doi.org/10.1101/gr.278131.123)
-
-## Other resources
-You may download the [rice genome here](http://rice.uga.edu/pub/data/Eukaryotic_Projects/o_sativa/annotation_dbs/pseudomolecules/version_7.0/all.dir/) (the "all.con" file).
-
-## Questions and Issues
-You may want to check out this [Q&A page](https://github.com/oushujun/EDTA/wiki) for best practices and get answered. If you have other issues with installation and usage, please check if similar issues have been reported in [Issues](https://github.com/oushujun/EDTA/issues) or open a new issue. If you are (looking for) happy users, please read or write successful cases [here](https://github.com/oushujun/EDTA/issues/15).
-
-## Acknowledgements
-I want to thank [Jacques Dainat](https://github.com/Juke34) for contribution of the EDTA conda recipe as well as improving the codes. I also want to thank [Qiushi Li](https://github.com/QiushiLi), [Zhigui Bao](https://github.com/baozg), [Philipp Bayer](https://github.com/philippbayer), [Nick Carleson](https://github.com/Neato-Nick), [@aderzelle](https://github.com/aderzelle), [Sanzhen Liu](https://github.com/liu3zhenlab), [Zhougeng Xu](https://github.com/xuzhougeng), [Shun Wang](https://github.com/wangshun1121), [Nancy Manchanda](https://github.com/nm100), [Eric Burgueño](https://github.com/eburgueno), [Sergei Ryazansky](https://github.com/DrHogart), and many more others for testing, debugging, and improving the EDTA pipeline.
-
-The ongoing development of EDTA's Nextflow pipeline is a collaborative effort between The Ou lab at Ohio State University, Deng's Bioinformatics Engineering Team at The New Zealand Institute for Plant and Food Research Limited, and Joseph Guhlin from Peter Dearden's lab at University of Otago and Genomics Aotearoa.
