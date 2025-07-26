@@ -55,6 +55,7 @@ conda activate EDTA
 >* You can move the ``gui folder`` into the EDTA directory, or
 >* Use the same Conda environment created earlier.
 ><br>
+>
 >In the latter case, you will only need to install the following additional packages:
 >* Flask packages: ``flask`` / ``flask-email`` / ``flask-pymongo`` / ``flask-script`` / ``python-dotenv``
 
