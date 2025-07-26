@@ -51,7 +51,7 @@ conda activate EDTA
 > And replace EDTA with the name of your environment
 
 >[!TIP]
->**Integration with existing EDTA:** If you already have EDTA installed:
+>📌 **Integration with existing EDTA:** If you already have EDTA installed:
 >* You can move the ``gui folder`` into the EDTA directory, or
 >* Use the same Conda environment created earlier.
 ><br>
@@ -70,7 +70,7 @@ FLASK_APP = "main.py"
 FLASK_DEBUG = True
 FLASK_ENV = development
 ```
-**Step 4 - Email:** The interface architecture is designed to ensure continuous user monitoring during execution by offering an <b>optional</b> ``email notification system``. When enabled, EDTAGUI automatically sends updates about the start and completion of analyses, as well as any errors that may occur.
+📌 **Email:** The interface architecture is designed to ensure continuous user monitoring during execution by offering an <b>optional</b> ``email notification system``. When enabled, EDTAGUI automatically sends updates about the start and completion of analyses, as well as any errors that may occur.
 * If you plan to use the built-in email system (for notifications), you should also include the following configuration in your ``.flaskenv`` file:
 
 ```sh
@@ -104,7 +104,7 @@ MAIL_PASSWORD=your_app_password
 > * Avoid using your primary email account. You can use a dedicated email address for application use.
 > * <b>Never share your ``.flaskenv`` file</b> or expose it in public repositories, as it contains sensitive credentials.
 
-**Step 5 - Run the Application:** Within the ``gui`` folder, and with the Conda environment activated, start the application by running the following command:
+**Step 4 - Run the Application:** Within the ``gui`` folder, and with the Conda environment activated, start the application by running the following command:
 ```sh
 flask run
 ```
@@ -120,7 +120,7 @@ If all settings are correct, you will see a message similar to this:
  * Debugger PIN: 264-075-516
 ```
 
-**Step 6 - Access the Platform:** Click on the link http://127.0.0.1:5000/, or copy and paste it into your browser to access the platform and start testing it.
+**Step 5 - Access the Platform:** Click on the link http://127.0.0.1:5000/, or copy and paste it into your browser to access the platform and start testing it.
 
 
 ## Exploring the EDTAGUI Interface
