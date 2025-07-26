@@ -452,10 +452,10 @@
 
 			<section class="bloco">
 				<h3 style="border-bottom: 0.125rem solid var(--red-01);"> EDTA </h3>
-				<p style="margin-bottom: 1rem;"> This section replicates several fields from the EDTA pipeline, organizing them into sub-areas to enhance annotation clarity. It is structured into three parts: Data Input, Additional Features, and Additional Input File.</p>
+				<p style="margin-bottom: 1rem;"> This section replicates several fields from the EDTA pipeline, organizing them into sub-areas to enhance annotation clarity </p>
 
 				<h4> Data Input </h4>
-				<p> This subsection receives the main input data to initiate the annotation process. It includes the fields Email (optional) and Genome Data. </p>
+				<p> Data entry begins with the following fields: </p>
 				<p><b>Email Address: </b> To start the annotation process, enter a valid email address. This is a optional field and is used to send notifications about the status of the analysis. While the email facilitates communication, the annotation occurs locally, so keep the system running during the process. </p>
 				
 				<p><b>Genome Data: </b> Upload the input file containing the complete genomic sequence in FASTA format. Use the "Browse" button to select the file from the local system.</p>
@@ -479,6 +479,7 @@
 					<li><p><b>Final: </b>Begins with filtered TEs to completion.</p></li>
 					<li><p><b>Anno: </b>Conducts genome-wide annotation after building the TE library.</p></li>
 				</ul>
+				<p>When selecting the Filter, Final, or Anno options, it is necessary to specify the name of the folder where a previous annotation step has already been executed. This folder must be located within the <i>/EDTA/gui/results</i> directory. This ensures that EDTAGUI can access the required files to continue the process, reusing the data already generated and avoiding the repetition of previous steps.</p>
 
 				<p><b>Overwrite:</b> Decide whether existing output data should be overwritten.</p>
 				<p><b>Sensitivity:</b> Control the execution of RepeatModeler to identify additional elements.</p>
@@ -504,9 +505,10 @@
 
 			<section class="bloco">
 				<h3 style="border-bottom: 0.125rem solid var(--red-01);"> panEDTA </h3>
-				<p style="margin-bottom: 1rem;">This section provides the interface for panEDTA, a new feature of the EDTA pipeline that enables sequential annotation of multiple genomes. It is divided into two subsections: Data Input and Additional Features, similar to the initial EDTA screen.</p>
+				<p style="margin-bottom: 1rem;">This section provides the interface for panEDTA, a new feature of the EDTA pipeline that enables sequential annotation of multiple genomes.</p>
 
 				<h4> Data Input </h4>
+				<p>Data input begins with the following fields:</p>
 				<p><b>Email Address: </b> To start the annotation process, enter a valid email address. This is a optional field and is used to send notifications about the status of the analysis. While the email facilitates communication, the annotation occurs locally, so keep the system running during the process. </p>
 				
 				<p><b>Genome Data: </b> Upload the input file containing the complete genome sequence in FASTA format, along with a corresponding CDS file (optional). You must provide at least one genome file. The optional CDS file will only be considered if it is linked to a genome; otherwise, it will be ignored. Use the Browse button to select files from your local system. By clicking the "+" icon, you can add more fields to upload additional genome and CDS files. </p>
@@ -520,7 +522,7 @@
 				<p><b>Non-redundant library:</b> Optional. A manually curated non-redundant library following the RepeatMasker naming convention. </p>
 			
 				<p><b>Threads:</b> Specify the number of threads to be used when running panEDTA (default: 10).</p>
-				<p><b>Minimum number of full-length TE copies in individual genomes</b> Defines the minimum number of full-length TE copies required in individual genomes for them to be considered as candidate TEs for the pangenome. Lower values are more inclusive, resulting in a larger library, higher sensitivity, but increased inconsistency. Higher values are more stringent, leading to a smaller library, reduced sensitivity, and greater consistency. (default: 3). </p>
+				<p><b>Minimum number of full-length TE copies in individual genomes:</b> Defines the minimum number of full-length TE copies required in individual genomes for them to be considered as candidate TEs for the pangenome. Lower values are more inclusive, resulting in a larger library, higher sensitivity, but increased inconsistency. Higher values are more stringent, leading to a smaller library, reduced sensitivity, and greater consistency. (default: 3). </p>
 				
 			</section>
 				
