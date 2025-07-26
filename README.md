@@ -17,6 +17,7 @@
     - [panEDTA](#panedta)
     - [Results](#results)
   - [Testing](#testing)
+  - [Docker](#docker)
   - [Outputs](#outputs)
   - [Citations](#citations)
 
