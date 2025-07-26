@@ -192,12 +192,12 @@ You can also monitor the progress of the annotation by accessing the "Results" t
 
 **Note 2:** Errors may occasionally occur during the annotation process, so it is important to pay attention to two key stages:
 
-**1.** Start of annotation: After uploading a file, ensure that the annotation process has actually begun. Sometimes, the file may not be properly recognised by the system, and in such cases, you will need to re-upload the file and restart the process.
+  * **1.** Start of annotation: After uploading a file, ensure that the annotation process has actually begun. Sometimes, the file may not be properly recognised by the system, and in such cases, you will need to re-upload the file and restart the process.
 
-**2.** Completion of annotation: Even if the process runs, the annotation may not be successfully finalised in the Results section. Therefore, it is important to check the following:
+  * **2.** Completion of annotation: Even if the process runs, the annotation may not be successfully finalised in the Results section. Therefore, it is important to check the following:
 
-  * Look out for any prolonged error messages.
-  * Confirm whether the message <i>"Evaluation of TE annotation finished! ..."</i> or <i>"panEDTA annotation of genome_${date}.cds.list is finished!"</i> appears — this message indicates that the annotation has been successfully completed.
+    * Look out for any prolonged error messages.
+    * Confirm whether the message <i>"Evaluation of TE annotation finished! ..."</i> or <i>"panEDTA annotation of genome_${date}.cds.list is finished!"</i> appears — this message indicates that the annotation has been successfully completed.
 
 ### Help
 Provides a brief guide explaining each option available in the annotation sections.
