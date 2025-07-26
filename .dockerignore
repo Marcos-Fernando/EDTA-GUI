@@ -1,0 +1,10 @@
+config_s.py
+config.py
+
+gui/
+
+gui_docker/app.py
+gui_docker/extensions/config.py
+
+.git
+.gitignore

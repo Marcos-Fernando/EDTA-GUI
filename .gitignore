@@ -1,3 +1,7 @@
 gui/.flaskenv
 gui/results/*
-!gui/results/.test
+!gui/results/example_20250726-103151
+
+gui_docker/
+config_s.py
+config.py
