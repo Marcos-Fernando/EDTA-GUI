@@ -426,11 +426,10 @@ singularity exec --bind <path-to-results-folder>:/usr/local/EDTA/gui/results <na
 > - ``--bind <path-to-results-folder>:/usr/local/EDTA/gui/results``: maps a directory from your local machine to a directory inside the container
 > - ``bash -c "..."``: executes a sequence of commands within the container.
 
-<!-- ## CLI version
-A ferramenta conta com as versões cli separada para cada modo. O EDTA pode ser obtido no repositório original, junto a suas versões docker e singularity: [EDTA](https://github.com/oushujun/EDTA). -->
-
-
-
+## CLI version
+The tool provides command-line interface (CLI) versions specific to each mode.
+EDTA can be obtained from its official repository ([EDTA](https://github.com/oushujun/EDTA)), where Docker and Singularity versions are also available.
+The AnnoTEP mode has a usage guide available in its dedicated folder ([AnnoTEP](https://github.com/Marcos-Fernando/EDTA-GUI/tree/main/AnnoTEP)), which likewise includes Docker and Singularity versions.
 
 ## Citations
 This work is an extension of the EDTA tool. Therefore, when using EDTA-GUI in publications or projects, please cite the following original articles:
