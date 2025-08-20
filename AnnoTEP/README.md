@@ -12,7 +12,7 @@
 # Introduction
 The AnnoTEP is a mode designed for the annotation of transposable elements (TEs) in plant genomes. Built upon the [EDTA pipeline](https://github.com/oushujun/EDTA), the tool incorporates specific modifications inspired by the [Plant genome Annotation pipeline](https://github.com/amvarani/Plant_Annotation_TEs), as well as adjustments that enhance its performance and flexibility.
 
-In addition to its GitHub repository, AnnoTEP also has a [website](https://plantgenomics.ncc.unesp.br/AnnoTEP/) that centralises its documentation, displays the genome mutation rate table, and showcases a selection of pre-processed genomes using the tool.
+In addition to its GitHub repository, AnnoTEP mode also provides a dedicated [Database](https://plantgenomics.ncc.unesp.br/AnnoTEP-DB/) for plant genomes.
 
 ### Functions of AnnoTEP
 * Enhancement in the detection of LTRs, LINEs, TIRs, and Helitrons.
