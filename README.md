@@ -176,7 +176,7 @@ Next, the interface presents additional features, grouped into a subsection with
 
   When selecting the "Filter", "Final", or "Anno" options, a field will appear to choose the folder where a previous annotation step was processed. This folder must be located in one of the following directories:
   * ``Repository installation``: ./EDTA-GUI/gui/results; 
-  * ``Docker installation``: /usr/local/AnnoTEP/gui/results or in the volume configured to map this directory.
+  * ``Docker installation``: /usr/local/EDTA/gui/results or in the volume configured to map this directory.
 
 * **TE Analysis Parameters**
 * **EDTA-GUI mode**
@@ -320,18 +320,18 @@ Open the terminal and run the following commands:
 
 **Step 1. Download the EDTA-GUI Image:** Open your terminal and run the following command to download the EDTA-GUI Docker image:
 ```sh
-docker pull annotep/edtagui:v1
+docker pull annotep/edta-gui:v1
 ```
 
 **Step 2. Run the Container** Next, run the container using the command below. Specify a folder on your machine to store the annotation results:
 ```sh
-docker run -it -v <path-to-results-folder>:/usr/local/EDTA/gui/results -dp 0.0.0.0:5000:5000 annotep/edtagui:v1
+docker run -it -v <path-to-results-folder>:/usr/local/EDTA/gui/results -dp 0.0.0.0:5000:5000 annotep/edta-gui:v1
 ```
 > [!TIP]
 > ### Description:
 > - ``-v <path-to-results-folder>:/usr/local/EDTA/gui/results``: Creates a volume between your machine and the container to store results. Replace ``-v <path-to-results-folder>`` with the path to a folder on your machine. If the folder doesn't exist, Docker will create it. The path ``/usr/local/EDTA/gui/results`` is the directory inside the container and should not be changed.
 > - ``-dp 0.0.0.0:5000:5000``: Maps port 5000 on the container to port 5000 on your machine.
-> - ``annotep/edtagui:v1``: Specifies the Docker image to use.
+> - ``annotep/edta-gui:v1``: Specifies the Docker image to use.
 > <br>
 
 
@@ -347,6 +347,53 @@ Once the process is complete, you will receive an email confirming whether it fi
 >[!IMPORTANT]
 > * **Avoid shutting down your machine during the process**, as this may interrupt the analysis. Even when using the web interface, processing occurs locally on your machine.
 > * **Annotation speed depends on your machine's performance.** Ensure your system meets the recommended requirements for optimal results.
+
+## Singularity
+You can use EDTA-GUI with Singularity by converting the official Docker images. Below are the available methods to obtain and run ``.sif`` images.
+
+**Step 1. Obtaining the Singularity Image:** There are two ways to obtain the image:
+<br>
+
+📌  **Method 1 – Direct Conversion from Docker Hub:** Download and convert the image directly from Docker Hub using:
+```sh
+singularity build <name-image>.sif docker://annotep/edta-gui:v1
+```
+
+>[!TIP]
+> ### Description:
+> - ``<name-image>``: you can name the image anything you like; the extension must be ``.sif``.
+> - ``docker://``: specifies that the image will be pulled from a remote repository (e.g. Docker Hub).
+<br>
+
+📌 **Method 2 – Conversion from a Local Docker Image:** This method involves saving the Docker image locally and then converting it:
+1. Save the Docker image to a ``.tar`` file:
+```sh
+docker save annotep/edta-gui:v1 -o edtagui1.tar
+```
+2. Convert the ``.tar`` file to a Singularity image:
+```sh
+singularity build <name-image>.sif docker-archive://edtagui1.tar
+```
+
+>[!TIP]
+> ### Description:
+> - ``-o``: specifies the name of the ``.tar`` file.
+> - ``<name-image>``:  you can name the image anything you like; the extension must be ``.sif``.
+> - ``docker-archive://``: indicates the image will be built from a local ``.tar`` archive.
+
+**Step 2. Running the Image:** How you run the container depends on the interface you choose:
+📌 To launch the graphical interface, use:
+```sh
+singularity exec --bind <path-to-results-folder>:/usr/local/EDTA/gui/results <name-image>.sif bash -c "cd /usr/local/EDTA/gui && source /usr/local/miniconda3/etc/profile.d/conda.sh && conda activate EDTAgui && python main.py"
+```
+
+📌 After running the container, access the EDTA-GUI interface by typing the following address into your web browser:``127.0.0.1:5000``
+
+
+>[!TIP]
+> ### Description:
+> - ``--bind <path-to-results-folder>:/usr/local/EDTA/gui/results``: maps a directory from your local machine to a directory inside the container
+> - ``bash -c "..."``: executes a sequence of commands within the container.
 
 
 ## Citations
