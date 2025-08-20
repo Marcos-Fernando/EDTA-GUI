@@ -227,6 +227,7 @@ singularity build <name-image>.sif docker-archive://annotep_cli1.tar
 > - ``docker-archive://``: indicates the image will be built from a local ``.tar`` archive.
 
 **Step 2. Running the Image:** How you run the container depends on the interface you choose:
+
 📌 To run via the command line, use:
 ```sh 
 singularity exec -B <path-to-results-folder>:/usr/local/AnnoTEP/cli/results -B <absolute-path-to-folder-genomes>:/genomas <name-image>.sif python /usr/local/AnnoTEP/cli/run_annotep.py --genome /genomas/genome.fasta --threads <threads>
