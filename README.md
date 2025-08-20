@@ -24,8 +24,34 @@
 ## Introduction
 This package was developed as an extension of the [EDTA pipeline](https://github.com/oushujun/EDTA), with the aim of providing a graphical interface for users. The purpose of EDTA-GUI is to make the use of EDTA more accessible, meeting the needs of researchers at different levels of experience – from beginners to experts – and facilitating the analysis and annotation of transposable elements in genomes. EDTA-GUI also features AnnoTEP mode, an extension of EDTA modified to annotate plant genomes comprehensively.
 
+## Installing EDTA-GUI
+EDTA-GUI can be installed in different ways, depending on your preferences and needs. In this tutorial, we will guide you through two main installation methods: the traditional method and installation via Docker. Both methods are detailed to ensure a smooth and efficient setup on your machine.
 
-## Installation
+>[!IMPORTANT]
+> <b> System requirements </b> <br>
+> 💾 <b>Software</b>
+> - 🖥️ System Ubuntu (20.04.6 LTS, 22.04.4 LTS)
+> - 📦 [Miniconda3](https://docs.conda.io/projects/miniconda/en/latest/) 
+>
+> 💻 <b> Hardware </b> <br>
+> Minimum requirements for Genomes up to <b>1GB</b>
+> * <b>Threads:</b> 20
+> * <b> RAM: </b> 50GB
+> * <b> Storage: </b> 1TB 
+> 
+> ⚠️ Higher computational resources are strongly recommended for larger genomes.
+
+**Step 1.** In terminal, Download the repository
+```sh 
+git clone https://github.com/Marcos-Fernando/EDTA-GUI.git $HOME/EDTA-GUI
+```
+
+**Step 2.** Enter into the folder
+```sh 
+cd $HOME/EDTA-GUI
+```
+
+## Installing with library and conda
 **Step 1 - Prequisites:** Ensure that Miniconda ins installed on your machine:
 * You can download it from the following link: [Miniconda3](https://docs.conda.io/projects/miniconda/en/latest/) 
 * After downloading Miniconda from the link above, run the following command in your terminal:
@@ -40,6 +66,10 @@ cd $HOME/EDTA-GUI
 
 conda activate EDTAgui
 ```
+
+📌  Still within the <b>EDTA-GUI directory</b>, copy the ```break_fasta.pl``` script to ```/usr/local/bin``` to make it accessible system-wide:
+```sh
+sudo cp AnnoTEP/Scripts/break_fasta.pl /usr/local/bin
 
 > [!IMPORTANT]
 > 📌 <b> RepeatMasker Fixes for Long Names </b> <br>
@@ -394,6 +424,11 @@ singularity exec --bind <path-to-results-folder>:/usr/local/EDTA/gui/results <na
 > ### Description:
 > - ``--bind <path-to-results-folder>:/usr/local/EDTA/gui/results``: maps a directory from your local machine to a directory inside the container
 > - ``bash -c "..."``: executes a sequence of commands within the container.
+
+<!-- ## CLI version
+A ferramenta conta com as versões cli separada para cada modo. O EDTA pode ser obtido no repositório original, junto a suas versões docker e singularity: [EDTA](https://github.com/oushujun/EDTA). -->
+
+
 
 
 ## Citations
