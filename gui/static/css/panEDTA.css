@@ -36,8 +36,11 @@
     font-size: 1.5rem;
 	color: var(--grey-05);
 	text-shadow: 0px 4px 10px rgba(105, 35, 35, 0.25);
+}
 
-    margin: 0.75rem 0 0.25rem 0;
+.pangenome-add-features .title-help,
+.container-inputGenomes .title-help{
+    margin-top: 1rem;
 }
 
 .input-text2,
@@ -59,6 +62,11 @@
     margin-bottom: 0.5rem;
 }
 
+
+.remove-group{
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+}
 
 .add-button {
   margin-top: 0.5rem;

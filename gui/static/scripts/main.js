@@ -1,3 +1,64 @@
+function execute_annotation(threadsValue) {
+  const { filegenome, email } = getFileAndEmail();
+  const { checkedTir: tircandidates, checkedStep: stepannotation, checkedMode:modeAnnotation, directoryName: directoryResults } = getCheckedValues();
+  const {cdsFile, curateLibFile, maskedRegionsFile, rmLibFile, rmoutFile} = getFiles();
+
+        var data = new FormData();
+        data.append('genome', filegenome);
+        data.append('email', email);
+        data.append('thread', threadsValue);
+        
+        // Adds each item from `tircandidates` and `stepannotation` individually
+        tircandidates.forEach(item => data.append('tircandidates', item));
+        stepannotation.forEach(item => data.append('stepannotation', item));
+        modeAnnotation.forEach(item => data.append('modeAnnotation', item));
+
+
+        data.append('directoryResults', directoryResults);
+
+        const validatedValues = getValuesAndValidate();
+        if (!validatedValues) return; // Terminate if validation fails
+        const { mutationRate, maxDivergence } = validatedValues;
+
+        data.append('overwrite', switchValues.overwriteValue);
+        data.append('sensitivity', switchValues.sensitivityValue);
+        data.append('force', switchValues.forceValue);
+        data.append('tirfilter', switchValues.tirfilterValue);
+        data.append('annottype', switchValues.annottypeValue);
+        data.append('annotation', annotationValue);
+        data.append('evaluate', evaluateValue);
+        data.append("mutation_rate", mutationRate);
+        data.append("max_divergence", maxDivergence);
+        data.append("cds_file", cdsFile);
+        data.append("curate_lib", curateLibFile);
+        data.append("masked_region", maskedRegionsFile);
+        data.append("rm_lib", rmLibFile);
+        data.append("rmout_lib", rmoutFile);
+
+        // console.log(filegenome);
+
+        // fetch('/annotation_process', {
+        //         method: 'POST',
+        //         body: data
+        // }).then(response => {
+        //       console.log("Flask response received");
+        // }).catch(error => {
+        //       console.error(error);
+        // });
+
+        fetch('/annotation_process', {
+                method: 'POST',
+                body: data
+        }).catch(err => {
+            console.error("Sending error:", err);
+        });
+
+  setTimeout(function() {
+    location.reload();
+  }, 1000);
+
+}
+
 // ------ Call Flask ---------
 function getFileAndEmail() {
   var filegenome = document.getElementById('inputdata').files[0];
@@ -10,28 +71,38 @@ function getCheckedValues() {
   // Selects all the checkboxes marked in the ‘tir’ group
   const checkedTir = Array.from(document.querySelectorAll('input[name="tir"]:checked'))
     .map(checkbox => checkbox.value);
-  
-  // Select all the checkboxes marked in the ‘step’ group
   const checkedStep = Array.from(document.querySelectorAll('input[name="step"]:checked'))
     .map(checkbox => checkbox.value);
-
+  const checkedMode= Array.from(document.querySelectorAll('input[name="mode"]:checked'))
+    .map(checkbox => checkbox.value);
   const directoryName = document.getElementById('directoryInput').value;
 
-  return { checkedTir, checkedStep, directoryName };
+  return { checkedTir, checkedStep, checkedMode, directoryName };
 }
 
-// Fuction to update the state of the directory input based on the selected steps
 function updateDirectoryInputState() {
-  const { checkedStep: stepannotation } = getCheckedValues();
-  const directoryInput = document.getElementById('directoryInput');
-
-  // Checks if "filter", "final" or "anno" are selected
-  const shouldEnable = stepannotation.some(step =>
-    ['filter', 'final', 'anno'].includes(step)
-  );
-
-  directoryInput.disabled = !shouldEnable;
-  directoryInput.readOnly = !shouldEnable;
+    const { checkedStep: stepannotation } = getCheckedValues();
+    const directoryInput = document.getElementById('directoryInput');
+    const containerDirectoryName = document.querySelector('.container-directory-name');
+    // Verifica se "all" está selecionado
+    const isAllSelected = stepannotation.includes('all');
+    // Se "all" estiver selecionado, esconde a div; caso contrário, verifica os outros checkboxes
+    if (isAllSelected) {
+        containerDirectoryName.classList.add('hiddenstep'); // Esconde a div
+        directoryInput.disabled = true; // Desabilita o input
+        directoryInput.readOnly = true; // Define como somente leitura
+        directoryInput.value = ''; // Limpa o valor do input
+    } else {
+        // Verifica se "filter", "final" ou "anno" estão selecionados
+        const shouldShow = stepannotation.some(step =>
+            ['filter', 'final', 'anno'].includes(step)
+        );
+        if (shouldShow) {
+            containerDirectoryName.classList.remove('hiddenstep'); // Mostra a div
+        } else {
+            containerDirectoryName.classList.add('hiddenstep'); // Esconde a div se nenhum dos outros estiver selecionado
+        }
+    }
 }
 
 function getValuesAndValidate() {
@@ -87,64 +158,6 @@ function getFiles() {
 }
 
 
-function execute_annotation(threadsValue) {
-  const { filegenome, email } = getFileAndEmail();
-  const { checkedTir: tircandidates, checkedStep: stepannotation, directoryName: directoryResults } = getCheckedValues();
-  const {cdsFile, curateLibFile, maskedRegionsFile, rmLibFile, rmoutFile} = getFiles();
-
-        var data = new FormData();
-        data.append('genome', filegenome);
-        data.append('email', email);
-        data.append('thread', threadsValue);
-        
-        // Adds each item from `tircandidates` and `stepannotation` individually
-        tircandidates.forEach(item => data.append('tircandidates', item));
-        stepannotation.forEach(item => data.append('stepannotation', item));
-
-        data.append('directoryResults', directoryResults);
-
-        const validatedValues = getValuesAndValidate();
-        if (!validatedValues) return; // Terminate if validation fails
-        const { mutationRate, maxDivergence } = validatedValues;
-
-        data.append('overwrite', switchValues.overwriteValue);
-        data.append('sensitivity', switchValues.sensitivityValue);
-        data.append('force', switchValues.forceValue);
-        data.append('annotation', annotationValue);
-        data.append('evaluate', evaluateValue);
-        data.append("mutation_rate", mutationRate);
-        data.append("max_divergence", maxDivergence);
-        data.append("cds_file", cdsFile);
-        data.append("curate_lib", curateLibFile);
-        data.append("masked_region", maskedRegionsFile);
-        data.append("rm_lib", rmLibFile);
-        data.append("rmout_lib", rmoutFile);
-
-        // console.log(filegenome);
-
-        // fetch('/annotation_process', {
-        //         method: 'POST',
-        //         body: data
-        // }).then(response => {
-        //       console.log("Flask response received");
-        // }).catch(error => {
-        //       console.error(error);
-        // });
-
-        fetch('/annotation_process', {
-                method: 'POST',
-                body: data
-        }).catch(err => {
-            console.error("Sending error:", err);
-        });
-
-  setTimeout(function() {
-    location.reload();
-  }, 1000);
-
-}
-
-
 const uploaddate = document.getElementById('uploaddata');
 const threadsInput = document.getElementById('threads'); // Make sure this ID is correct
 let threadsValue;
@@ -152,8 +165,8 @@ let threadsValue;
 uploaddate.addEventListener('click', function () {
   // Get the number of threads and make sure it's at least 4
   threadsValue = parseInt(threadsInput.value, 10);
-  if (isNaN(threadsValue) || threadsValue < 4) {
-    threadsValue = 4; // Set to 4 if empty, invalid or less than 4
+  if (isNaN(threadsValue) || threadsValue < 10) {
+    threadsValue = 10; // Set to 10 if empty, invalid or less than 4
     threadsInput.value = threadsValue; // Update the field to reflect the adjustment
   }
 
@@ -163,11 +176,13 @@ uploaddate.addEventListener('click', function () {
 });
 
 
-// ------ Switch button ------- //
+// ---------------------------- Switch button ----------------------------------------------- //
 const switchValues = {
   overwriteValue: 0,
   sensitivityValue: 1,
-  forceValue: 0
+  forceValue: 0,
+  tirfilterValue: 0,
+  annottypeValue: 0
 };
 
 let annotationValue = 0;
@@ -199,11 +214,13 @@ const browseExcludeButton = document.getElementById("browseExcludeButton");
 function updateSwitchStatus(switchElement, statusTextElement, switchKey) {
   if (switchElement.checked) {
       statusTextElement.textContent = "Enabled";
-      statusTextElement.style.color = "#d30f0f";
+      statusTextElement.classList.add("status-enabled");
+      statusTextElement.classList.remove("status-deactivated");
       switchValues[switchKey] = 1;
   } else {
       statusTextElement.textContent = "Deactivated";
-      statusTextElement.style.color = "#C4C4CC";
+      statusTextElement.classList.add("status-deactivated");
+      statusTextElement.classList.remove("status-enabled");
       switchValues[switchKey] = 0;
   }
 }
@@ -220,11 +237,20 @@ switch5.addEventListener("change", function () {
   updateSwitchStatus(switch5, statusTextswitch5, 'forceValue');
 });
 
+function updateSwitch6() {
+    updateSwitchStatus(switch6, statusTextswitch6, 'tirfilterValue');
+}
+
+function updateSwitch7() {
+    updateSwitchStatus(switch7, statusTextswitch7, 'annottypeValue');
+}
+
 // Function to update the visual and text status of switch3 (Annotation)
 function updateSwitch3() {
   if (switch3.checked) {
       statusTextswitch3.textContent = "Enabled";
-      statusTextswitch3.style.color = "#d30f0f";
+      statusTextswitch3.classList.add("status-enabled");
+      statusTextswitch3.classList.remove("status-deactivated");
       annotationValue = 1;
 
       switch4.disabled = false; // Enable switch4 when switch3 is activated
@@ -236,7 +262,8 @@ function updateSwitch3() {
       browseExcludeButton.classList.remove("disabled");
   } else {
       statusTextswitch3.textContent = "Deactivated";
-      statusTextswitch3.style.color = "#C4C4CC";
+      statusTextswitch3.classList.add("status-deactivated");
+      statusTextswitch3.classList.remove("status-enabled");
       annotationValue = 0;
       switch4.checked = false; // Deactivate switch4 if switch3 is deactivated
       switch4.disabled = true; // Disable switch4 when switch3 is disabled
@@ -259,117 +286,70 @@ function updateSwitch3() {
 function updateSwitch4() {
   if (switch4.checked) {
       statusTextswitch4.textContent = "Enabled";
-      statusTextswitch4.style.color = "#d30f0f";
+      statusTextswitch4.classList.add("status-enabled");
+      statusTextswitch4.classList.remove("status-deactivated");
       evaluateValue = 1;
 
       switch3.checked = true; // Activates switch3 automatically if switch4 is activated
       updateSwitch3(); // Update the state of switch3 to reflect activation
   } else {
       statusTextswitch4.textContent = "Deactivated";
-      statusTextswitch4.style.color = "#C4C4CC";
+      statusTextswitch4.classList.add("status-deactivated");
+      statusTextswitch4.classList.remove("status-enabled");
       evaluateValue = 0;
   }
 }
 
+
+function updateMode() {
+    const edtaCheckbox = document.getElementById("edtagui");
+    const annotepCheckbox = document.getElementById("annotep");
+
+    const switch6Row = document.getElementById("switch6").closest("tr");
+    const switch7Row = document.getElementById("switch7").closest("tr");
+
+    if (annotepCheckbox.checked) {
+        // Release switches 6 e 7
+        switch2.checked = true; // Marca o switch2
+        switch2.disabled = true; //Trava switch2
+        updateSwitchStatus(switch2, statusTextswitch2, 'sensitivityValue');
+
+        switch6.disabled = false;
+        switch7.disabled = false;
+        switch6Row.classList.remove("hidden"); 
+        switch7Row.classList.remove("hidden"); 
+    } else if (edtaCheckbox.checked) {
+        // Blocks abd disable switches 6 e 7
+        switch2.disabled = false;
+
+        switch6.checked = false;
+        switch7.checked = false;
+        updateSwitch6();
+        updateSwitch7();
+        switch6.disabled = true;
+        switch7.disabled = true;
+        switch6Row.classList.add("hidden");
+        switch7Row.classList.add("hidden");
+    } else {
+        // Caso nenhum esteja selecionado, garante que switch2 está editável
+        switch2.disabled = false;
+    }
+}
+
+// Atualiza modo quando qualquer checkbox-mode for clicado
+document.querySelectorAll(".checkbox-mode").forEach(checkbox => {
+    checkbox.addEventListener("change", updateMode);
+});
+
 // Add event listeners for the changes in switch3 and switch4
 switch3.addEventListener("change", updateSwitch3);
 switch4.addEventListener("change", updateSwitch4);
+switch6.addEventListener("change", updateSwitch6);
+switch7.addEventListener("change", updateSwitch7);
 
 // Initialises the default state when loading the page
 updateSwitch3();
 updateSwitch4();
 
-// =========== Finding results ============
-async function atualizarStatus() {
-  const res = await fetch("/status");
-  const dados = await res.json();
-
-  const ul = document.getElementById("list-results");
-
-  // Saves the IDs of the logs that are expanded
-  const logsAbertos = new Set();
-  ul.querySelectorAll("li").forEach(li => {
-    const name = li.dataset.name;
-    const logVisivel = li.querySelector(".log-container")?.style.display === "block";
-    if (logVisivel && name) logsAbertos.add(name);
-  });
-
-  ul.innerHTML = "";
-
-  dados.forEach(item => {
-    const li = document.createElement("li");
-    li.dataset.name = item.name || "desconhecido";
-    
-    // Main div with data (name, start, end)
-    const divInfo = document.createElement("div");
-    let text = `<span>${item.name || "name não disponível"}</span> — `;
-    
-    if (item.start) {
-      const inicioDate = new Date(item.start);
-      const inicio = `${inicioDate.getFullYear()}/${String(inicioDate.getMonth() + 1).padStart(2, '0')}/${String(inicioDate.getDate()).padStart(2, '0')} ${String(inicioDate.getHours()).padStart(2, '0')}:${String(inicioDate.getMinutes()).padStart(2, '0')}:${String(inicioDate.getSeconds()).padStart(2, '0')}`;
-      text += `<b>Starting at: </b> ${inicio} — `;
-    } else {
-        text += "<b>Starting at: -- </b> — ";
-    }
-  
-    if (item.completed && item.end) {
-        const fimDate = new Date(item.end * 1000);
-        const fim = `${fimDate.getFullYear()}/${String(fimDate.getMonth() + 1).padStart(2, '0')}/${String(fimDate.getDate()).padStart(2, '0')} ${String(fimDate.getHours()).padStart(2, '0')}:${String(fimDate.getMinutes()).padStart(2, '0')}:${String(fimDate.getSeconds()).padStart(2, '0')}`;
-        text += `<b>Ending at:</b> ${fim}`;
-    } else {
-        text += "<b>Ending at: -- </b> ";
-    }
-    
-    divInfo.innerHTML = `<p>${text}</p>`;
-    
-    // Status div (below info, above log)
-    const divStatus = document.createElement("div");
-    divStatus.className = "status-container";
-    
-    let textStatus = "";
-    let status = item.results || "Annotating ...";
-    textStatus += `<b>Status:</b> ${status}`;
-    
-    divStatus.innerHTML = `<p>${textStatus}</p>`;
-    
-    // Div do log
-    const divLog = document.createElement("div");
-    divLog.className = "log-container";
-
-    const logContent = item.last_lines_log?.length > 0
-      ? item.last_lines_log.join("<br>")
-      : "No log lines.";
-
-    divLog.innerHTML = `<div class="log">${logContent}</div>`;
-    divLog.style.display = "none";
-
-    // Toggle button
-    const toggleBtn = document.createElement("button");
-    toggleBtn.classList.add("toggle-log-btn"); 
-    toggleBtn.textContent = "Show log";
-
-    toggleBtn.onclick = () => {
-      const isHidden = divLog.style.display === "none";
-      divLog.style.display = isHidden ? "block" : "none";
-      toggleBtn.textContent = isHidden ? "Hide log" : "Show log";
-    };
-
-    // Restore expansion
-    if (logsAbertos.has(item.name)) {
-      divLog.style.display = "block";
-      toggleBtn.textContent = "Hide log";
-    }
-
-
-    // Correct order of assembly
-    li.appendChild(divInfo);
-    li.appendChild(divStatus);
-    li.appendChild(toggleBtn);
-    li.appendChild(divLog);
-    ul.appendChild(li);
-
-  });
-}
-
-setInterval(atualizarStatus, 10000);
-atualizarStatus();
+// Estado inicial (EDTA)
+updateMode();

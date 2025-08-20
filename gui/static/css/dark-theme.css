@@ -15,14 +15,10 @@
 	
 }
 
-
+.box-checkboxs-mode.dark-theme,
 .box-checkboxs-tir.dark-theme,
 .box-checkboxs-step.dark-theme{
 	color: var(--grey-02);
-}
-
-.box-checkboxs-step.dark-theme .directory_name{
-	border: 0.0625rem solid var(--grey-02);
 }
 
 .box-checkboxs-step.dark-theme .directory_name:focus {
@@ -79,11 +75,13 @@ main.dark-theme .title-add-features,
 	border-bottom: 0.125rem solid var(--orange-01);
 }
 
+main.dark-theme .checkbox-mode + label::before, 
 main.dark-theme .checkbox-step + label::before, 
 main.dark-theme .checkbox-tir + label::before{
 	border: 0.125rem solid var(--red-01);
 }
 
+main.dark-theme  .checkbox-mode:checked + label::before, 
 main.dark-theme  .checkbox-step:checked + label::before, 
 main.dark-theme .checkbox-tir:checked + label::before{
 	background-color: var(--red-01);

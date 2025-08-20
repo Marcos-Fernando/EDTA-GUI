@@ -36,7 +36,6 @@
     list-style-type: none
   }
 
-  /* Estilo para o botão de toggle */
 .toggle-log-btn {
     background-color: var(--orange-02);
     color: white;

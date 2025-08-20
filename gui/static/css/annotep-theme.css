@@ -1,0 +1,112 @@
+:root{
+	--white-01:	#E9E9E9;
+	--grey-01: 	#DDD;
+	--grey-02:	#C4C4CC;
+	--grey-03: 	#121214;
+	--grey-04: 	#787878;
+	--grey-05: 	#444444;
+	--orange-01:#FBA94C;
+	--orange-02:#d4a017;
+	--orange-03:#e6be589f;
+	--black:    #29292E;
+	--green-01: #00B37E;
+	--green-02: #00875F;
+	--green-03: #23693B;
+	--purple-01:#8D6FC5;
+    --purple-02:#3B2369;
+	
+}
+
+aside.annotep-theme{
+	background-image: linear-gradient(to top, 
+		#46CE75,  
+		#3BB86A,  
+		#309F5C,  
+		#267F4C,  
+		#1C5F3A,  
+		#143F29,  
+		#121214   
+	);
+}
+
+aside.annotep-theme #menu li:hover{
+	background-color: #cfc1e981;
+}
+
+aside.annotep-theme #menu li.open{
+	background-color: var(--purple-01);
+}
+
+.header.annotep-theme .logo{
+	width: 45rem;
+	margin: 1rem;
+}
+
+main.annotep-theme article b{
+	color: var(--green-01);
+}
+
+
+header.annotep-theme{
+	border-bottom: 0.125rem solid var(--green-03);
+}
+
+main.annotep-theme .title-add-features,
+main.annotep-theme .title-input{
+	border-bottom: 0.125rem solid var(--green-02);
+}
+
+main.annotep-theme .checkbox-mode + label::before, 
+main.annotep-theme .checkbox-step + label::before, 
+main.annotep-theme .checkbox-tir + label::before{
+	border: 0.125rem solid var(--green-01);
+}
+
+main.annotep-theme  .checkbox-mode:checked + label::before, 
+main.annotep-theme  .checkbox-step:checked + label::before, 
+main.annotep-theme .checkbox-tir:checked + label::before{
+	background-color: var(--green-01);
+}
+
+main.annotep-theme  .status-enabled {
+    color: var(--green-02) !important;
+}
+
+main.annotep-theme .uploadpangenome,
+main.annotep-theme .uploaddata{
+	background: var(--green-01);
+	border: 0.0625rem solid var(--green-01);
+}
+
+footer.annotep-theme{
+	border-top: 0.125rem solid var(--green-03);
+}
+
+main.annotep-theme .switch input:checked + label {
+  background: var(--green-02);
+}
+
+main.annotep-theme .list-results li {
+    border: 0.0625rem solid var(--green-02);
+}
+
+main.annotep-theme .container-results span{
+    color: var(--green-01);
+}
+
+main.annotep-theme .toggle-log-btn {
+	background-color: var(--purple-02);
+}
+
+main.annotep-theme .toggle-log-btn:hover {
+    background-color: var(--purple-01);
+}
+
+main.annotep-theme .toggle-log-btn:focus {
+	box-shadow: 0 0 5px rgba(59, 35, 105, 0.5); 
+}
+
+main.annotep-theme .log-container {
+	background-color: #f0f8f1;
+	border: 0.0625rem solid var(--green-02);
+}

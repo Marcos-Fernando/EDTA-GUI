@@ -7,36 +7,33 @@
     <link rel="shortcut icon" href="../static/assets/icon.svg" type="image/x-icon" />
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/home.css') }}" />
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/panEDTA.css') }}" />
-	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/help.css') }}" />
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/results.css') }}" />
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/sidebarHelp.css') }}" />
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dark-theme.css') }}" />
-    <title> EDTA </title>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/annotep-theme.css') }}" />
+    <title> EDTA-GUI </title>
 </head>
 <body>
 	<div class="menuMobile">
-		<img src="../static/assets/icon_menu.png" alt="menu icon" class="menuIcon">
+		<img src="../static/assets/icon_menu.svg" alt="menu icon" class="menuIcon">
 	</div>
 
 	<aside class="aside">
 		<ul id="menu">
 			<div class="logoedta home" id="Home">
-				<img src="../static/assets/icon.svg" alt="Logo do edta">
+				<img class="icon-menu" src="../static/assets/icon.svg" alt="Logo do edta">
 			</div>
 			<li class="li open home" id="Home">
 				<img class="home-icon" src="../static/assets/home.svg">
-				<span class="txt-link"> EDTA </span>
+				<span class="txt-link"> EDTA-GUI </span>
 			</li>
 			<li class="li" id="panEDTA">
 				<img class="help-icon" src="../static/assets/dna.svg">
-				<span class="txt-link"> panEDTA </span>
+				<span class="txt-link"> panEDTA-GUI </span>
 			</li>
 			<li class="li" id="Results">
 				<img class="help-icon" src="../static/assets/box.svg">
 				<span class="txt-link"> Results </span>
-			</li>
-			<li class="li" id="Help">
-				<img class="help-icon" src="../static/assets/QuestionCircle.svg">
-				<span class="txt-link"> Help </span>
 			</li>
 		</ul>
 	</aside>
@@ -54,23 +51,28 @@
 
 		<section class="container-main">
 			<article class="description-screen">
-				<p> Welcome to EDTAGUI. This version provides a graphical interface that streamlines your work and research in annotating transposable elements. The performance of the annotation process depends on your machine's specifications, so ensure it remains powered on during execution. For any questions or further information, please use the <b>'Help'</b> option available in the menu.</p>
+				<p> Welcome to EDTA-GUI. This version provides a graphical interface that streamlines your work and research in annotating transposable elements. The performance of the annotation process depends on your machine's specifications, so ensure it remains powered on during execution. For any questions or further information, use the icon<img src="../static/assets/question-red.svg" alt="help icon" class="question-icon" style="cursor: text"> &nbsp. </p>
 			</article>
 		</section>
 	
-
 		<section class="container-data-input">
 			<div class="title-input">
 				<p>Data input</p>
 			</div>
 			<div class="data-input">
 				<section class="container-email">
-					<p class="session-title">Email Adress</p>
+					<div class="title-help">
+						<p class="session-title">Email Adress</p>
+						<img src="../static/assets/question-red.svg" alt="help icon" class="question-icon" onclick="toggleHelp('helpSidebar1')">
+					</div>
 					<input name=email id="email" class="email" placeholder="Enter email" type="email" onfocus="clearPlaceholder(this)"/> 
 				</section>
 				
 				<section class="container-genome">
-					<p class="session-title">Genome data <span class="required">*</span> </p>
+					<div class="title-help">
+						<p class="session-title">Genome data</p>
+						<img src="../static/assets/question-red.svg" alt="help icon" class="question-icon" onclick="toggleHelp('helpSidebar1')">
+					</div>
 					<div  class="input-genome">
 						<div class="box-input">
 							<input type="text" id="fileNameInput" placeholder="FASTA" class="input-text" readonly disabled>
@@ -83,6 +85,20 @@
 					</div>
 				</section>
 			</div>
+
+			<div id="helpSidebar1" class="help-sidebar hiddenHelp">
+				<button class="close-btn" onclick="toggleHelp('helpSidebar1')">
+					<img src="../static/assets/close.svg" alt="close" class="close-icon">
+				</button>
+				<h2> Email Adress </h2>
+				<p>To start the annotation process, enter a valid email address. This is a optional field and is used to send notifications about the status of the analysis. While the email facilitates communication, the annotation occurs locally, so keep the system running during the process.</p>
+
+				<p style="margin-top: 1.5rem;"> You can also monitor the progress of the annotation by accessing the "Results" tab. </p>
+
+				<h2 style="margin-top: 1.5rem;"> Genome Data </h2>
+				<p>Upload the input file containing the complete genomic sequence in FASTA format. Use the "Browse" button to select the file from the local system.</p>
+			</div>
+
 		</section>
 
 		<section class="container-action">
@@ -90,9 +106,42 @@
 				<p>Additional features</p>
 			</div>
 
+			<section style="margin-top: 0.5rem;">
+				<div class="title-help">
+					<p class="session-title">Mode </p>
+					<img src="../static/assets/question-red.svg" alt="help icon" class="question-icon" onclick="toggleHelp('helpSidebar2')">
+				</div>
+				<div class="box-checkboxs-mode">
+					<div class="container-checkbox-mode">
+						<input type="checkbox" id="edtagui" name="mode" value="edtagui" class="checkbox-mode" checked onclick="toggleCheckbox('box-checkboxs-mode', this)">
+						<label for="edtagui"> EDTA-GUI </label>
+					</div>
+					<div class="container-checkbox-mode">
+						<input type="checkbox" id="annotep" name="mode" value="annotep" class="checkbox-mode" onclick="toggleCheckbox('box-checkboxs-mode', this)">
+						<label for="annotep">AnnoTEP (Annotation of TEs in Plants)</label>
+					</div>
+				</div>
+
+				<div id="helpSidebar2" class="help-sidebar hiddenHelp">
+					<button class="close-btn" onclick="toggleHelp('helpSidebar2')">
+						<img src="../static/assets/close.svg" alt="close" class="close-icon">
+					</button>
+					<h2> Mode </h2>
+					<p> Specifies which annotation tool you wish to use. The available options are: </p>
+					<ul>
+						<li><strong>EDTA-GUI</strong> Provides annotation of transposable elements in eukaryotic genomes. Performs <i>de novo</i> detection and general classification of different TE classes. This is the default option for genomes of any eukaryotic organism. (default) </li>
+						<li style="margin-top: 1rem;"><strong>AnnoTEP: </strong> Provides specialised annotation of transposable elements in plant genomes. A version of EDTA adapted for high accuracy in identifying all classes, including autonomous and non-autonomous elements, as well as LTR lineages in plant genomes. Produces charts, detailed reports, and phylogenetic trees from the results. </li>
+					</ul>
+				</div>
+			</section>
+
 			<div class="container-add-feature">
 				<section>
-					<p class="session-title">Species specification to identify TIR candidates </p>
+					<div class="title-help">
+						<p class="session-title">Species specification to identify TIR candidates </p>
+						<img src="../static/assets/question-red.svg" alt="help icon" class="question-icon" onclick="toggleHelp('helpSidebar3')">
+					</div>
+					
 					<div class="box-checkboxs-tir">
 						<div class="container-checkbox-tir">
 							<input type="checkbox" id="others" name="tir" value="others" class="checkbox-tir" checked onclick="toggleCheckbox('box-checkboxs-tir', this)">
@@ -107,10 +156,27 @@
 							<label for="maize">maize</label>
 						</div>
 					</div>
+
+					<div id="helpSidebar3" class="help-sidebar hiddenHelp">
+						<button class="close-btn" onclick="toggleHelp('helpSidebar3')">
+							<img src="../static/assets/close.svg" alt="close" class="close-icon">
+						</button>
+						<h2>Species Specification to Identify TIR Candidates </h2>
+						<p style="margin-top: 1rem;">The options include: </p>
+						<ul>
+							<li style="margin-top: 1rem;"><strong>Others:</strong> For species other than rice or maize (default). </li>
+							<li style="margin-top: 1rem;"><strong>Rice:</strong> For rice genomes.</li>
+							<li style="margin-top: 1rem;"><strong>Maize:</strong> For maize genomes. </li>
+						</ul>
+					</div>
 				</section>
 			
 				<section>
-					<p class="session-title">Steps to be executed </p>
+					<div class="title-help">
+						<p class="session-title"> Steps to be executed </p>
+						<img src="../static/assets/question-red.svg" alt="help icon" class="question-icon" onclick="toggleHelp('helpSidebar4')">
+					</div>
+					
 					<div class="box-checkboxs-step">
 						<div class="container-checkbox-step">
 							<input type="checkbox" id="all" name="step" value="all" class="checkbox-step" checked onclick="toggleCheckbox('box-checkboxs-step', this); updateDirectoryInputState()">
@@ -128,14 +194,43 @@
 							<input type="checkbox" id="anno" name="step" value="anno" class="checkbox-step" onclick="toggleCheckbox('box-checkboxs-step', this); updateDirectoryInputState()">
 							<label for="anno">anno</label>
 						</div>
-						<div class="container-directory-name">
-							<input name=directory_name id="directoryInput" class="directory_name" placeholder="Enter directory name" type="text" onfocus="clearPlaceholder(this)" readonly disabled/> 
+						 <div class="container-directory-name hiddenstep">
+							<input type="text" name="directory_name" id="directoryInput" class="directory_name" placeholder="Enter directory name" readonly disabled>
+							<label for="directorynameInput" class="file-input">
+								<p class="name-btn">Browse</p>
+								<input type="file" class="input-data" id="directorynameInput" webkitdirectory directory multiple style="display: none;">
+							</label>
 						</div>
+					</div>
+
+					<div id="helpSidebar4" class="help-sidebar hiddenHelp">
+						<button class="close-btn" onclick="toggleHelp('helpSidebar4')">
+							<img src="../static/assets/close.svg" alt="close" class="close-icon">
+						</button>
+						<h2> Steps to Be Executed</h2>
+						<p> Select which parts of the pipeline will be executed:</p>
+						<ul>
+							<li style="margin-top: 1rem;"><strong>All:</strong> Runs the entire pipeline (default). </li>
+							<li style="margin-top: 1rem;"><strong>Filter:</strong> Starts from raw TEs to the end. </li>
+							<li style="margin-top: 1rem;"><strong>Final:</strong> Begins with filtered TEs to completion. </li>
+							<li style="margin-top: 1rem;"><strong>Anno:</strong> Conducts genome-wide annotation after building the TE library. </li>
+						</ul>
+
+						<p style="margin-top: 1rem;">When selecting the options "Filter", "Final" or "Anno", a field will appear to choose the folder where a previous annotation step was processed.</p>
+						<p>This folder must be located in one of the following directories:</p>
+						<ul>
+							<li style="margin-top: 1rem;"><strong>Repository installation:</strong> /EDTA/gui/results </li>
+							<li style="margin-top: 1rem;"><strong>Docker installation: </strong>  /usr/local/AnnoTEP/gui/results or in the volume configured to map this directory. </li>
+						</ul>
 					</div>
 				</section>
 			</div>
 			
 
+			<div class="title-help" style="margin-top: 1.5rem; margin-bottom: 0;">
+					<p class="session-title"> TE Analysis Parameters </p>
+					<img src="../static/assets/question-red.svg" alt="help icon" class="question-icon" onclick="toggleHelp('helpSidebar5')">
+		   </div>
 		   <section class="container-switch">
 				<table class="table-switch">
 					<tr>
@@ -152,11 +247,11 @@
 						<td><p class="session-title">Sensitivity</p></td>
 						<td class="button-switch">
 							<div class="switch">
-								<input type="checkbox" id="switch2" name="sensitivity" checked/>
+								<input type="checkbox" id="switch2" name="sensitivity"/>
 								<label for="switch2">Toggle</label>
 							</div>
 						</td>
-						<td><p id="status-text-switch2"> Enable</p></td>
+						<td><p id="status-text-switch2"> Deactivated </p></td>
 					</tr>
 					<tr>
 						<td><p class="session-title">Annotation</p></td>
@@ -191,8 +286,30 @@
 						</td>
 						<td><p id="status-text-switch5">Deactivated</p></td>
 					</tr>
+					<tr class="hidden">
+						<td><p class="session-title">TIR filter</p></td>
+						<td class="button-switch">
+							<div class="switch">
+								<input type="checkbox" id="switch6" name="tirfilter"/>
+								<label for="switch6">Toggle</label>   
+							</div>
+						</td>
+						<td><p id="status-text-switch6">Deactivated</p></td>
+					</tr>
 				</table>
 
+				<table class="table-switch">
+					<tr class="hidden">
+						<td><p class="session-title">Annot. type</p></td>
+						<td class="button-switch" style="padding-left: 0.5rem;">
+							<div class="switch">
+								<input type="checkbox" id="switch7" name="annottype"/>
+								<label for="switch7">Toggle</label>   
+							</div>
+						</td>
+						<td><p id="status-text-switch7">Deactivated</p></td>
+					</tr>
+				</table>
 		   </section>
 
 			<div class="container-number-input">
@@ -208,10 +325,10 @@
 	
 				<section class="container-threads">
 					<p class="session-title"> Threads </p>
-					<input type="number" id="threads" name="threads" min="4" value="4" step="1">
+					<input type="number" id="threads" name="threads" min="10" value="10" step="1	">
 				</section>
 			</div>
-			<span class="not-required">* For highly repetitive genomes, users are encouraged to adjust the "Maximum divergence" parameter </span>
+			 
 		</section>
 
 			<section class="container-action">
@@ -222,8 +339,9 @@
 
 				<div class="container-add-input">
 					<section class="container-genome">
-						<div class="session-title">
-							<p> Coding DNA Sequence (cds) </p>
+						<div class="title-help">
+							<p class="session-title">  Coding DNA Sequence (cds) </p>
+							<img src="../static/assets/question-red.svg" alt="help icon" class="question-icon" onclick="toggleHelp('helpSidebar6')">
 						</div>
 						<div class="box-input">
 							<input type="text" id="cdsInput" name="cds_file" class="input-library" placeholder=".fasta .fa" readonly disabled>
@@ -235,8 +353,9 @@
 					</section>
 
 					<section class="container-genome">
-						<div class="session-title">
-							<p> Curate library (curatedlib) </p>
+						<div class="title-help">
+							<p class="session-title">  Curate library (curatedlib) </p>
+							<img src="../static/assets/question-red.svg" alt="help icon" class="question-icon" onclick="toggleHelp('helpSidebar6')">
 						</div>
 						<div class="box-input">
 							<input type="text" id="curateLibInput" name="curate_lib" class="input-library"  readonly disabled>
@@ -248,8 +367,9 @@
 					</section>
 
 					<section class="container-genome">
-						<div class="session-title">
-							<p>Exclusion of masked regions (exclude)</p>
+						<div class="title-help">
+							<p class="session-title">  Exclusion of masked regions (exclude) </p>
+							<img src="../static/assets/question-red.svg" alt="help icon" class="question-icon" onclick="toggleHelp('helpSidebar6')">
 						</div>
 						<div class="box-input">
 							<input type="text" id="maskedRegionsInput" name="masked_regions" class="input-library" placeholder=".bed" readonly disabled>
@@ -264,8 +384,9 @@
 
 				<div class="container-add-input">
 					<section class="container-genome">
-						<div class="session-title">
-							<p>RepeatModeler library (rmlib)</p>
+						<div class="title-help">
+							<p class="session-title">  RepeatModeler library (rmlib) </p>
+							<img src="../static/assets/question-red.svg" alt="help icon" class="question-icon" onclick="toggleHelp('helpSidebar6')">
 						</div>
 						<div class="box-input">
 							<input type="text" id="rmLibInput" name="rm_lib" class="input-library" readonly disabled>
@@ -278,8 +399,9 @@
 					</section>
 
 					<section class="container-genome">
-						<div class="session-title">
-							<p> RepeatMasker library (rmout)</p>
+						<div class="title-help">
+							<p class="session-title">  RepeatMasker library (rmout) </p>
+							<img src="../static/assets/question-red.svg" alt="help icon" class="question-icon" onclick="toggleHelp('helpSidebar6')">
 						</div>
 						<div class="box-input">
 							<input type="text" id="rmoutInput" name="rm_out" class="input-library" placeholder=".out" readonly disabled>
@@ -289,6 +411,47 @@
 							</label>
 						</div>
 					</section>
+				</div>
+
+				<div id="helpSidebar5" class="help-sidebar hiddenHelp">
+					<button class="close-btn" onclick="toggleHelp('helpSidebar5')">
+						<img src="../static/assets/close.svg" alt="close" class="close-icon">
+					</button>
+					<h2>TE Analysis Parameters</h2>
+					<h3>EDTA-GUI mode</h3>
+						<ul>
+							<li><strong>Overwrite:</strong> Decide whether existing output data should be overwritten. </li>
+							<li><strong>Sensitivity:</strong> Control the execution of RepeatModeler to identify additional elements. </li>
+							<li><strong>Annotation:</strong> Specify whether the genome-wide annotation of TEs should proceed after building the TE library.</li>
+							<li><strong>Evaluate:</strong> Check if the classification of annotated TEs is consistent. The "Annotation" field must be enabled to use this feature.</li>
+							<li><strong>Force:</strong> If no reliable TE candidates are identified, enabling this option allows the script to continue using a backup rice TE library.</li>
+						</ul>
+						<h3> AnnoTEP mode (Additional feature)</h3>
+						<ul>
+							<li><strong>TIR filter:</strong> Filter TIRs without annotated domains. Enabling this filter can substantially reduce false positives, but may also result in the loss of some true positives (false negatives).</li>
+							<li><strong>Annot. type:</strong>  Specify whether to annotate the genome using a RepeatMasker-based librar. Enabling this option may negatively affect the filtering step and compromise benchmark results. </li>
+						</ul>
+						<h3> </h3>
+						<ul>
+							<li><strong>Neutral Mutation Rate:</strong> Set the neutral mutation rate for calculating the age of intact LTR elements (default: 1.3e-8 bp per year, based on rice).</li>
+							<li><strong>Maximum Divergence:</strong>  Define the maximum acceptable divergence for TE fragments. For highly repetitive genomes, users are encouraged to adjust the parameter (default: 40). </li>
+							<li><strong>Threads:</strong>  Determine the number of threads to be used in running the pipeline (default: 10). </li>
+						</ul>
+				</div>
+
+				<div id="helpSidebar6" class="help-sidebar hiddenHelp">
+					<button class="close-btn" onclick="toggleHelp('helpSidebar6')">
+						<img src="../static/assets/close.svg" alt="close" class="close-icon">
+					</button>
+					<h2>Additional Input File</h2>
+					<p style="margin-top: 1rem;">This subsection allows for the addition of optional files to customise the analysis:</p>
+					<ul>
+						<li style="margin-top: 1rem;"><strong>Coding DNA Sequence:</strong> Select a FASTA file containing the coding sequence (without introns, UTRs, or TEs) of the genome or a close relative. This helps in excluding non-transposable elements. </li>
+						<li style="margin-top: 1rem;"><strong>Curate library:</strong> Upload a curated library to maintain consistent TE naming and classification. Only manually validated TEs should be provided. This file is optional. </li>
+						<li style="margin-top: 1rem;"><strong>Exclusion of masked regions:</strong> Define regions to be ignored during TE masking. The "Annotation" field must be enabled to use this option.</li>
+						<li style="margin-top: 1rem;"><strong>RepeatModeler library:</strong> Upload a classified RepeatModeler library to enhance analysis sensitivity, particularly for LINEs. If not provided, one will be generated automatically.</li>
+						<li style="margin-top: 1rem;"><strong>RepeatMasker library:</strong>Provide your own homology-based TE annotation in RepeatMasker .out format. This file will be merged with the structure-based annotation. The "Annotation" field must be enabled. </li>
+					</ul>
 				</div>
 			</section>
 	
@@ -311,11 +474,11 @@
 		</header>
 		<section class="container-panGenome">
 			<div class="title-input">
-				<p>panEDTA</p>
+				<p>panEDTA-GUI</p>
 			</div>
 			<section class="container-main">
 				<article class="description-screen">
-					<p>This is the serial version of panEDTA. Each genome will be annotated sequentially and then combined with the panEDTA functionality. Existing EDTA annotation of genomes (EDTA run with --anno 1) will be recognized and reused. A way to acclerate the pan-genome annotation is to execute EDTA annotation of each genomes separately and in parallel, then execute panEDTA to finish the remaining of the runs. You may want to save the GFF files and the sum file of the EDTA results of each genome because they will be overwritten by panEDTA. To help filtering out gene-related sequences, at least one CDS file is required. Please read <a href="https://github.com/oushujun/EDTA/wiki/Making-sense-of-EDTA-usage-and-outputs---Q&A" target="_blank">wiki</a> for the CDS requirement. You may want to check out the toy example in the ./test folder to get familiarized. </p>
+					<p>This is the serial version of panEDTA. Each genome will be annotated sequentially and then combined with the panEDTA functionality. Existing EDTA annotation of genomes (EDTA run with --anno 1) will be recognized and reused. A way to acclerate the pan-genome annotation is to execute EDTA-GUI annotation of each genomes separately and in parallel, then execute panEDTA-GUI to finish the remaining of the runs. To help filtering out gene-related sequences, at least one CDS file is required. Please read <a href="https://github.com/oushujun/EDTA/wiki/Making-sense-of-EDTA-usage-and-outputs---Q&A" target="_blank">wiki</a> for the CDS requirement. You may want to check out the toy example in the ./test folder to get familiarized. </p>
 				</article>
 			</section>
 
@@ -325,13 +488,19 @@
 				</div>
 
 				<section class="container-email">
-					<p class="session-title">Email Adress</p>
+					<div class="title-help">
+						<p class="session-title">Email Adress</p>
+						<img src="../static/assets/question-red.svg" alt="help icon" class="question-icon" onclick="toggleHelp('helpSidebar7')">
+					</div>
 					<input name=emailpangenome id="emailpangenome" class="email" placeholder="Enter email" type="email" onfocus="clearPlaceholder(this)" autocomplete="email"/> 
 				</section>
 				
 				<div id="list-pangenome" class="input-listgenome">
-					<div class="session-title">
-						<p>Genome data <span class="required">*</span></p>
+					<div class="title-help">
+						<div class="session-title">
+							<p>Genome data <span class="required">*</span></p>
+						</div>
+						<img src="../static/assets/question-red.svg" alt="help icon" class="question-icon" onclick="toggleHelp('helpSidebar7')">
 					</div>
 
 					<div class="box-group">
@@ -354,6 +523,19 @@
 				</div>
 
 				<button type="button" id="add-genome" class="add-button">+</button>
+
+				<div id="helpSidebar7" class="help-sidebar hiddenHelp">
+					<button class="close-btn" onclick="toggleHelp('helpSidebar7')">
+						<img src="../static/assets/close.svg" alt="close" class="close-icon">
+					</button>
+					<h2> Email Adress </h2>
+					<p>To start the annotation process, enter a valid email address. This is a optional field and is used to send notifications about the status of the analysis. While the email facilitates communication, the annotation occurs locally, so keep the system running during the process.</p>
+
+					<p style="margin-top: 1.5rem;"> You can also monitor the progress of the annotation by accessing the "Results" tab. </p>
+
+					<h2 style="margin-top: 1.5rem;"> Genome Data </h2>
+					<p>Upload the input file containing the complete genome sequence in FASTA format, along with a corresponding CDS file (optional). You must provide at least one genome file. The optional CDS file will only be considered if it is linked to a genome; otherwise, it will be ignored. Use the Browse button to select files from your local system. By clicking the "+" icon, you can add more fields to upload additional genome and CDS files. By clicking on the "-"" icon, you can remove the added field.</p>
+				</div>
 			</section>
 
 			<div class="title-add-features">
@@ -361,8 +543,11 @@
 			</div>
 			<div class="pangenome-add-features">
 				<section class="container-option">
-					<div class="session-title">
-						<p> Coding DNA Sequence (cds) <span class="required">*</span></p>
+					<div class="title-help">
+						<div class="session-title">
+							<p>Coding DNA Sequence (cds)  <span class="required">*</span></p>
+						</div>
+						<img src="../static/assets/question-red.svg" alt="help icon" class="question-icon" onclick="toggleHelp('helpSidebar8')">
 					</div>
 					<div class="box-input">
 						<input type="text" id="cdspangenomeInput" name="cdspangenome_file" class="input-library" placeholder=".fasta .fa" readonly disabled>
@@ -373,8 +558,9 @@
 					</div>
 				</section>
 				<section class="container-option">
-					<div class="session-title">
-						<p> Non-redundant library </p>
+					<div class="title-help">
+						<p class="session-title">Non-redundant library</p>
+						<img src="../static/assets/question-red.svg" alt="help icon" class="question-icon" onclick="toggleHelp('helpSidebar8')">
 					</div>
 					<div class="box-input">
 						<input type="text" id="nlibraryInput" name="nlibrary_file" class="input-library" readonly disabled>
@@ -401,7 +587,20 @@
 			<section class="container-submit-pangenome">
 				<button type="button" id="uploadpangenome" class="uploadpangenome"> Submit </button>
 			</section>
-			
+
+			<div id="helpSidebar8" class="help-sidebar hiddenHelp">
+				<button class="close-btn" onclick="toggleHelp('helpSidebar8')">
+					<img src="../static/assets/close.svg" alt="close" class="close-icon">
+				</button>
+				<h2> Additional Features </h2>
+				<p> This subsection provides advanced configuration options for the analysis.</p>
+				<ul>
+					<li style="margin-top: 1rem;"><strong>Coding DNA Sequence:</strong> Required. A coding sequence file in FASTA format. The CDS file provided in this field will be used to fill in any missing CDS files from the Genome Data list. If no CDS files are specified in the genome list, this CDS file will be applied to all genomes. </li>
+					<li style="margin-top: 1rem;"><strong>Non-redundant library:</strong> SOptional. A manually curated non-redundant library following the RepeatMasker naming convention. </li>
+					<li style="margin-top: 1rem;"><strong>Threads:</strong> Specify the number of threads to be used when running panEDTA-GUI (default: 10). </li>
+					<li style="margin-top: 1rem;"><strong>Minimum number of full-length TE copies in individual genomes:</strong> Defines the minimum number of full-length TE copies required in individual genomes for them to be considered as candidate TEs for the pangenome. Lower values are more inclusive, resulting in a larger library, higher sensitivity, but increased inconsistency. Higher values are more stringent, leading to a smaller library, reduced sensitivity, and greater consistency. (default: 3). </li>
+				</ul>
+			</div>	
 		</section>
 
 		<footer class="footer">
@@ -421,148 +620,41 @@
 			<div class="title-input">
 				<p>Latest Activities</p>
 			</div>
-			<article>
-				<p> List of the 10 most recent genomic data annotations </p>
-			</article>
 
-			<ul class="list-results" id="list-results"></ul>
-		</section>
-	</main>
-
-	<main class="Help">
-		<header class="header">
-			<section class="container-header">
-				<img class="logo" src="../static/assets/Logo.svg" alt="Logo TEP"/>
-			</section>
-		</header>
-		<section class="documentation-edta">
-			<section class="bloco">
-				<h3> EDTAGUI documentation - The <span>E</span>xtensive <i><span>D</span>e novo</i> <span>T</span>E <span>A</span>nnotator </h3>
-			
-				<p> Welcome to the EDTA Documentation </p>
-				<p> The EDTA package was designed to filter out false discoveries in raw TE candidates and generate a high-quality non-redundant TE library for whole-genome TE annotations. Selection of initial search programs were based on benckmarkings on the annotation performance using a manually curated TE library in the rice genome.  </p>
-
-				<p> EDTA also features a structured graphical interface that facilitates the annotation of transposable elements in eukaryotic genomes. This interface enables the scientific community to conduct analyses more efficiently and with greater visual accessibility, providing essential support for research focused on the understanding and classification of transposable elements. </p>
-			</section>
-				
-			<section class="bloco">
-				<h3> How to use the platform </h3>
-				<p> The EDTA interface is divided into four main sections: EDTA, panEDTA, Results, and Help. Below, we explain how to use the first three sections to configure and perform transposable element analysis. </p>
-			</section>
-
-			<section class="bloco">
-				<h3 style="border-bottom: 0.125rem solid var(--red-01);"> EDTA </h3>
-				<p style="margin-bottom: 1rem;"> This section replicates several fields from the EDTA pipeline, organizing them into sub-areas to enhance annotation clarity </p>
-
-				<h4> Data Input </h4>
-				<p> Data entry begins with the following fields: </p>
-				<p><b>Email Address: </b> To start the annotation process, enter a valid email address. This is a optional field and is used to send notifications about the status of the analysis. While the email facilitates communication, the annotation occurs locally, so keep the system running during the process. </p>
-				
-				<p><b>Genome Data: </b> Upload the input file containing the complete genomic sequence in FASTA format. Use the "Browse" button to select the file from the local system.</p>
-			</section>
-
-			<section class="bloco">
-				<h4> Additional Features </h4>
-				<p>This subsection provides advanced configuration options for the analysis.</p>
-
-				<p><b>Species Specification to Identify TIR Candidates:</b> Specify the species to optimise the identification of TIR elements. The options include:</p>
-				<ul>
-					<li><p><b>Others: </b> For species other than rice or maize (default).</p></li>
-					<li><p><b>Rice: </b>For rice genomes.</p></li>
-					<li><p><b>Maize: </b>For maize genomes. </p></li>
-				</ul>
-
-				<p><b>Steps to Be Executed:</b> Select which parts of the pipeline will be executed: </p>
-				<ul>
-					<li><p><b>All: </b>Runs the entire pipeline (default).</p></li>
-					<li><p><b>Filter: </b>Starts from raw TEs to the end.</p></li>
-					<li><p><b>Final: </b>Begins with filtered TEs to completion.</p></li>
-					<li><p><b>Anno: </b>Conducts genome-wide annotation after building the TE library.</p></li>
-				</ul>
-				<p>When selecting the Filter, Final, or Anno options, it is necessary to specify the name of the folder where a previous annotation step has already been executed. This folder must be located within the <i>/EDTA/gui/results</i> directory. This ensures that EDTAGUI can access the required files to continue the process, reusing the data already generated and avoiding the repetition of previous steps.</p>
-
-				<p><b>Overwrite:</b> Decide whether existing output data should be overwritten.</p>
-				<p><b>Sensitivity:</b> Control the execution of RepeatModeler to identify additional elements.</p>
-				<p><b>Annotation:</b> Specify whether the genome-wide annotation of TEs should proceed after building the TE library.</p>
-				<p><b>Evaluate:</b> Check if the classification of annotated TEs is consistent. The "Annotation" field must be enabled to use this feature.</p>
-				<p><b>Force:</b> If no reliable TE candidates are identified, enabling this option allows the script to continue using a backup rice TE library.</p>
-
-				<p><b>Neutral Mutation Rate:</b> Set the neutral mutation rate for calculating the age of intact LTR elements (default: 1.3e-8 bp per year, based on rice).</p>
-				<p><b>Maximum Divergence:</b> Define the maximum acceptable divergence for TE fragments. For highly repetitive genomes, users are encouraged to adjust the parameter (default: 40). </p>
-				<p><b>Threads:</b> Determine the number of threads to be used in running the pipeline (default: 4).</p>
-			</section>
-				
-			<section class="bloco">
-				<h4> Additional Input File </h4>
-				<p>This subsection allows for the addition of optional files to customise the analysis:</p>
-
-				<p><b>Coding DNA Sequence: </b>Select a FASTA file containing the coding sequence (without introns, UTRs, or TEs) of the genome or a close relative. This helps in excluding non-transposable elements.</p>
-				<p><b>Curate library: </b>Upload a curated library to maintain consistent TE naming and classification. Only manually validated TEs should be provided. This file is optional.</p>
-				<p><b>Exclusion of masked regions: </b>Define regions to be ignored during TE masking. The "Annotation" field must be enabled to use this option.</p>
-				<p><b>RepeatModeler library: </b>Upload a classified RepeatModeler library to enhance analysis sensitivity, particularly for LINEs. If not provided, one will be generated automatically.</p>
-				<p><b>RepeatMasker library: </b>Provide your own homology-based TE annotation in RepeatMasker .out format. This file will be merged with the structure-based annotation. The "Annotation" field must be enabled.</p>
-			</section>
-
-			<section class="bloco">
-				<h3 style="border-bottom: 0.125rem solid var(--red-01);"> panEDTA </h3>
-				<p style="margin-bottom: 1rem;">This section provides the interface for panEDTA, a new feature of the EDTA pipeline that enables sequential annotation of multiple genomes.</p>
-
-				<h4> Data Input </h4>
-				<p>Data input begins with the following fields:</p>
-				<p><b>Email Address: </b> To start the annotation process, enter a valid email address. This is a optional field and is used to send notifications about the status of the analysis. While the email facilitates communication, the annotation occurs locally, so keep the system running during the process. </p>
-				
-				<p><b>Genome Data: </b> Upload the input file containing the complete genome sequence in FASTA format, along with a corresponding CDS file (optional). You must provide at least one genome file. The optional CDS file will only be considered if it is linked to a genome; otherwise, it will be ignored. Use the Browse button to select files from your local system. By clicking the "+" icon, you can add more fields to upload additional genome and CDS files. </p>
-			</section>
-
-			<section class="bloco">
-				<h4> Additional Features </h4>
-				<p>This subsection provides advanced configuration options for the analysis.</p>
-
-				<p><b>Coding DNA Sequence:</b> Required. A coding sequence file in FASTA format. The CDS file provided in this field will be used to fill in any missing CDS files from the Genome Data list. If no CDS files are specified in the genome list, this CDS file will be applied to all genomes.</p>
-				<p><b>Non-redundant library:</b> Optional. A manually curated non-redundant library following the RepeatMasker naming convention. </p>
-			
-				<p><b>Threads:</b> Specify the number of threads to be used when running panEDTA (default: 10).</p>
-				<p><b>Minimum number of full-length TE copies in individual genomes:</b> Defines the minimum number of full-length TE copies required in individual genomes for them to be considered as candidate TEs for the pangenome. Lower values are more inclusive, resulting in a larger library, higher sensitivity, but increased inconsistency. Higher values are more stringent, leading to a smaller library, reduced sensitivity, and greater consistency. (default: 3). </p>
-				
-			</section>
-				
-			<section class="bloco">
-				<h4> Submit and results </h4>
-				<p> After completing all necessary fields, click "Submit" to start the analysis. Ensure that all configurations are correct for efficient and accurate processing. </p>
-
-				<p>If you have provided a valid email address, you will receive a notification once the annotation process has started. Upon completion, a second email will be sent, indicating whether the process was successful or if any issues occurred. This final email will include a detailed log file outlining the outcome.</p>
-
-				<p>You can also monitor the progress of the annotation by accessing the "Results" tab. This section displays key information such as:</p>
-
-				<ul>
-					<li><p>The name of the generated output file;</p></li>
-
-					<li><p>Start and end timestamps (when available);</p></li>
-
-					<li><p>The current status of the annotation (e.g., in progress, completed, failed);</p></li>
-
-					<li><p>The last 20 lines of the annotation log.</p></li>
-				</ul>
-
-				<p><b>Note 1:</b> all results and output files will be stored in the Docker volume you specified as the output directory. Ensure this path is correctly mounted to access the generated data.</p>
-
-				<p><b>Note 2:</b> Errors may occasionally occur during the annotation process, so it is important to pay attention to two key stages:</p>
-				<ol>
-					<li><p><b>Start of annotation: </b>After uploading a file, ensure that the annotation process has actually begun. Sometimes, the file may not be properly recognised by the system, and in such cases, you will need to re-upload the file and restart the process.</p></li>
-					<li><p><b>Completion of annotation: </b>Even if the process runs, the annotation may not be successfully finalised in the Results section. Therefore, it is important to check the following:</p></li>
-					<ul style="margin-left: 1.5rem;">
-						<li>Look out for any prolonged error messages.</li>
-						<li>Confirm whether the message <i>"Evaluation of TE annotation finished! ..."</i> or <i>"panEDTA annotation of genome_${date}.cds.list is finished!"</i> appears — this message indicates that the annotation has been successfully completed.</li>
-					</ul>
-				</ol>
-			</section>
-		</section>
-		
-		<footer class="footer">
-			<div class="cite-us">
-				
+			<div class="title-help">
+				<article>
+					<p> List of the 10 most recent genomic data annotations </p>
+				</article>
+				<img src="../static/assets/question-red.svg" alt="help icon" class="question-icon" onclick="toggleHelp('helpSidebar9')">
 			</div>
-		</footer>
+			
+			<ul class="list-results" id="list-results"></ul>
+
+			<div id="helpSidebar9" class="help-sidebar hiddenHelp">
+				<button class="close-btn" onclick="toggleHelp('helpSidebar9')">
+					<img src="../static/assets/close.svg" alt="close" class="close-icon">
+				</button>
+				<h2> Latest Activities </h2>
+				<p> This section displays key information such as: </p>
+				<ul>
+					<li style="margin-top: 1rem;">The name of the generated output file;</li>
+					<li style="margin-top: 1rem;">Start and end timestamps (when available);</li>
+					<li style="margin-top: 1rem;">The current status of the annotation (e.g., in progress, completed, failed);</li>
+					<li style="margin-top: 1rem;">The last 20 lines of the annotation log.</li>
+				</ul>
+
+				<h3>Note 1</h3>
+				<p> All results and output files will be stored in the Docker volume you specified as the output directory. Ensure this path is correctly mounted to access the generated data.</p>
+
+				<h3>Note 2 </h3>
+				<p>Errors may occasionally occur during the annotation process, so it is important to pay attention to two key stages:</p>
+				<ul>
+					<li style="margin-top: 1rem;">Look out for any prolonged error messages.</li>
+					<li style="margin-top: 1rem;"> <strong>Using EDTA-GUI:</strong> Confirm whether the message "Evaluation of TE annotation finished! ..." or "panEDTA annotation of genome_${date}.cds.list is finished!" appears — this message indicates that the annotation has been successfully completed.</li>
+					<li style="margin-top: 1rem;"><strong>Using AnnoTEP:</strong> Confirm whether the message "The generation of charts and reports has been completed" appears — this message indicates that the annotation has been successfully completed.</li>
+				</ul>
+			</div>
+		</section>
 	</main>
 
 	<script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -571,5 +663,7 @@
 	<script type="text/javascript" src="{{ url_for('static', filename='scripts/dark-theme.js') }}"></script>
 	<script type="text/javascript" src="{{ url_for('static', filename='scripts/pages.js') }}"></script>
 	<script type="text/javascript" src="{{ url_for('static', filename='scripts/panEDTA.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='scripts/annotep-theme.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='scripts/results.js') }}"></script>
 </body>
 </html>

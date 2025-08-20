@@ -1,0 +1,101 @@
+.close-icon,
+.question-icon {
+    cursor: pointer;
+    margin-left: 10px;
+    width: 1.5rem;
+}
+
+.help-sidebar {
+    position: fixed;
+    top: 0;
+    right: -38rem;
+    width: 38rem;
+    background-color: #f9f9f9;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5); 
+    transition: right 0.3s ease;
+    padding: 2rem;
+    text-align: justify;
+    z-index: 1000;
+
+    border-radius: 2rem 0 0 2rem;
+}
+
+.results,
+.panEDTA,
+.main {
+    position: relative;
+    overflow-x: hidden;
+    width: 100%;
+}
+
+.help-sidebar h3{
+    margin-top: 1rem;
+}
+
+.help-sidebar.hiddenHelp {
+    right: -38.5rem;
+}
+
+.help-sidebar:not(.hiddenHelp) {
+    right: 0; 
+}
+
+#helpSidebar1{
+    top: -9rem;
+    height: 22rem;
+}
+
+#helpSidebar2{
+    top: -14rem;
+    height: 21rem;
+}
+
+#helpSidebar3{
+    top: -9rem;
+    height: 16rem;
+}
+
+#helpSidebar4{
+    top: -3rem;
+    height: 28rem;
+}
+
+#helpSidebar5{
+    top: -28rem;
+    height: 40rem;
+}
+
+#helpSidebar6{
+    top: -22rem;
+    height: 34rem;
+}
+
+#helpSidebar7{
+    top: 6rem;
+    height: 28rem;
+}
+
+#helpSidebar8{
+    top: 12rem;
+    height: 32rem;
+}
+
+#helpSidebar9{
+    top: 1rem;
+    height: 40rem;
+}
+
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    float: right;
+}
+
+.title-help {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}

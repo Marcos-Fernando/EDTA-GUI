@@ -9,7 +9,7 @@ def send_email_checking(email, genome_name, speciesTIR, stepsExecuted, sensitivi
     sender = "noreply@app.com"
     msg = Message(msg_title, sender=sender, recipients=[email])
     msg.body = f"""
-    Thank you for choosing EDTA, your reliable tool for annotating transposable elements. We are excited to be part of your research journey!
+    Thank you for choosing EDTA-GUI, your reliable tool for annotating transposable elements. We are excited to be part of your research journey!
 
     Here are the parameters you used for the annotation:
     --genome {genome_name} --species {speciesTIR} --step {stepsExecuted} --sensitive {sensitivity} --threads {threads} {param_str}
@@ -25,7 +25,7 @@ def send_email_pan_checking(email, filepangenome, cds_filename, lib_param, threa
     sender = "noreply@app.com"
     msg = Message(msg_title, sender=sender, recipients=[email])
     msg.body = f"""
-    Thank you for choosing EDTA, your reliable tool for annotating transposable elements. We are excited to be part of your research journey!
+    Thank you for choosing EDTA-GUI, your reliable tool for annotating transposable elements. We are excited to be part of your research journey!
 
     Here are the parameters you used for the annotation:
     -g {filepangenome} -c {cds_filename} {lib_param} -t {threadspan} -f {tecopies}

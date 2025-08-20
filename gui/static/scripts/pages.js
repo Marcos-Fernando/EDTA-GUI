@@ -1,22 +1,21 @@
-// ==== Código para alternar os guias da página ====
+// ==== Code to switch page guides ====
 function showSection(sectionToShow) {
-  const sections = ['main','panEDTA', 'results', 'Help'];
+  const sections = ['main','panEDTA', 'results'];
   sections.forEach(section => {
     const element = document.querySelector(`.${section}`);
     element.style.display = section === sectionToShow ? 'flex' : 'none';
   });
 }
 
-// E então vincular os eventos:
+//  Then link the events:
 document.getElementById('panEDTA').addEventListener('click', () => showSection('panEDTA'));
 document.getElementById('Results').addEventListener('click', () => showSection('results'));
-document.getElementById('Help').addEventListener('click', () => showSection('Help'));
 document.querySelectorAll('.home').forEach(el => {
   el.addEventListener('click', () => showSection('main'));
 });
 
 
-//=============  Aside movimentação da seleção =============//
+//=============  Aside selection movement =============//
 var menuSide = document.querySelector('.aside');
 var mainleft = document.querySelector('.main');
 var menuItems = document.querySelectorAll('li');

@@ -15,6 +15,8 @@ app, _ = create_app()
 GRAPHIC_DIR = os.path.dirname(os.path.abspath(__file__))
 RESULTS_DIR = os.path.join(GRAPHIC_DIR, 'results')
 EDTA_DIR = os.path.join(GRAPHIC_DIR, '..')
+ANNOTEP_DIR = os.path.join(EDTA_DIR, 'AnnoTEP')
+ANNOTEP_SCRIPT_DIR = os.path.join(ANNOTEP_DIR, 'Scripts')
 
 @app.route("/")
 def index():
@@ -30,6 +32,7 @@ def annotation_process():
     # Extracts the first item from each list or leaves it empty if the list is empty
     speciesTIR = request.form.getlist('tircandidates')[0] if request.form.getlist('tircandidates') else None
     stepsExecuted = request.form.getlist('stepannotation')[0] if request.form.getlist('stepannotation') else None
+    modeAnnotation = request.form.getlist('modeAnnotation')[0] if request.form.getlist('modeAnnotation') else None
 
     directoryResults = request.form.get('directoryResults')
 
@@ -64,6 +67,14 @@ def annotation_process():
     if directoryResults and directoryResults.strip():
         storageFolder = secure_filename(directoryResults.strip())
         output_dir = os.path.join(RESULTS_DIR, storageFolder)
+
+        status_file = os.path.join(output_dir, 'status.txt')
+        if os.path.exists(status_file):
+            try:
+                os.remove(status_file)
+                print(f"status.txt file removed: {status_file}")  # Opcional: para logs
+            except Exception as e:
+                print(f"Error removing status.txt: {e}")
     else:
         now = datetime.now()
         formatted_date = now.strftime("%Y%m%d-%H%M%S")
@@ -112,17 +123,36 @@ def annotation_process():
 
     # Final command
     try:
-        cmds = f"""
-            cd {output_dir}
+        if modeAnnotation == "edtagui":
+            cmds = f"""
+                cd {output_dir}
 
-            source $HOME/miniconda3/etc/profile.d/conda.sh && conda activate EDTA &&
-            export PATH="$HOME/miniconda3/envs/EDTA/bin:$PATH" &&
-            export PATH="$HOME/miniconda3/envs/EDTA/bin/RepeatMasker:$PATH" &&
-            export PATH="$HOME/miniconda3/envs/EDTA/bin/gt:$PATH" &&
-            export PATH="{EDTA_DIR}/util:$PATH" &&
+                source $HOME/miniconda3/etc/profile.d/conda.sh && conda activate EDTAgui &&
+                export PATH="$HOME/miniconda3/envs/EDTAgui/bin:$PATH" &&
+                export PATH="$HOME/miniconda3/envs/EDTAgui/bin/RepeatMasker:$PATH" &&
+                export PATH="$HOME/miniconda3/envs/EDTAgui/bin/gt:$PATH" &&
+                export PATH="{EDTA_DIR}/util:$PATH" &&
 
-            {EDTA_DIR}/EDTA.pl --genome {genome_fasta} --species {speciesTIR} --step {stepsExecuted} --sensitive {sensitivity} --threads {num_threads} {param_str}
-        """
+                {EDTA_DIR}/EDTA.pl --genome {genome_fasta} --species {speciesTIR} --step {stepsExecuted} --sensitive {sensitivity} --threads {num_threads} {param_str}
+            """
+        elif modeAnnotation == "annotep":
+            cmds = f"""
+                cd {output_dir}
+                source $HOME/miniconda3/etc/profile.d/conda.sh && conda activate AnnoTEPgui &&
+                export PATH="$HOME/miniconda3/envs/AnnoTEPgui/bin:$PATH" &&
+                export PATH="$HOME/miniconda3/envs/AnnoTEPgui/bin/RepeatMasker:$PATH" &&
+                export PATH="$HOME/miniconda3/envs/AnnoTEPgui/bin/gt:$PATH" &&
+                export PATH="{ANNOTEP_DIR}/util:$PATH" &&
+                {ANNOTEP_DIR}/EDTA/EDTA.pl --genome {genome_fasta} --species {speciesTIR} --step {stepsExecuted} --sensitive {sensitivity} --threads {num_threads} {param_str} &&
+                echo "################## AnnoTEP annotation completed successfully ##################" &&
+                echo " " &&
+                echo "################## Starting report and chart generation #######################"
+                wait &&
+                perl {ANNOTEP_DIR}/Scripts/generate_PLOTs-for-TE-pipe.sh {genome_fasta}
+            """
+
+        else:
+            raise ValueError("Invalid modeAnnotation value")
 
         with open(log_file_path, "w") as logfile:
             process = subprocess.Popen(cmds, shell=True, executable='/bin/bash',
@@ -200,6 +230,13 @@ def annotation_panedta():
             if c_name:
                 codingds_path = os.path.join(output_dir, c_name)
                 codingds_file.save(codingds_path)
+                # linha = f"{genome_path}\t{codingds_path}"
+                linha = f"{g_name}\t{c_name}"
+            else:
+                linha = genome_path
+            
+            # 2a. Build a list line (com caminhos completos agora!)
+            linhas.append(linha)
 
     # 3. save the .cds.list file
     save_path = os.path.join(output_dir, filepangenome)
@@ -234,20 +271,22 @@ def annotation_panedta():
     # Final command
     try:
         cmds = f"""
-            cd {output_dir}
-
-            source $HOME/miniconda3/etc/profile.d/conda.sh && conda activate EDTA &&
-            export PATH="$HOME/miniconda3/envs/EDTA/bin:$PATH" &&
-            export PATH="$HOME/miniconda3/envs/EDTA/bin/RepeatMasker:$PATH" &&
-            export PATH="$HOME/miniconda3/envs/EDTA/bin/gt:$PATH" &&
+            source $HOME/miniconda3/etc/profile.d/conda.sh && conda activate EDTAgui &&
+            export PATH="$HOME/miniconda3/envs/EDTAgui/bin:$PATH" &&
+            export PATH="$HOME/miniconda3/envs/EDTAgui/bin/RepeatMasker:$PATH" &&
+            export PATH="$HOME/miniconda3/envs/EDTAgui/bin/gt:$PATH" &&
             export PATH="{EDTA_DIR}/util:$PATH" &&
 
-            sh {EDTA_DIR}/panEDTA.sh -g {filepangenome} -c {cds_filename} {lib_param} -t {threadspan} -f {tecopies} 
+            sh {EDTA_DIR}/panEDTA.sh -g {filepangenome} -c {cds_filename} {lib_param} -t {threadspan} -f {tecopies} -o 1
         """
 
         with open(log_file_pangenome, "w") as logfile:
-            process = subprocess.Popen(cmds, shell=True, executable='/bin/bash',
-                                   stdout=logfile, stderr=logfile)
+            process = subprocess.Popen(
+                ["/bin/bash", "-c", cmds],
+                stdout=logfile,
+                stderr=logfile,
+                cwd=output_dir
+            )
             process.wait()
 
         # Check if it failed

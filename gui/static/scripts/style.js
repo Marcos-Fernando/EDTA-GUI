@@ -3,7 +3,7 @@ function clearPlaceholder(input) {
   input.placeholder = '';
 }
 
-//O arquvio selecionado no input type="file" aparecerá em input type="text"
+// The file selected in input type="file" will appear in input type="text"
 function updateFileName(inputFileId, inputTextId) {
   const fileInput = document.getElementById(inputFileId);
   const textInput = document.getElementById(inputTextId);
@@ -15,7 +15,7 @@ function updateFileName(inputFileId, inputTextId) {
   }
 }
 
-// Adicionar os eventos onchange para cada campo
+// ------------------------------------- Input --------------------------------------- //
 document.getElementById('inputdata').addEventListener('change', () => updateFileName('inputdata', 'fileNameInput'));
 document.getElementById('cds').addEventListener('change', () => updateFileName('cds', 'cdsInput'));
 document.getElementById('curatelib').addEventListener('change', () => updateFileName('curatelib', 'curateLibInput'));
@@ -23,46 +23,36 @@ document.getElementById('exclude').addEventListener('change', () => updateFileNa
 document.getElementById('rmlib').addEventListener('change', () => updateFileName('rmlib', 'rmLibInput'));
 document.getElementById('rmout').addEventListener('change', () => updateFileName('rmout', 'rmoutInput'));
 
+document.getElementById('directorynameInput').addEventListener('change', function(event) {
+  const directoryHandle = event.target.files[0].webkitRelativePath.split('/')[0];
+  document.getElementById('directoryInput').value = directoryHandle; 
+});
 
-
-// Função para verificar o formato de email válido
-// function isValidEmail(email) {
-//   const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-//   return emailRegex.test(email);
-// }
-
-// Função para validar ambos os campos
-function validateInputs() {
-  const isFileSelected = fileInput.files.length > 0;
-
-  submitButton.disabled = !(isFileSelected);
-}
-
-const fileInput = document.getElementById('inputdata');
-const submitButton = document.getElementById('uploaddata');
-
-
-fileInput.addEventListener('change', validateInputs);
-
-
-// ----- checkbox --- //
+// --------------------------------- checkbox ----------------------------------- //
 function toggleCheckbox(groupClass, clickedCheckbox) {
-  // Seleciona todos os checkboxes no grupo
-  const checkboxes = document.querySelectorAll(`.${groupClass} .checkbox-tir, .${groupClass} .checkbox-step`);
+  // Selects all checkboxes in the group
+  const checkboxes = document.querySelectorAll(`.${groupClass} .checkbox-tir, .${groupClass} .checkbox-step, .${groupClass} .checkbox-mode`);
   
-  // Desmarca todos os checkboxes do grupo
+  // Uncheck all checkboxes in the group
   checkboxes.forEach(checkbox => {
       if (checkbox !== clickedCheckbox) {
           checkbox.checked = false;
       }
   });
 
-  // Ativa o checkbox clicado
+  // Activate the clicked checkbox
   clickedCheckbox.checked = true;
+  setTheme(annotepCheckbox.checked);
+}
+
+//----- Capture the toggleHelp IDs and call ---- //
+function toggleHelp(sidebarId) {
+    const helpSidebar = document.getElementById(sidebarId);
+    helpSidebar.classList.toggle('hiddenHelp'); // Alterna a classe 'hidden'
 }
 
 
-//------------------  Aside movimentação ---------------//
+//------------------ Aside movement---------------//
 var menuSide = document.querySelector('.aside');
 var mainleft = document.querySelector('.main');
 var menuItems = document.querySelectorAll('li');
@@ -77,7 +67,7 @@ menuItems.forEach(function(item) {
   });
 });
 
-//------------------  Aside formato MOBILE ---------------//
+//------------------  Aside MOBILE format ---------------//
 let menuMobile = document.querySelector('.menuMobile');
 let menuIcon = document.querySelector('.menuIcon');
 
@@ -92,7 +82,7 @@ menuMobile.addEventListener('click', () => {
   menuOpen = !menuOpen;
   setTimeout(() => {
     menuIcon.src = menuOpen
-      ? "../static/assets/icon_close.png"
-      : "../static/assets/icon_menu.png";
+      ? "../static/assets/icon_close.svg"
+      : "../static/assets/icon_menu.svg";
   }, 250);
 });

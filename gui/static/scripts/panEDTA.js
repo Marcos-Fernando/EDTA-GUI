@@ -1,22 +1,48 @@
 const container = document.getElementById('list-pangenome');
 const addButton = document.getElementById('add-genome');
 
-addButton.addEventListener('click', () => {
-  const lastGroup = container.querySelector('.box-group:last-of-type');
-  const clone = lastGroup.cloneNode(true);
-
-  // Limpa inputs de texto
-  clone.querySelector('.input-text2').value = '';
-  clone.querySelector('.input-codingds-text').value = '';
-
-  // Limpa inputs de arquivo
-  clone.querySelector('.input-pangenome').value = '';
-  clone.querySelector('.input-codingds').value = '';
-
-  container.appendChild(clone);
+// Adds event delegates to the container
+container.addEventListener('click', function(e) {
+    if (e.target.classList.contains('remove-group')) {
+        const groupToRemove = e.target.closest('.box-group');
+        if (!groupToRemove.classList.contains('original-group')) {
+            container.removeChild(groupToRemove);
+        }
+    }
 });
 
-// Atualiza os nomes dos arquivos selecionados
+// Function to add a new group of inputs
+addButton.addEventListener('click', () => {
+    const lastGroup = container.querySelector('.box-group:last-of-type');
+    const clone = lastGroup.cloneNode(true);
+    
+    // Remove all event listeners from the cloned group
+    const newRemoveBtn = document.createElement('button');
+    newRemoveBtn.className = 'remove-group';
+    newRemoveBtn.textContent = '-';
+    
+    // Replace and existing button
+    const existingBtn = clone.querySelector('.remove-group');
+    if (existingBtn) {
+        clone.removeChild(existingBtn);
+    }
+    
+    clone.appendChild(newRemoveBtn);
+    
+    // Clear all input
+    const inputs = clone.querySelectorAll('input');
+    inputs.forEach(input => {
+        if (input.type !== 'button') {
+            input.value = '';
+        }
+    });
+    
+    container.appendChild(clone);
+});
+
+
+
+// Updates the names of the selected files
 container.addEventListener('change', function (event) {
   const target = event.target;
 
@@ -33,7 +59,7 @@ container.addEventListener('change', function (event) {
 
 
 
-// /O que for selecionado no browser será mostrado no input de texto
+// Whatever is selected in the browser will be displayed in the text input field.
 document.getElementById('list-pangenome').addEventListener('change', function (event) {
     if (event.target.classList.contains('input-pangenome')) {
         const fileInput = event.target;
@@ -47,7 +73,7 @@ document.getElementById('list-pangenome').addEventListener('change', function (e
     }
 });
 
-//O que for selecionado no browser será mostrado no input de texto
+// Whatever is selected in the browser will be displayed in the text input field.
 document.addEventListener("DOMContentLoaded", () => {
   const cdsInputFile = document.getElementById("cdspangenome");
   const cdsInputText = document.getElementById("cdspangenomeInput");
@@ -68,11 +94,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-//Enviando os dados
+//sending data
 document.getElementById('uploadpangenome').addEventListener('click', function () {
     const formData = new FormData();
-
-    // Validação básica
     const groups = document.querySelectorAll('.box-group');
     if (groups.length === 0) {
         alert('Você precisa adicionar pelo menos um genoma.');
@@ -102,7 +126,7 @@ document.getElementById('uploadpangenome').addEventListener('click', function ()
         return;
     }
 
-    // Campos adicionais obrigatórios
+    // Additional mandatory fields
     const cdsFile = document.getElementById('cdspangenome');
     const threadspangenome = document.getElementById('threadspangenome').value;
     const tecopies = document.getElementById('tecopies').value;
@@ -123,7 +147,7 @@ document.getElementById('uploadpangenome').addEventListener('click', function ()
         return;
     }
 
-    // Preenche formData
+    // Fill out the formData
     formData.append('cdspangenome_file', cdsFile.files[0]);
     formData.append('emailpangenome', emailpangenome);
 
@@ -135,7 +159,6 @@ document.getElementById('uploadpangenome').addEventListener('click', function ()
     formData.append('threadspangenome', threadspangenome);
     formData.append('tecopies_number', tecopies);
 
-    // Envia
     fetch('/annotation_panedta', {
         method: 'POST',
         body: formData
