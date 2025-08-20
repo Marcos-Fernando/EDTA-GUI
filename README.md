@@ -70,6 +70,7 @@ conda activate EDTAgui
 📌  Still within the <b>EDTA-GUI directory</b>, copy the ```break_fasta.pl``` script to ```/usr/local/bin``` to make it accessible system-wide:
 ```sh
 sudo cp AnnoTEP/Scripts/break_fasta.pl /usr/local/bin
+```
 
 > [!IMPORTANT]
 > 📌 <b> RepeatMasker Fixes for Long Names </b> <br>
