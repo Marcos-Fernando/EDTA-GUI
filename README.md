@@ -284,7 +284,6 @@ Examples of data output:
 📌 ``TE-Report*``: These charts, generated from the ``TEs-Report-Lite.txt`` file, provide a clear and informative visualisation of TEs, categorised by hierarchical levels.
 <div align="center">
     <img src="gui/static/assets/screenshot/TE-Report2-bar.png" alt="TE-Report-bar" border="0" width="450px" />
-    <img src="gui/static/assets/screenshot/TE-Report2-bubble-panels.png" alt="TE-Report-bubble" border="0" width="869px" />
 </div>
 <br>
 
@@ -294,9 +293,8 @@ Examples of data output:
 </div>
 
 
-📌 ``AGE-Gypsy.pdf`` and ``AGE-Copia.pdf``
+📌 ``AGE-Gypsy.pdf``
 <div align="center">
-    <img src="gui/static/assets/screenshot/AGE-Copia.png" alt="AGE-Copia" border="0" width="450px">
     <img src="gui/static/assets/screenshot/AGE-Gypsy.png" alt="AGE-Gypsy" border="0" width="450px">
 </div>
 
