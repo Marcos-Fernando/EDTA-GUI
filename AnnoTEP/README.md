@@ -1,30 +1,12 @@
-<div align="center"> 
-    <img src="gui/static/assets/Logo2.svg" alt="Logo2">
-</div><br>
-
-<div align="center">
-
-![Linux version](https://img.shields.io/badge/PLATFORM-Linux_64-orange) ![InterfaceCLI](https://img.shields.io/badge/Interface-CLI-0E60D7) ![InterfaceGUI](https://img.shields.io/badge/Interface-GUI-1C9997) ![Python](https://img.shields.io/badge/LANGUAGE-Python-blue) ![Perl](https://img.shields.io/badge/LANGUAGE-Perl-39457E) ![JavaScript](https://img.shields.io/badge/LANGUAGE-JavaScript-F7DF1E) ![R](https://img.shields.io/badge/LANGUAGE-R-276DC3) ![Conda](https://img.shields.io/badge/Environment-Conda-green) ![Docker](https://img.shields.io/badge/Container-Docker-4682B4) ![Singularity](https://img.shields.io/badge/Container-Singularity-yellow)  ![License](https://img.shields.io/badge/LICENSE-GPL_v3.0-D3D3D3)
-</div>
-
 # Table of contents
 * [Introduction](#introduction)
-* [Installing AnnoTEP](#installing-annotep)
 * [Installing with library and conda](#installing-with-library-and-conda)
     * [Testing](#testing)
     * [Generating Graphs](#generating-graphs)
-    * [Using AnnoTEP with graphical user interface](#using-annotep-with-graphical-user-interface)
 * [Installing with Container](#installing-with-container)
     * [Docker](#docker)
-        * [Graphic User Interface - GUI](#graphic-user-interface---gui)
-        * [Command Line Interface - CLI](#command-line-interface---cli)
     * [Singularity](#singularity)
-        * [GUI](#gui)
-        * [CLI](#cli)
-* [Results](#results)
 * [List of genomes tested in this pipeline](#list-of-genomes-tested-in-this-pipeline)
-* [Citations](#citations)
-* [Questions and Issues](#questions-and-issues)
 <br>
 
 # Introduction
@@ -68,7 +50,6 @@ conda activate AnnoTEPgui
 ```sh
 sudo cp AnnoTEP/Scripts/break_fasta.pl /usr/local/bin
 ```
-
 
 > [!IMPORTANT]
 > 📌 <b> RepeatMasker Fixes for Long Names </b> <br>
@@ -167,12 +148,6 @@ At the end of the analysis, a directory named REPORT will be created. It contain
 > - 📦 [Singularity](https://docs.sylabs.io/guides/3.5/user-guide/quick_start.html)
 
 ## Docker
-
-## Command Line Interface - CLI
-<div align="center"> 
-    <img src="gui/static/assets/Command-Line-interface-logo.svg" alt="Logo4" width="350px">
-</div><br>
-
 While the primary focus of AnnoTEP is its user-friendly graphical interface, we also provide a Docker version designed exclusively for command-line use. This option caters to researchers who prefer or are more accustomed to working in a terminal environment. The configurable parameters in the Docker version closely mirror those offered by the EDTA pipeline, ensuring a consistent and flexible experience for diverse workflows.
 
 **Step 1. Download the AnnoTEP Image:** To get started, download the AnnoTEP CLI Docker image by running the following command:
@@ -274,65 +249,6 @@ In addition to FASTA libraries, GFF3 files, and softmasking outputs, AnnoTEP als
 ## TE-REPORT
 The **TE-REPORT** directory is generated at the end of the annotation process and contains a comprehensive set of reports and visualisations. Within this directory, you will find both detailed and summary reports that hierarchically classify transposable elements (TEs) by order, superfamily, and autonomy; Bubble and bar charts representing the TE classification; Repeat landscape plots generated using Kimura distance calculations; LTR age distribution charts, showing the estimated insertion times of LTR superfamilies; and Phylogenetic trees of LTR elements.
 
-
-📌 ``TEs-Report-Complete.tbl``: A comprehensive table listing the classifications of TEs, including partial elements, which are labelled with the suffix “-like” (e.g., Angela-like).
-<br>
-📌 ``TEs-Report-Lite.tbl``: A simplified report derived from the complete version, containing concise and accessible information.
-<div align="center">
-    <img src="gui/static/assets/screenshot/TEs-Lite.png" alt="TEs-Lite" border="0" width="550px"/>
-</div>
-<br>
-
-📌 ``TE-Report*``: These charts, generated from the ``TEs-Report-Lite.txt`` file, provide a clear and informative visualisation of TEs, categorised by hierarchical levels.
-<div align="center">
-    <img src="gui/static/assets/screenshot/TE-Report-bar.svg" alt="TE-Report-bar" border="0" width="650px" />
-    <img src="gui/static/assets/screenshot/TE-Report-bubble.svg" alt="TE-Report-bubble" border="0" width="650px" />
-</div>
-<br>
-
-📌 ``kimura_distance_plot.pdf``: This graph provides a coherent and easily understandable inference of the relative ages of each repetitive element identified in a specific genome. The analysis is based on the genetic distance calculation proposed by Kimura, which estimates the time elapsed since duplication or insertion events of these elements. <br>
-By applying Kimura’s calculation, the graph distinguishes older elements (with greater accumulated divergence) from more recent ones (with lower divergence), offering valuable insights into the evolutionary dynamics and genomic history of the organism under study.
-<div align="center">
-    <img src="gui/static/assets/screenshot/kimura_distance_plot.svg" alt="Repeat-Land-Scape" border="0" width="650px" />
-</div>
-
-
-📌 ``AGE-Gypsy.pdf`` and ``AGE-Copia.pdf``: The histogram displays the age distribution of LTR elements identified in the genome. The dashed vertical lines indicate the median age, while the horizontal line represents the mean, both expressed in million years (Mya). This visualisation provides a clear analysis of the dispersion of LTR ages, highlighting the central tendency and temporal variability of these elements.
-<div align="center">
-    <img src="gui/static/assets/screenshot/AGE-Copia.svg" alt="AGE-Copia" border="0" width="650px">
-    <img src="gui/static/assets/screenshot/AGE-Gypsy.svg" alt="AGE-Gypsy" border="0" width="650px">
-</div>
-
-
-📌 ``LTR_RT-Tree1*``: These charts represent the phylogeny of lineage alignments within LTR superfamilies, providing a comprehensive visualisation of their evolutionary relationships. The phylogeny illustrates how different LTR-RT domains are related to each other based on their genetic sequences.
-<div align="center">
-    <img src="gui/static/assets/screenshot/LTR_RT-Tree1_original_circular.svg" alt="LTR_RT-Tree1_original_circular" border="0" width="750px">
-</div>
-<br>
-
-📌 ``LTR_RT-Tree2*``: A circular chart where: 
-    - The outer circle (purple) represents the length (in base pairs) occupied by each element.
-    - The inner circle (red) represents the number of occurrences of each element.
-<div align="center">
-    <img src="gui/static/assets/screenshot/LTR_RT-Tree2_circular_density.svg" alt="LTR_RT-Tree2_circular_density" border="0" width="750px">
-</div>
-<br>
-
-📌 ``divergence_plot*`` and ``chromosome_density*``: These files are originally generated by the EDTA pipeline and are preserved and further refined by AnnoTEP to improve visual clarity and consistency within the results framework.
-<div align="center">
-    <img src="gui/static/assets/screenshot/divergence_plot.svg" alt="divergence_plot" border="0" width="750px">
-    <img src="gui/static/assets/screenshot/divergence_plot_2.2.svg" alt="divergence_plot_2.2" border="0" width="750px">
-</div>
-
-* The number of files generated by ``chromosome_density*`` may vary between genomes, with some genomes producing over 100 files.
-<div align="center">
-    <img src="gui/static/assets/screenshot/chromosome_density_plots_page1.svg" alt="chromosome_density_plots_page1" border="0" width="750px">
-</div>
-
-📎 Return to [Table of contents](#table-of-contents)
-
-<br>
-
 # List of genomes tested in this pipeline
 AnnoTEP offers the capability to analyse a wide range of plants, algae, and microalgae that have not yet been explored or are underrepresented in previous studies. This approach enables the discovery of new TEs and genomic patterns that could be crucial for advancements in areas such as genomic evolution, species adaptation, and biotechnology. By focusing on less-studied genomes, AnnoTEP opens doors to groundbreaking research and contributes to filling gaps in the current understanding of TE diversity and functionality.
 <br>
@@ -424,11 +340,3 @@ This section lists the genomes currently being analysed using the AnnoTEP pipeli
 | -                                                | -                      | -             |
 
 📎 Return to [Table of contents](#table-of-contents)
-
-<br>
-
-# Citations
-- Comming Soon
-
-# Questions and Issues
-- Commig Soon
