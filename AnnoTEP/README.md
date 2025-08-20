@@ -10,7 +10,7 @@
 <br>
 
 # Introduction
-The AnnoTEP is a platform designed for the annotation of transposable elements (TEs) in plant genomes. Built upon the [EDTA pipeline](https://github.com/oushujun/EDTA), the tool incorporates specific modifications inspired by the [Plant genome Annotation pipeline](https://github.com/amvarani/Plant_Annotation_TEs), as well as adjustments that enhance its performance and flexibility. One of the key differentiators of AnnoTEP is its graphical user interface (GUI), developed using HTML and Python technologies, which makes the process accessible even to researchers with limited familiarity with command-line operations. Combining efficiency, customisation, and ease of use, AnnoTEP provides a robust solution for the analysis and annotation of TEs. Additionally, the tool has proven effective in the analysis of algae and microalgae, contributing to significant advancements in genomic research.
+The AnnoTEP is a mode designed for the annotation of transposable elements (TEs) in plant genomes. Built upon the [EDTA pipeline](https://github.com/oushujun/EDTA), the tool incorporates specific modifications inspired by the [Plant genome Annotation pipeline](https://github.com/amvarani/Plant_Annotation_TEs), as well as adjustments that enhance its performance and flexibility.
 
 In addition to its GitHub repository, AnnoTEP also has a [website](https://plantgenomics.ncc.unesp.br/AnnoTEP/) that centralises its documentation, displays the genome mutation rate table, and showcases a selection of pre-processed genomes using the tool.
 
@@ -37,7 +37,7 @@ In addition to its GitHub repository, AnnoTEP also has a [website](https://plant
 > bash Miniconda3-latest-Linux-x86_64.sh
 > ```
 
-📌 Once Miniconda is installed, make sure you are inside the <b>AnnoTEP directory</b>, then set up the environment as follows:
+📌 Once Miniconda is installed, make sure you are inside the <b>EDTA-GUI directory</b>, then set up the environment as follows:
 ```sh
 cd $HOME/EDTA-GUI
 
@@ -45,6 +45,10 @@ cd $HOME/EDTA-GUI
 
 conda activate AnnoTEPgui
 ```
+
+> [!IMPORTANT]
+> The AnnoTEP mode must be run within the AnnoTEPgui environment; using the EDTAgui environment may result in errors.
+>
 
 📌  Still within the <b>AnnoTEP directory</b>, copy the ```break_fasta.pl``` script to ```/usr/local/bin``` to make it accessible system-wide:
 ```sh
