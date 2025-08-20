@@ -273,35 +273,36 @@ After completion, all results are organised in the /EDTA-GUI/gui/results directo
 EDTA in AnnoTEP mode is a feature designed for the annotation of transposable elements in plants, incorporating additional analysis and visualisation tools optimised for plant genomes. This mode generates complementary outputs, including reports, masked genome versions, charts, and phylogenetic trees. Some of these data are stored in the TE-REPORT directory, which is automatically created during the annotation process.
 
 Examples of data output:
+<br>
+
 📌 ``TEs-Report-Lite.tbl``: A simplified report derived from the complete version, containing concise and accessible information.
 <div align="center">
-    <img src="gui/static/assets/screenshot/TEs-Lite.png" alt="TEs-Lite" border="0" width="150px"/>
+    <img src="gui/static/assets/screenshot/TEs-Lite.png" alt="TEs-Lite" border="0" width="450px"/>
 </div>
 <br>
 
 📌 ``TE-Report*``: These charts, generated from the ``TEs-Report-Lite.txt`` file, provide a clear and informative visualisation of TEs, categorised by hierarchical levels.
 <div align="center">
-    <img src="gui/static/assets/screenshot/TE-Report-bar.svg" alt="TE-Report-bar" border="0" width="150px" />
-    <img src="gui/static/assets/screenshot/TE-Report-bubble.svg" alt="TE-Report-bubble" border="0" width="150px" />
+    <img src="gui/static/assets/screenshot/TE-Report2-bar.png" alt="TE-Report-bar" border="0" width="450px" />
+    <img src="gui/static/assets/screenshot/TE-Report2-bubble-panels.png" alt="TE-Report-bubble" border="0" width="869px" />
 </div>
 <br>
 
 📌 ``kimura_distance_plot.pdf``
 <div align="center">
-    <img src="gui/static/assets/screenshot/kimura_distance_plot.svg" alt="Repeat-Land-Scape" border="0" width="150px" />
+    <img src="gui/static/assets/screenshot/kimura_distance_plot.png" alt="Repeat-Land-Scape" border="0" width="450px" />
 </div>
 
 
 📌 ``AGE-Gypsy.pdf`` and ``AGE-Copia.pdf``
 <div align="center">
-    <img src="gui/static/assets/screenshot/AGE-Copia.svg" alt="AGE-Copia" border="0" width="150px">
-    <img src="gui/static/assets/screenshot/AGE-Gypsy.svg" alt="AGE-Gypsy" border="0" width="150px">
+    <img src="gui/static/assets/screenshot/AGE-Copia.png" alt="AGE-Copia" border="0" width="450px">
+    <img src="gui/static/assets/screenshot/AGE-Gypsy.png" alt="AGE-Gypsy" border="0" width="450px">
 </div>
 
 📌 ``LTR_RT-Tree*``:
 <div align="center">
-    <img src="gui/static/assets/screenshot/LTR_RT-Tree1_original_circular.svg" alt="LTR_RT-Tree1_original_circular" border="0" width="250px">
-    <img src="gui/static/assets/screenshot/LTR_RT-Tree2_circular_density.svg" alt="LTR_RT-Tree2_circular_density" border="0" width="250px">
+    <img src="gui/static/assets/screenshot/LTR_RT-Tree2_cladogram_density.png" alt="LTR_RT-Tree2_cladogram_density" border="0" width="450px">
 </div>
 <br>
 
