@@ -12,9 +12,9 @@
 ## Table of Contents
   - [Introduction](#introduction)
   - [Installation](#installation)
-  - [Exploring the EDTAGUI Interface](#exploring-the-edtagui-interface)
-    - [EDTA](#edta)
-    - [panEDTA](#panedta)
+  - [Exploring the EDTA-GUI Interface](#exploring-the-edta-gui-interface)
+    - [EDTA-GUI](#edta-gui)
+    - [panEDTA-GUI](#panedta-gui)
     - [Results](#results)
   - [Testing](#testing)
   - [Docker](#docker)
@@ -22,46 +22,63 @@
   - [Citations](#citations)
 
 ## Introduction
-This package was developed as an extension of the [EDTA pipeline](https://github.com/oushujun/EDTA), with the aim of providing a graphical interface for users. The purpose of EDTAGUI is to make the use of EDTA more accessible, meeting the needs of researchers at different levels of experience – from beginners to experts – and facilitating the analysis and annotation of transposable elements in genomes.
+This package was developed as an extension of the [EDTA pipeline](https://github.com/oushujun/EDTA), with the aim of providing a graphical interface for users. The purpose of EDTA-GUI is to make the use of EDTA more accessible, meeting the needs of researchers at different levels of experience – from beginners to experts – and facilitating the analysis and annotation of transposable elements in genomes. EDTA-GUI also features AnnoTEP mode, an extension of EDTA modified to annotate plant genomes comprehensively.
 
 
 ## Installation
-**Step 1 - Prrequisites:** Ensure that Miniconda ins installed on your machine:
+**Step 1 - Prequisites:** Ensure that Miniconda ins installed on your machine:
 * You can download it from the following link: [Miniconda3](https://docs.conda.io/projects/miniconda/en/latest/) 
 * After downloading Miniconda from the link above, run the following command in your terminal:
  ```sh
  bash Miniconda3-latest-Linux-x86_64.sh
  ```
-**Step 2 - Conda Environment:** The installation of EDTAGUI is similar to that of EDTA, with the addition of a few extra packages via Conda and pip to support the graphical interface.
+**Step 2 - Conda Environment:** Setting up the conda environment involves installing two conda environments, EDTAgui and AnnoTEPgui, using install.sh.
 ```sh
-cd $HOME/EDTA
+cd $HOME/EDTA-GUI
 
-conda env create -f EDTA_2.2.x.yml
-conda activate EDTA
+./install.sh
+
+conda activate EDTAgui
 ```
 
 > [!IMPORTANT]
-> The default name of the Conda environment used is <b>EDTA</b>
-><br>
-> If you used a different name, you will need to edit the ``main.py`` file located in the ``gui`` folder.
-> <br>
-> Look for the following lines:
-> * "conda activate EDTA" or "$HOME/miniconda3/envs/EDTA/"
-> <br>
-> And replace EDTA with the name of your environment
-
->[!TIP]
->📌 **Integration with existing EDTA:** If you already have EDTA installed:
->* You can move the ``gui folder`` into the EDTA directory, or
->* Use the same Conda environment created earlier.
-><br>
+> 📌 <b> RepeatMasker Fixes for Long Names </b> <br>
 >
->In the latter case, you will only need to install the following additional packages:
->* Flask packages: ``flask`` / ``flask-email`` / ``flask-pymongo`` / ``flask-script`` / ``python-dotenv``
+> When running EDTA-GUI in AnnoTEP mode, you may encounter the following error: ``` FastaDB::_cleanIndexAndCompact(): Fasta file contains a sequence identifier which is too long ( max id length = 50 )```
+> 
+> To fix this issue, follow the steps below:
+> <br>
+> **Step 1.** Edit the **RepeatMasker File**
+> * Access the RepeatMasker file installed in the Conda environment:
+>   ```sh
+>   /home/"user"/miniconda3/envs/AnnoTEPgui/bin/RepeatMasker
+>   ``` 
+>
+> * Locate all occurrences of ``FastaDB`` where the following snippet appears:
+>   ``` sh
+>    = FastaDB->new(
+>                   maxIDLength => 50
+>   );
+>   ``` 
+> * Change the value of ``maxIDLength`` from ``50`` to a higher value, for example:
+>   ``` sh
+>    = FastaDB->new(
+>                   maxIDLength => 80
+>    );
+>    ```
+>
+> **Step 2.** Edit the **ProcessRepeats File**
+> * Acess the ``ProcessRepeats`` file:
+>
+>   ```sh
+>   /home/"user"/miniconda3/envs/AnnoTEPgui/share/RepeatMasker/ProcessRepeats
+>   ``` 
+> * Repeat the same procedure to change the value of  ``maxIDLength`` to ``80``.
+>
 
 **Step 3 - Graphical User Interface:**  With the Conda environment active, navigate to the ``gui folder``. Inside this folder, you can create a ``.flaskenv`` file, which defines essential Flask settings and can optionally enable the email notification feature.
 ```sh
-cd $HOME/EDTA/gui
+cd $HOME/EDTA-GUI/gui
 ```
 
 * You can create the ``.flaskenv`` file with the following content:
@@ -70,7 +87,7 @@ FLASK_APP = "main.py"
 FLASK_DEBUG = True
 FLASK_ENV = development
 ```
-📌 **Email:** The interface architecture is designed to ensure continuous user monitoring during execution by offering an <b>optional</b> ``email notification system``. When enabled, EDTAGUI automatically sends updates about the start and completion of analyses, as well as any errors that may occur.
+📌 **Email:** The interface architecture is designed to ensure continuous user monitoring during execution by offering an <b>optional</b> ``email notification system``. When enabled, EDTA-GUI automatically sends updates about the start and completion of analyses, as well as any errors that may occur.
 * If you plan to use the built-in email system (for notifications), you should also include the following configuration in your ``.flaskenv`` file:
 
 ```sh
@@ -123,12 +140,12 @@ If all settings are correct, you will see a message similar to this:
 **Step 5 - Access the Platform:** Click on the link http://127.0.0.1:5000/, or copy and paste it into your browser to access the platform and start testing it.
 
 
-## Exploring the EDTAGUI Interface
-The EDTAGUI interface was developed to implement, as closely as possible, all the functionalities available in the traditional EDTA pipeline, but in a more accessible way through a graphical interface.
+## Exploring the EDTA-GUI Interface
+The EDTA-GUI interface was developed to implement, as closely as possible, all the functionalities available in the traditional EDTA pipeline, but in a more accessible way through a graphical interface.
 
-The interface is divided into four main sections: EDTA, panEDTA, Result, and Help.
+The interface is divided into four main sections: EDTA-GUI, panEDTA-GUI and, Result
 
-### EDTA
+### EDTA-GUI
 
 <div align="center">
     <img src="gui/static/assets/edtagui.png" alt="edtagui" style="width: 750px; border: 0" />
@@ -142,6 +159,10 @@ Data input begins with the following fields:
 * **Genome Data:** Upload the input file containing the complete genomic sequence in FASTA format. Use the "Browse" button to select the file from the local system.
 
 Next, the interface presents additional features, grouped into a subsection with advanced configuration options for the analysis.
+* **Mode:** Specifies which annotation tool you wish to use. The available options are:
+  * **EDTA-GUI:** Provides annotation of transposable elements in eukaryotic genomes. Perfoms <i>de novo</i> detection and general classification of different TE classes. This is the default option for genomes of any eukaryotic organism. (default)
+  * **AnnoTEP:** Provides specialised annotation of transposable elements in plant genomes. A version of EDTA adapted for high accurary in identifying all classes, including autonomous and non-autonomous elements, as well as LTR lineages in plant genomes. Produce charts, detailed reports, and phylogenetic trees from the results.
+
 * **Species Specification to Identify TIR Candidates:** Allows users to specify the reference species in order to optimise the identification of TIR elements. The options include:
   * Others: For species other than rice or maize (default).
   * Rice: For rice genomes.
@@ -153,17 +174,25 @@ Next, the interface presents additional features, grouped into a subsection with
   * Final: Begins with filtered TEs to completion.
   * Anno: Conducts genome-wide annotation after building the TE library.
 
-  When selecting the Filter, Final, or Anno options, it is necessary to specify the name of the folder where a previous annotation step has already been executed. This folder must be located within the /EDTA/gui/results directory. This ensures that EDTAGUI can access the required files to continue the process, reusing the data already generated and avoiding the repetition of previous steps.
+  When selecting the "Filter", "Final", or "Anno" options, a field will appear to choose the folder where a previous annotation step was processed. This folder must be located in one of the following directories:
+  * ``Repository installation``: ./EDTA-GUI/gui/results; 
+  * ``Docker installation``: /usr/local/AnnoTEP/gui/results or in the volume configured to map this directory.
 
-* **Overwrite:** Decide whether existing output data should be overwritten.
-* **Sensitivity:** Control the execution of RepeatModeler to identify additional elements.
-* **Annotation:** Specify whether the genome-wide annotation of TEs should proceed after building the TE library.
-* **Evaluate:** Check if the classification of annotated TEs is consistent. The "Annotation" field must be enabled to use this feature.
-* **Force:** If no reliable TE candidates are identified, enabling this option allows the script to continue using a backup rice TE library.
-* **Neutral Mutation Rate:** Set the neutral mutation rate for calculating the age of intact LTR elements (default: 1.3e-8 bp per year, based on rice).
-* **Maximum Divergence:** Define the maximum acceptable divergence for TE fragments. For highly repetitive genomes, users are encouraged to adjust the parameter (default: 40).
-* **Threads:** Determine the number of threads to be used in running the pipeline (default: 4).
-  
+* **TE Analysis Parameters**
+* **EDTA-GUI mode**
+  * **Overwrite:** Decide whether existing output data should be overwritten.
+  * **Sensitivity:** Control the execution of RepeatModeler to identify additional elements.
+  * **Annotation:** Specify whether the genome-wide annotation of TEs should proceed after building the TE library.
+  * **Evaluate:** Check if the classification of annotated TEs is consistent. The "Annotation" field must be enabled to use this feature.
+  * **Force:** If no reliable TE candidates are identified, enabling this option allows the script to continue using a backup rice TE library.
+  * **Neutral Mutation Rate:** Set the neutral mutation rate for calculating the age of intact LTR elements (default: 1.3e-8 bp per year, based on rice).
+  * **Maximum Divergence:** Define the maximum acceptable divergence for TE fragments. For highly repetitive genomes, users are encouraged to adjust the parameter (default: 40).
+  * **Threads:** Determine the number of threads to be used in running the pipeline (default: 10).
+
+* **AnnoTEP mode (Additional features)**
+  * **TIR filter:** Filter TIRs without annotated domains. Enabling this filter can substantially reduce false positives, but may also result in the loss of some true positives (false negatives).
+  * **Annot. type:** Specify whether to annotate the genome using a RepeatMasker-based librar. Enabling this option may negatively affect the filtering step and compromise benchmark results. 
+
 Finally, there is a section dedicated to additional input files, allowing users to include complementary files to streamline and enhance the analysis.
 * **Coding DNA Sequence:** Select a FASTA file containing the coding sequence (without introns, UTRs, or TEs) of the genome or a close relative. This helps in excluding non-transposable elements.
 * **Curate library:** Upload a curated library to maintain consistent TE naming and classification. Only manually validated TEs should be provided. This file is optional.
@@ -172,7 +201,7 @@ Finally, there is a section dedicated to additional input files, allowing users 
 * **RepeatMasker library:** Provide your own homology-based TE annotation in RepeatMasker .out format. This file will be merged with the structure-based annotation. The "Annotation" field must be enabled.
 
 
-### panEDTA
+### panEDTA-GUI
 
 <div align="center">
     <img src="gui/static/assets/panedta.png" alt="panedta" style="width: 750px; border: 0" />
@@ -183,7 +212,7 @@ This section provides the interface for panEDTA, a new feature of the EDTA pipel
 Data input begins with the following fields:
 * **Email Address:** To start the annotation process, enter a valid email address. This is a optional field and is used to send notifications about the status of the analysis. While the email facilitates communication, the annotation occurs locally, so keep the system running during the process.
 
-* **Genome Data:** Upload the input file containing the complete genome sequence in FASTA format, along with a corresponding CDS file (optional). You must provide at least one genome file. The optional CDS file will only be considered if it is linked to a genome; otherwise, it will be ignored. Use the Browse button to select files from your local system. By clicking the "+" icon, you can add more fields to upload additional genome and CDS files.
+* **Genome Data:** Upload the input file containing the complete genome sequence in FASTA format, along with a corresponding CDS file (optional). You must provide at least one genome file. The optional CDS file will only be considered if it is linked to a genome; otherwise, it will be ignored. Use the Browse button to select files from your local system. By clicking the "+" icon, you can add more fields to upload additional genome and CDS files. By clicking on the "-" icon, you can remove the added field.
 
 Next, the interface presents additional features, this subsection provides advanced configuration options for the analysis.
 * **Coding DNA Sequence:** Required. A coding sequence file in FASTA format. The CDS file provided in this field will be used to fill in any missing CDS files from the Genome Data list. If no CDS files are specified in the genome list, this CDS file will be applied to all genomes.
@@ -214,32 +243,67 @@ You can also monitor the progress of the annotation by accessing the "Results" t
   * **2.** Completion of annotation: Even if the process runs, the annotation may not be successfully finalised in the Results section. Therefore, it is important to check the following:
 
     * Look out for any prolonged error messages.
-    * Confirm whether the message <i>"Evaluation of TE annotation finished! ..."</i> or <i>"panEDTA annotation of genome_${date}.cds.list is finished!"</i> appears — this message indicates that the annotation has been successfully completed.
+    * **Using EDTA-GUI:** Confirm whether the message <i>"Evaluation of TE annotation finished! ..."</i> or <i>"panEDTA annotation of genome_${date}.cds.list is finished!"</i> appears — this message indicates that the annotation has been successfully completed.
+    * **Using AnnoTEP:** Confirm whether the message <i>"The generation of charts and reports has been completed"</i> appears — this message indicates that the annotation has been successfully completed.
 
-### Help
-Provides a brief guide explaining each option available in the annotation sections.
 
 ## Testing
-You should test the EDTA pipeline with a 1-Mb toy genome, which takes about five mins. If your test finishs without any errors (warnings are OK), then EDTA should be correctly installed. If the test is OK but you encounter errors with your data, you should check your own data for any formating/naming mistakes.
+You should test the EDTA-GUI with a 1-Mb toy genome, which takes about five mins. If your test finishs without any errors (warnings are OK), then EDTA-GUI should be correctly installed. If the test is OK but you encounter errors with your data, you should check your own data for any formating/naming mistakes.
 
 Step-by-step:
 
-**1.** Genome data: Select the genome.fa file located in the /EDTA/test folder.
+**1.** Genome data: Select the genome.fa file located in the /EDTA-GUI/test folder.
 
 **2.** Activate the options: Overwrite, Annotation, and Sensitivity (These options are enabled by default in the graphical interface).
 
 **3.** Threads: Define the number of threads you wish to use for processing.
 
-**4.** Coding DNA Sequence (CDS): Add the genome.cds.fa file, also located in /EDTA/test.
+**4.** Coding DNA Sequence (CDS): Add the genome.cds.fa file, also located in /EDTA-GUI/test.
 
-**5.** Curate library: Select the rice7.0.0.liban file, available in the /EDTA/database folder.
+**5.** Curate library: Select the rice7.0.0.liban file, available in the /EDTA-GUI/database folder.
 
-**6.** Exclusion of masked regions: Specify the genome.exclude.bed file, also found in /EDTA/test.
+**6.** Exclusion of masked regions: Specify the genome.exclude.bed file, also found in /EDTA-GUI/test.
 
 **7.** After completing all fields, click <b>Submit</b> to start the pipeline execution.
 
 ## Outputs
-After completion, all results are organised in the /EDTA/gui/results directory. The folders generated by the annotation process in the EDTA section are named according to the genome name, the date (year, month, day), and the time (hour, minute, second) of execution. The folder generated by the panEDTA section follows the same naming pattern but starts with the prefix panGenome.
+After completion, all results are organised in the /EDTA-GUI/gui/results directory. The folders generated by the annotation process in the EDTA-GUI section are named according to the genome name, the date (year, month, day), and the time (hour, minute, second) of execution. The folder generated by the panEDTA-GUI section follows the same naming pattern but starts with the prefix panGenome.
+
+## Using EDTA in AnnoTEP mode
+EDTA in AnnoTEP mode is a feature designed for the annotation of transposable elements in plants, incorporating additional analysis and visualisation tools optimised for plant genomes. This mode generates complementary outputs, including reports, masked genome versions, charts, and phylogenetic trees. Some of these data are stored in the TE-REPORT directory, which is automatically created during the annotation process.
+
+Examples of data output:
+📌 ``TEs-Report-Lite.tbl``: A simplified report derived from the complete version, containing concise and accessible information.
+<div align="center">
+    <img src="gui/static/assets/screenshot/TEs-Lite.png" alt="TEs-Lite" border="0" width="150px"/>
+</div>
+<br>
+
+📌 ``TE-Report*``: These charts, generated from the ``TEs-Report-Lite.txt`` file, provide a clear and informative visualisation of TEs, categorised by hierarchical levels.
+<div align="center">
+    <img src="gui/static/assets/screenshot/TE-Report-bar.svg" alt="TE-Report-bar" border="0" width="150px" />
+    <img src="gui/static/assets/screenshot/TE-Report-bubble.svg" alt="TE-Report-bubble" border="0" width="150px" />
+</div>
+<br>
+
+📌 ``kimura_distance_plot.pdf``
+<div align="center">
+    <img src="gui/static/assets/screenshot/kimura_distance_plot.svg" alt="Repeat-Land-Scape" border="0" width="150px" />
+</div>
+
+
+📌 ``AGE-Gypsy.pdf`` and ``AGE-Copia.pdf``
+<div align="center">
+    <img src="gui/static/assets/screenshot/AGE-Copia.svg" alt="AGE-Copia" border="0" width="150px">
+    <img src="gui/static/assets/screenshot/AGE-Gypsy.svg" alt="AGE-Gypsy" border="0" width="150px">
+</div>
+
+📌 ``LTR_RT-Tree*``:
+<div align="center">
+    <img src="gui/static/assets/screenshot/LTR_RT-Tree1_original_circular.svg" alt="LTR_RT-Tree1_original_circular" border="0" width="250px">
+    <img src="gui/static/assets/screenshot/LTR_RT-Tree2_circular_density.svg" alt="LTR_RT-Tree2_circular_density" border="0" width="250px">
+</div>
+<br>
 
 ## Docker
 > [!IMPORTANT] 
@@ -251,7 +315,7 @@ After completion, all results are organised in the /EDTA/gui/results directory. 
 
 Open the terminal and run the following commands:
 
-**Step 1. Download the EDTA Image:** Open your terminal and run the following command to download the EDTA Docker image:
+**Step 1. Download the EDTA-GUI Image:** Open your terminal and run the following command to download the EDTA-GUI Docker image:
 ```sh
 docker pull annotep/edtagui:v1
 ```
@@ -283,7 +347,7 @@ Once the process is complete, you will receive an email confirming whether it fi
 
 
 ## Citations
-This work is an extension of the EDTA tool. Therefore, when using EDTAGUI in publications or projects, please cite the following original articles:
+This work is an extension of the EDTA tool. Therefore, when using EDTA-GUI in publications or projects, please cite the following original articles:
 
 Ou S., Su W., Liao Y., Chougule K., Agda J. R. A., Hellinga A. J., Lugo C. S. B., Elliott T. A., Ware D., Peterson T., Jiang N.✉, Hirsch C. N.✉ and Hufford M. B.✉ (2019). Benchmarking Transposable Element Annotation Methods for Creation of a Streamlined, Comprehensive Pipeline. [Genome Biol. 20(1): 275.](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1905-y)
 

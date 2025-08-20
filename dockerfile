@@ -5,6 +5,7 @@ RUN apt-get update -y \
     && apt-get install -y curl gnupg wget git vim
 
 COPY . /usr/local/EDTA
+COPY AnnoTEP/Scripts/break_fasta.pl /usr/local/bin/
 
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
     && bash Miniconda3-latest-Linux-x86_64.sh -b -p /usr/local/miniconda3 \
@@ -21,7 +22,7 @@ RUN conda config --set channel_priority flexible \
 
 
 RUN cd /usr/local/EDTA \
-    && conda env create -f EDTA_2.2.x.yml
+    && /bin/bash install.sh
 
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
@@ -33,6 +34,8 @@ COPY gui_docker/ /usr/local/EDTA/gui
 
 WORKDIR /usr/local/EDTA/gui
 
+# RUN rm -rf gui_docker/
+
 VOLUME /usr/local/EDTA/gui/results
 
-CMD ["bash", "-c", "source /usr/local/miniconda3/etc/profile.d/conda.sh && conda activate EDTA && flask run --host=0.0.0.0 --port=5000"]
+CMD ["bash", "-c", "source /usr/local/miniconda3/etc/profile.d/conda.sh && conda activate EDTAgui && flask run --host=0.0.0.0 --port=5000"]
