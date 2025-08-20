@@ -122,7 +122,7 @@ tail -f EDTA.log
 > <br>
 > 📌 <b> Improving TE detection - </b> Enable ``--sensitive 1``. for more accurate TE detection and annotation. This option runs RepeatModeler to identify additional TEs and repeat sequences, and it also provides Superfamily and Lineage-level classifications.
 > <br>
-> 📌 <b>Enhancing genome analysis with mutation rate - </b> For a more refined analysis of TE insertion age, we recommend setting the mutation rate using the ``-u <float>``parameter. Suggested values and detailed explanations can be found in the ``LTR-Ages.doc`` file or in the Genome section of the [AnnoTEP](https://plantgenomics.ncc.unesp.br/AnnoTEP/). <br>
+> 📌 <b>Enhancing genome analysis with mutation rate - </b> For a more refined analysis of TE insertion age, we recommend setting the mutation rate using the ``-u <float>``parameter. Suggested values and detailed explanations can be found in the ``LTR-Ages.doc`` file or in the Genome section of the [AnnoTEP](https://plantgenomics.ncc.unesp.br/AnnoTEP-DB/). <br>
 > 
 
 
@@ -253,95 +253,5 @@ In addition to FASTA libraries, GFF3 files, and softmasking outputs, AnnoTEP als
 
 ## TE-REPORT
 The **TE-REPORT** directory is generated at the end of the annotation process and contains a comprehensive set of reports and visualisations. Within this directory, you will find both detailed and summary reports that hierarchically classify transposable elements (TEs) by order, superfamily, and autonomy; Bubble and bar charts representing the TE classification; Repeat landscape plots generated using Kimura distance calculations; LTR age distribution charts, showing the estimated insertion times of LTR superfamilies; and Phylogenetic trees of LTR elements.
-
-# List of genomes tested in this pipeline
-AnnoTEP offers the capability to analyse a wide range of plants, algae, and microalgae that have not yet been explored or are underrepresented in previous studies. This approach enables the discovery of new TEs and genomic patterns that could be crucial for advancements in areas such as genomic evolution, species adaptation, and biotechnology. By focusing on less-studied genomes, AnnoTEP opens doors to groundbreaking research and contributes to filling gaps in the current understanding of TE diversity and functionality.
-<br>
-
-| Genome                                           | Common Name            | Size          |
-|--------------------------------------------------|------------------------|---------------|
-| _Adiantum capillus_                              | S. maidenhair fern     | 4,82 GB       |
-| _Aegilops tauschii_                              | Rough-spike hard grass | 4,12 GB       |
-| _Amborella trichopoda_ (v1.0)                    | Amborella              | 706,33 Mb     |
-| _Ananas comosus_ (v1)                            | Pineapple              | 381,91 Mb     |
-| _Anthoceros angustus_                            | Hornwort               | 119,35 Mb     |
-| _Arabidopsis lyrata_ (V2.1)                      | Lyrate Rockcress       | 206,67 Mb     |
-| _Arabidopsis thaliana_ (TAIR10)                  | Thale cress            | 119,67 Mb     |
-| _Azolla filiculoides_                            | Mosquito fern          | 622,59 Mb     |
-| _Brachypodium distachyon_ (ABR2 v1)              | Stiff brome            | 271,43 Mb     |
-| _Brassica oleracea_ capitata (v1.0)              | Cabbage                | 385,01 Mb     |
-| _Carnegiea gigantea_                             | Saguaro                | 1,14 Gb       |
-| _Ceratodon purpureus_                            | Moss                   | 349,46 Mb     |
-| _Ceratopteris richardii (v2.1)_                  | Fern                   | 7,46 GB       |
-| _Chlamydomonas reinhardtii_                      | Green algae            | 114,63 Mb     |
-| _Citrus sinensis_                                | Orange                 | 620,59 Mb     |
-| _Coffea arabica_                                 | Arabian coffee         | 1,19 Gb       |
-| _Conticribra weissflogii_                        | Diatoms                | 231,50 Mb     |
-| _Cucumis sativus_                                | Cucumber               | 226,64 Mb     |
-| _Cycas panshihuaensis_                           | Dukou sago palm        | 10,48 GB      |
-| _Cyanophora paradoxa_                            | Freshwater Glaucophyte | 99,94 Mb      |
-| _Dendrobium huoshanense_                         | Mihu                   | 1,28 GB       |
-| _Diacronema lutheri_                             | Haptophytes            | 43,50 Mb      |
-| _Dioscorea alata_                                | Guyana arrowroot       | 480,02 Mb     |
-| _Eucalyptus grandis_ (v2.0)                      | Rose gum               | 691,35 Mb     |
-| _Euglena gracilis_                               | Unicellular algae      | 2,37 Gb       |
-| _Fragaria x ananassa_ (Royal Royce v1.0)         | Strawberries           | 786,54 Mb     |
-| _Ginkgo biloba_                                  | Maidenhair trees       | 9,35 Gb       |
-| _Glycine max_                                    | Soybean                | 1,01 Gb       |
-| _Gnetum montanum_                                | Joint fir              | 3,79 Gb       |
-| _Gossypium hirsutum_ (v3.1)                      | Cotton                 | 2,28 Gb       |
-| _Helianthus annuus_ (r1.2)                       | Sunflower              | 3,03 Gb       |
-| _Hevea brasiliensis_                             | Rubber tree            | 1,88 Gb       |
-| _Isoetes taiwanensis_                            | Quillwort              | 1,66 Gb       |
-| _Juglans regia_                                  | Walnut                 | 572,95 Mb     |
-| _Kappaphycus striatus_                           | Green sacol            | 208,23 Mb     |
-| _Lotus japonicus_                                | Miyakogusa             | 553,71 Mb     |
-| _Malpighia emarginata_                           | Acerola                | 1,03 Gb       |
-| _Malus domestica_ (v1.1)                         | Apple                  | 709,56 Mb     |
-| _Manihot esculenta_                              | Cassava                | 639,59 Mb     |
-| _Marchantia polymorpha_ (v3.0)                   | Common liverwort       | 225,76 Mb     |
-| _Manihot esculenta_ (V8.1)                       | Cassava                | 639,59 Mb     |
-| _Mimosa bimucronata_                             | Maricá                 | 640,55 Mb     |
-| _Mimosa pudica_                                  | Sensitive Plant        | 797,25 Mb     |
-| _Musa acuminata_ (Pahang)                        | Banana                 | 484,06 Mb     |
-| _Nelumbo nucifera_                               | Sacred lotus           | 821,29 Mb     |
-| _Nepenthes gracilis_                             | Pitcher plant          | 752,88 Mb     |
-| _Oryza sativa_ (v7.0)                            | Rice                   | 374,47 Mb     |
-| _Passiflora edulis_                              | Passion fruit          | 1,34 Gb       |
-| _Phaseolus vulgaris_ (v2.1)                      | Common bean            | 537,22 Mb     |
-| _Physcomitrium patens_ (6.1)                     | Moss                   | 481,75 Mb     |
-| _Populus trichocarpa_ (v4.1)                     | Black cottonwood       | 392,16 Mb     |
-| _Prunus persica_ (v2.1)                          | Peach                  | 227,41 Mb     |
-| _Psidium guajava_                                | Guava                  | 443,76 Mb     |
-| _Quercus rubra_ (v2.1)                           | Northern red oak       | 739,58 Mb     |
-| _Saccharum officinarum x spontaneum_ R570 (v2.1) | Sugarcane              | 5,05 Gb       |
-| _Salix purpurea_ (5.1)                           | Basket willow          | 329,29 Mb     |
-| _Salvinia cucullata_                             | Small rat's ear        | 231,85 Mb     |
-| _Selaginella moellendorffii_                     | Spikemoss              | 212,32 Mb     |
-| _Setaria viridis_ (v4.1)                         | Green foxtail          | 397,28 Mb     |
-| _Sherardia arvensis_                             | Field madder           | 441,30 Mb     |
-| _Skeletonema tropicum_                           | Centric diatoms        | 78,78 Mb      |
-| _Solanum lycopersicum_ (ITAG5.0)                 | Tomato                 | 801,81 Mb     |
-| _Solanum tuberosum_ (v6.1)                       | Potato                 | 741,59 Mb     |
-| _Sorghum bicolor_ (v5.1)                         | Broomcorn              | 719,89 Mb     |
-| _Theobroma cacao_ (v2.1)                         | Cacao                  | 341,71 Mb     |
-| _Theobroma grandiflorum_ (C174)                  | Cupuassu               | 415,77 Mb     |
-| _Theobroma grandiflorum_ (C1074)                 | Cupuassu               | 423,92 Mb     |
-| _Triticum aestivum_ cv Chinese Spring (v2.1)     | Bread wheat            | 14,58 Gb      |
-| _Utricularia gibba_                              | Floating bladderwort   | 100,69 Mb     |
-| _Vitis vinifera_ (v2.1)                          | Grape vine             | 486,20 Mb     |
-| _Welwitschia mirabilis_                          | Tree Tumbo             | 6,87 Gb       |
-| _Zea mays_                                       | Maize                  | 2,14 Gb       |
-| _Zostera marina_                                 | Eelgrass               | 260,49 Mb     |
-
-<br>
-
-### Genomes Under Analysis
-This section lists the genomes currently being analysed using the AnnoTEP pipeline. The results will be updated as the analysis progresses.
-<br>
-
-| Genome                                           | Common Name            | Size          |
-|--------------------------------------------------|------------------------|---------------|
-| -                                                | -                      | -             |
 
 📎 Return to [Table of contents](#table-of-contents)
