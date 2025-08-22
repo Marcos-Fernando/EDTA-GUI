@@ -11,7 +11,7 @@
 
 ## Table of Contents
   - [Introduction](#introduction)
-  - [Installation EDTA-GUI](#installation-edta-gui)
+  - [Installing EDTA-GUI](#installing-edta-gui)
   - [Installing with library and conda](#installing-with-library-and-conda)
   - [Exploring the EDTA-GUI Interface](#exploring-the-edta-gui-interface)
     - [EDTA-GUI](#edta-gui)
