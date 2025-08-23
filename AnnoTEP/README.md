@@ -6,7 +6,6 @@
 * [Installing with Container](#installing-with-container)
     * [Docker](#docker)
     * [Singularity](#singularity)
-* [List of genomes tested in this pipeline](#list-of-genomes-tested-in-this-pipeline)
 <br>
 
 # Introduction
@@ -89,6 +88,8 @@ sudo cp AnnoTEP/Scripts/break_fasta.pl /usr/local/bin
 >   ``` 
 > * Repeat the same procedure to change the value of  ``maxIDLength`` to ``80``.
 >
+
+📎 Return to [Table of contents](#table-of-contents)
 
 ## Testing 
 **Step 1.** Download the genome <br>
