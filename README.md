@@ -202,13 +202,13 @@ Data input begins with the following fields:
 * **Email Address:** To start the annotation process, enter a valid email address. This is a optional field and is used to send notifications about the status of the analysis. While the email facilitates communication, the annotation occurs locally, so keep the system running during the process.
 * **Genome Data:** Upload the input file containing the complete genomic sequence in FASTA format. Use the "Browse" button to select the file from the local system.
 
-  > [!Important]
-  >
-  > 📌 Please use simpe fasta headers! For example: >chr01, >scf001, >ctg001 and etc.
-  > 
-  > 📌 Do not use (NEVER) characters like "_" , "-" , "/" , "|" , for example >chr_001, >scf-001, >ctg|001 and etc!
-  > 
-  > 📌 The pipeline may crash if you dont't use simple fasta headers acording the above instructions!
+> [!Important]
+>
+> Please use simpe fasta headers! For example: >chr01, >scf001, >ctg001 and etc.
+> 
+> Do not use (NEVER) characters like "_" , "-" , "/" , "|" , for example >chr_001, >scf-001, >ctg|001 and etc!
+> 
+> The pipeline may crash if you dont't use simple fasta headers acording the above instructions!
 
 Next, the interface presents additional features, grouped into a subsection with advanced configuration options for the analysis.
 * **Mode:** Specifies which annotation tool you wish to use. The available options are:
