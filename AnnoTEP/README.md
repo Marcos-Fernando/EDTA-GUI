@@ -123,7 +123,15 @@ tail -f EDTA.log
 > 📌 <b> Improving TE detection - </b> Enable ``--sensitive 1``. for more accurate TE detection and annotation. This option runs RepeatModeler to identify additional TEs and repeat sequences, and it also provides Superfamily and Lineage-level classifications.
 > <br>
 > 📌 <b>Enhancing genome analysis with mutation rate - </b> For a more refined analysis of TE insertion age, we recommend setting the mutation rate using the ``-u <float>``parameter. Suggested values and detailed explanations can be found in the ``LTR-Ages.doc`` file or in the Genome section of the [AnnoTEP](https://plantgenomics.ncc.unesp.br/AnnoTEP-DB/). <br>
+>
+
+> [!Important]
+>
+> Please use simpe fasta headers! For example: >chr01, >scf001, >ctg001 and etc.
 > 
+> Do not use (NEVER) characters like "_" , "-" , "/" , "|" , for example >chr_001, >scf-001, >ctg|001 and etc!
+> 
+> The pipeline may crash if you dont't use simple fasta headers acording the above instructions!
 
 
 > [!NOTE]
