@@ -178,6 +178,7 @@ If all settings are correct, you will see a message similar to this:
 
 > [!Important]
 > Although the interface is accessed through the web browser, all processes run locally on the user’s machine. Therefore, performance will depend on the resources available on the computer.
+>
 > The platform can operate without an internet connection, with the exception of the e-mail system, which requires connectivity. If used offline, any attempt to send e-mails will result in an error, which may prevent the annotation process from completing.
 
 <br>
