@@ -10,11 +10,11 @@
 <br>
 
 # Introduction
-The AnnoTEP is a mode designed for the annotation of transposable elements (TEs) in plant genomes. Built upon the [EDTA pipeline](https://github.com/oushujun/EDTA), the tool incorporates specific modifications inspired by the [Plant genome Annotation pipeline](https://github.com/amvarani/Plant_Annotation_TEs), as well as adjustments that enhance its performance and flexibility.
+EDTA-GUI in AnnoTEP mode is designed for the annotation of transposable elements (TEs) in plant genomes. Built upon the [EDTA pipeline](https://github.com/oushujun/EDTA), the tool incorporates specific modifications inspired by the [Plant genome Annotation pipeline](https://github.com/amvarani/Plant_Annotation_TEs), as well as adjustments that enhance its performance and flexibility.
 
 In addition to its GitHub repository, AnnoTEP mode also provides a dedicated [Database](https://plantgenomics.ncc.unesp.br/AnnoTEP-DB/) for plant genomes.
 
-### Functions of AnnoTEP
+### Functions of EDTA-GUI in AnnoTEP mode
 * Enhancement in the detection of LTRs, LINEs, TIRs, and Helitrons.
 * Improved identification and classification of non-autonomous LTRs, such as TRIM, LARD, TR-GAG, and BARE2.
 * Detection of solo LTRs.
@@ -147,7 +147,15 @@ bash -u ../Scripts/generate_PLOTs-for-TE-pipe.sh At.fasta
 > [!TIP]
 > Make sure to replace ``At.fasta`` with the name of the input genome file you wish to process, if it is different.
 
-At the end of the analysis, a directory named REPORT will be created. It contains all the outputs, including bubble and bar plots, phylogenetic trees, and summary reports. Each of these results is described in detail in the [results section](#results).
+
+> [!Important]
+>
+> <b>Using the --step and --folder flags</b>
+>
+>If you wish to redo the annotation from a specific step, you can use the --step flag. However, since EDTA-GUI in AnnoTEP mode uses a fixed script and a fixed folder for storing results, it is necessary to use the --folder flag together with --step.
+>
+>The --folder flag allows you to specify the name of the folder where you want to redo the annotation. The programme will search for this folder inside the results directory and re-run the annotation in that location.
+>
 
 📎 Return to [Table of contents](#table-of-contents)
 
@@ -160,9 +168,7 @@ At the end of the analysis, a directory named REPORT will be created. It contain
 > - 📦 [Singularity](https://docs.sylabs.io/guides/3.5/user-guide/quick_start.html)
 
 ## Docker
-While the primary focus of AnnoTEP is its user-friendly graphical interface, we also provide a Docker version designed exclusively for command-line use. This option caters to researchers who prefer or are more accustomed to working in a terminal environment. The configurable parameters in the Docker version closely mirror those offered by the EDTA pipeline, ensuring a consistent and flexible experience for diverse workflows.
-
-**Step 1. Download the AnnoTEP Image:** To get started, download the AnnoTEP CLI Docker image by running the following command:
+**Step 1. Download the EDTA-GUI in AnnoTEP mode Image:** To get started, download the AnnoTEP mode image by running the following command:
 ```sh
 docker pull annotep/annotep-cli:v1
 ```
