@@ -309,6 +309,16 @@
 						</td>
 						<td><p id="status-text-switch7">Deactivated</p></td>
 					</tr>
+					<tr class="hidden">
+						<td><p class="session-title"> Run LAI </p></td>
+						<td class="button-switch" style="padding-left: 0.5rem;">
+							<div class="switch">
+								<input type="checkbox" id="switch8" name="lai"/>
+								<label for="switch8">Toggle</label>   
+							</div>
+						</td>
+						<td><p id="status-text-switch8">Enable</p></td>
+					</tr>
 				</table>
 		   </section>
 
@@ -430,6 +440,7 @@
 						<ul>
 							<li><strong>TIR filter:</strong> Filter TIRs without annotated domains. Enabling this filter can substantially reduce false positives, but may also result in the loss of some true positives (false negatives).</li>
 							<li><strong>Annot. type:</strong>  Specify whether to annotate the genome using a RepeatMasker-based librar. Enabling this option may negatively affect the filtering step and compromise benchmark results. </li>
+							<li><strong>Run LAI:</strong>  LAI calculations must be performed on haploid assemblies. If you have a diploid or polyploid genome, we recommend disabling this option. </li>
 						</ul>
 						<h3> </h3>
 						<ul>

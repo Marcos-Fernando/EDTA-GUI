@@ -25,6 +25,7 @@ function execute_annotation(threadsValue) {
         data.append('force', switchValues.forceValue);
         data.append('tirfilter', switchValues.tirfilterValue);
         data.append('annottype', switchValues.annottypeValue);
+        data.append('lai', switchValues.laiValue);
         data.append('annotation', annotationValue);
         data.append('evaluate', evaluateValue);
         data.append("mutation_rate", mutationRate);
@@ -182,7 +183,8 @@ const switchValues = {
   sensitivityValue: 1,
   forceValue: 0,
   tirfilterValue: 0,
-  annottypeValue: 0
+  annottypeValue: 0,
+  laiValue: 1
 };
 
 let annotationValue = 0;
@@ -195,6 +197,7 @@ const switch4 = document.getElementById("switch4");
 const switch5 = document.getElementById("switch5");
 const switch6 = document.getElementById("switch6");
 const switch7 = document.getElementById("switch7");
+const switch8 = document.getElementById("switch8");
 
 const statusTextswitch1 = document.getElementById("status-text-switch1");
 const statusTextswitch2 = document.getElementById("status-text-switch2");
@@ -203,6 +206,7 @@ const statusTextswitch4 = document.getElementById("status-text-switch4");
 const statusTextswitch5 = document.getElementById("status-text-switch5");
 const statusTextswitch6 = document.getElementById("status-text-switch6");
 const statusTextswitch7 = document.getElementById("status-text-switch7");
+const statusTextswitch8 = document.getElementById("status-text-switch8");
 
 const rmoutFileInput = document.getElementById("rmout");
 const excludeFileInput = document.getElementById("exclude");
@@ -243,6 +247,10 @@ function updateSwitch6() {
 
 function updateSwitch7() {
     updateSwitchStatus(switch7, statusTextswitch7, 'annottypeValue');
+}
+
+function updateSwitch8() {
+    updateSwitchStatus(switch8, statusTextswitch8, 'laiValue');
 }
 
 // Function to update the visual and text status of switch3 (Annotation)
@@ -307,29 +315,38 @@ function updateMode() {
 
     const switch6Row = document.getElementById("switch6").closest("tr");
     const switch7Row = document.getElementById("switch7").closest("tr");
+    const switch8Row = document.getElementById("switch8").closest("tr");
 
     if (annotepCheckbox.checked) {
         // Release switches 6 e 7
-        switch2.checked = true; // Marca o switch2
-        switch2.disabled = true; //Trava switch2
+        switch2.checked = true; // Mark switch2
+        switch2.disabled = true; //Lock switch2
         updateSwitchStatus(switch2, statusTextswitch2, 'sensitivityValue');
 
         switch6.disabled = false;
         switch7.disabled = false;
+        switch8.disabled = false;
+        switch8.checked = true;
+        updateSwitch8();
         switch6Row.classList.remove("hidden"); 
-        switch7Row.classList.remove("hidden"); 
+        switch7Row.classList.remove("hidden");
+        switch8Row.classList.remove("hidden"); 
     } else if (edtaCheckbox.checked) {
         // Blocks abd disable switches 6 e 7
         switch2.disabled = false;
 
         switch6.checked = false;
         switch7.checked = false;
+        switch8.checked = false;
         updateSwitch6();
         updateSwitch7();
+        updateSwitch8();
         switch6.disabled = true;
         switch7.disabled = true;
+        switch8.disabled = true;
         switch6Row.classList.add("hidden");
         switch7Row.classList.add("hidden");
+        switch8Row.classList.add("hidden");
     } else {
         // Caso nenhum esteja selecionado, garante que switch2 está editável
         switch2.disabled = false;
@@ -346,6 +363,7 @@ switch3.addEventListener("change", updateSwitch3);
 switch4.addEventListener("change", updateSwitch4);
 switch6.addEventListener("change", updateSwitch6);
 switch7.addEventListener("change", updateSwitch7);
+switch8.addEventListener("change", updateSwitch8);
 
 // Initialises the default state when loading the page
 updateSwitch3();

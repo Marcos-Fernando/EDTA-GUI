@@ -731,17 +731,18 @@ input[type="file"]{
   width: 1rem;
 }
 
-#status-text-switch1,
-#status-text-switch3,
-#status-text-switch2,
-#status-text-switch4,
-#status-text-switch5,
-#status-text-switch6,
-#status-text-switch7,
-#status-text-annotep{
-	color: var(--grey-02);
-	font-weight: 700;
-}
+	#status-text-switch1,
+	#status-text-switch3,
+	#status-text-switch2,
+	#status-text-switch4,
+	#status-text-switch5,
+	#status-text-switch6,
+	#status-text-switch7,
+	#status-text-switch8,
+	#status-text-annotep{
+		color: var(--grey-02);
+		font-weight: 700;
+	}
 
 .status-deactivated {
     color: var(--grey-02);
@@ -752,9 +753,8 @@ input[type="file"]{
 }
 
 /* {
-	color: var(--red-02);
+	color: var(--green-02);
 	font-weight: 700;
-	font-size: 1rem;
 } */
 
 

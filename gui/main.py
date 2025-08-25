@@ -3,7 +3,6 @@ import re
 from datetime import datetime
 import subprocess
 
-
 from app import create_app, allowed_file
 from werkzeug.utils import secure_filename
 from flask import render_template, request, redirect, flash, jsonify, Response
@@ -43,6 +42,7 @@ def annotation_process():
     force = int(request.form.get('force', 0))
     tirfilter = int(request.form.get('tirfilter', 0))
     annottype = int(request.form.get('annottype', 0))
+    lai = int(request.form.get('lai', 0))
 
     mutation_rate = request.form.get("mutation_rate") 
     max_divergence = request.form.get("max_divergence")
@@ -92,6 +92,8 @@ def annotation_process():
     save_file(rm_lib_file, output_dir)
     save_file(rmout_file, output_dir)
 
+    #'--LAI': lai,
+
     params = {
         '--overwrite': overwrite,
         '--anno': annotation,
@@ -101,6 +103,7 @@ def annotation_process():
         '--maxdiv': max_divergence,
         '--TIR_filter': tirfilter,
         '--ANNOT_TYPE':annottype,
+        '--run_LAI': lai,
         '--cds': cds_file.filename if cds_file else '',
         '--curatedlib': curate_lib_file.filename if curate_lib_file else '',
         '--exclude': masked_regions_file.filename if masked_regions_file else '',
@@ -109,7 +112,11 @@ def annotation_process():
     }
 
     # Filter out parameters that are empty or have a value of 0
-    filtered_params = {key: value for key, value in params.items() if value not in [None, 0, '']}
+    # filtered_params = {key: value for key, value in params.items() if value not in [None, 0, '']}
+    filtered_params = {
+        key: value for key, value in params.items()
+        if value not in [None, 0, ''] or key == '--run_LAI'
+    }
     # Build the parameter string
     param_str = ' '.join([f"{key} {value}" for key, value in filtered_params.items()])
 
