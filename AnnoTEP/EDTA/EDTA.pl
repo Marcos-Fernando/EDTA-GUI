@@ -82,6 +82,9 @@ perl EDTA.pl [options]
             		(1) Yes; (0) No [default, uses intact elements].  
                 	Enabling this option (1) may negatively affect the filtering step and compromise benchmark 
                 	results.
+	--run_LAI	Specify whether to run LTR Assembly Index (LAI)  
+            		(1) Yes; (0) No [default 1].  
+                	LAI calculation must be performed on haploid assemblies. If you have diploid or polyploid genome, please disable this option.
 	--rmout	[File]	Provide your own homology-based TE annotation instead of using the
 			EDTA library for masking. File is in RepeatMasker .out format. This
 			file will be merged with the structural-based TE annotation. (--anno 1
@@ -115,6 +118,7 @@ my $step = "ALL";
 # ADDED ###################
 my $TIR_filter = "0"; 
 my $ANNOT_TYPE = "0"; 
+my $run_LAI = "1";
 my $genome_size = "0";
 ###########################
 my $overwrite = 0; #0, no rerun. 1, rerun even old results exist.
@@ -217,6 +221,7 @@ if ( !GetOptions( 'genome=s'            => \$genome,
 # ADDED ###################
 		  'TIR_filter=i'         => \$TIR_filter,
 		  'ANNOT_TYPE=i'         => \$ANNOT_TYPE, 
+		  'run_LAI=i'		 => \$run_LAI,
 ###########################		  
 		  'rmout=s'              => \$rmout,
 		  'maxdiv=i'		 => \$maxdiv,
@@ -272,6 +277,7 @@ if ($threads !~ /^[0-9]+$/){ die "The expected value for the threads parameter i
 # ADDED ###################
 if ($TIR_filter != 0 and $TIR_filter != 1){ die "The expected value for the TIR_filter parameter is 0 or 1!\n"}
 if ($ANNOT_TYPE != 0 and $ANNOT_TYPE != 1){ die "The expected value for the ANNOT_TYPE parameter is 0 or 1!\n"}
+if ($run_LAI != 0 and $run_LAI != 1){ die "The expected value for the run_LAI parameter is 0 or 1!\n"}
 ###########################
 # define RepeatMasker -pa parameter
 #my $rm_threads = int($threads/4);
@@ -1052,33 +1058,38 @@ if ($anno == 1){
 	#
 	`rm -f temp.txt ; rm -f mask.gff ; rm -f temp2.fasta* ; rm -f *.new ; rm -f *.bed ; rm -f *.cbi ; rm -f *.new.masked ; rm -f to-mask.out `; 
 	my $structural_TE = `perl $count_base2 ../$genome-Softmasked.fa`;
-   $structural_TE = (split /\s+/, $structural_TE)[3];
-   $structural_TE = sprintf("%.2f%%", $structural_TE*100);
+        $structural_TE = (split /\s+/, $structural_TE)[3];
+        $structural_TE = sprintf("%.2f%%", $structural_TE*100);
 	#
 	# ==================
 	# Calculating LAI 
 	# ==================
 	#
-	chomp ($date = `date`);
-	print "$date\tPerforming LAI:\n\n";
-	#
-	#
-	if (-e "../BK-FINAL-$genome.out" and -e "../$genome.EDTA.raw/LTR/$genome.pass.list") {
-		if ($overwrite eq 0 and -s "../$genome.LAI") { 
-			print STDERR "$date\tA LAI result file $genome.LAI is provided! Will use this file without running LAI.\n\n";
-		        $LAI_index=`cat ../$genome.LAI  | grep whole_genome | cut -f 7 | sed 's# ##g' | tr '\n' ' ' `;
-		} else {
-			`LAI -genome ../$genome -intact ../$genome.EDTA.raw/LTR/$genome.pass.list -all ../BK-FINAL-$genome.out -q -t $threads  2>/dev/null`;
-			`mv BK-FINAL-$genome.out.LAI ../$genome.LAI 2>/dev/null`; 
-			`rm -f BK-FINAL-$genome.out.LAI.LTR.fa`;
-			`rm -f BK-FINAL-$genome.out.LAI.LTRlist`;
-			#
-			if (-e "../$genome.LAI" and -s "../$genome.LAI" ) { 
-			        $LAI_index=`cat ../$genome.LAI  | grep whole_genome | cut -f 7 | sed 's# ##g' | tr '\n' ' '`;
-			} else {	
-				$LAI_index= "LTR-RT content too low"; 
+	if ($run_LAI == 1){
+		chomp ($date = `date`);
+		print "$date\tPerforming LAI:\n\n";
+		#
+		#
+		if (-e "../BK-FINAL-$genome.out" and -e "../$genome.EDTA.raw/LTR/$genome.pass.list") {
+			if ($overwrite eq 0 and -s "../$genome.LAI") { 
+				print STDERR "$date\tA LAI result file $genome.LAI is provided! Will use this file without running LAI.\n\n";
+				$LAI_index=`cat ../$genome.LAI  | grep whole_genome | cut -f 7 | sed 's# ##g' | tr '\n' ' ' `;
+			} else {
+				`LAI -genome ../$genome -intact ../$genome.EDTA.raw/LTR/$genome.pass.list -all ../BK-FINAL-$genome.out -q -t $threads  2>/dev/null`;
+				`mv BK-FINAL-$genome.out.LAI ../$genome.LAI 2>/dev/null`; 
+				`rm -f BK-FINAL-$genome.out.LAI.LTR.fa`;
+				`rm -f BK-FINAL-$genome.out.LAI.LTRlist`;
+				#
+				if (-e "../$genome.LAI" and -s "../$genome.LAI" ) { 
+					$LAI_index=`cat ../$genome.LAI  | grep whole_genome | cut -f 7 | sed 's# ##g' | tr '\n' ' '`;
+				} else {	
+					$LAI_index= "LTR-RT content too low"; 
+				}
 			}
 		}
+	} else { 
+		$LAI_index= "LAI not calculated due to user option"; 
+		`touch ../$genome.LAI`; 
 	}
 	#	
 	# check results and report status
@@ -1094,8 +1105,12 @@ if ($anno == 1){
 
 	# Added
  	print "\t\t\tSoftmasking for structural gene annotation (masked: $structural_TE): $genome-Softmasked.fa\n";
-    	print "\t\t\tThis genomes has LAI of: $LAI_index, the complete LAI report is avaliable at: $genome.LAI\n";
-    	print "\t\t\tPlease consider the $genome-Softmasked.fa file for strucutral gene annotation\n\n";
+	if ($run_LAI == 1){
+	    	print "\t\t\tThis genomes has LAI of: $LAI_index, the complete LAI report is avaliable at: $genome.LAI\n";
+	} else {
+		print "\t\t\tLAI not calculated due to user option, empty LAI report is avaliable at: $genome.LAI\n";
+	}
+	print "\t\t\tPlease consider the $genome-Softmasked.fa file for strucutral gene annotation\n\n";
 	#
 
 	# copy results out
@@ -1110,9 +1125,18 @@ if ($anno == 1){
 	copy_file("${genome}_divergence_plot_2.2.pdf", "..");
 
 	#soloLTR
+	#`perl $findLTR -lib $genome.EDTA.TElib.fa > lib.LTR.info`;
+	#`perl $solofinder -i BK-FINAL-$genome.out -info lib.LTR.info > solo_LTR.txt`;
+	# copy_file("solo_LTR.txt", "..");
+
 	`perl $findLTR -lib $genome.EDTA.TElib.fa > lib.LTR.info`;
-	`perl $solofinder -i BK-FINAL-$genome.out -info lib.LTR.info > solo_LTR.txt`;
-	 copy_file("solo_LTR.txt", "..");
+	if ($run_LAI == 1){
+		`perl $solofinder -i BK-FINAL-$genome.out -info lib.LTR.info > solo_LTR.txt`;
+	} else {
+		`perl $solofinder -i ../BK-FINAL-$genome.out -info lib.LTR.info > solo_LTR.txt`;
+	}
+	copy_file("solo_LTR.txt", "..");
+
 
 	# evaluate the annotation consistency
 	if ($evaluate == 1){
