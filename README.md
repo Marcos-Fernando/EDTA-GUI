@@ -390,18 +390,18 @@ Open the terminal and run the following commands:
 
 **Step 1. Download the EDTA-GUI Image:** Open your terminal and run the following command to download the EDTA-GUI Docker image:
 ```sh
-docker pull annotep/edta-gui:v1
+docker pull annotep/edta-gui:v1.1
 ```
 
 **Step 2. Run the Container** Next, run the container using the command below. Specify a folder on your machine to store the annotation results:
 ```sh
-docker run -it -v <path-to-results-folder>:/usr/local/EDTA/gui/results -dp 0.0.0.0:5000:5000 annotep/edta-gui:v1
+docker run -it -v <path-to-results-folder>:/usr/local/EDTA/gui/results -dp 0.0.0.0:5000:5000 annotep/edta-gui:v1.1
 ```
 > [!TIP]
 > ### Description:
 > - ``-v <path-to-results-folder>:/usr/local/EDTA/gui/results``: Creates a volume between your machine and the container to store results. Replace ``-v <path-to-results-folder>`` with the path to a folder on your machine. If the folder doesn't exist, Docker will create it. The path ``/usr/local/EDTA/gui/results`` is the directory inside the container and should not be changed.
 > - ``-dp 0.0.0.0:5000:5000``: Maps port 5000 on the container to port 5000 on your machine.
-> - ``annotep/edta-gui:v1``: Specifies the Docker image to use.
+> - ``annotep/edta-gui:v1.1``: Specifies the Docker image to use.
 > <br>
 
 
@@ -428,7 +428,7 @@ You can use EDTA-GUI with Singularity by converting the official Docker images. 
 
 📌  **Method 1 – Direct Conversion from Docker Hub:** Download and convert the image directly from Docker Hub using:
 ```sh
-singularity build <name-image>.sif docker://annotep/edta-gui:v1
+singularity build <name-image>.sif docker://annotep/edta-gui:v1.1
 ```
 
 >[!TIP]
@@ -440,7 +440,7 @@ singularity build <name-image>.sif docker://annotep/edta-gui:v1
 📌 **Method 2 – Conversion from a Local Docker Image:** This method involves saving the Docker image locally and then converting it:
 1. Save the Docker image to a ``.tar`` file:
 ```sh
-docker save annotep/edta-gui:v1 -o edtagui1.tar
+docker save annotep/edta-gui:v1.1 -o edtagui1.tar
 ```
 2. Convert the ``.tar`` file to a Singularity image:
 ```sh
