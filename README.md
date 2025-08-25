@@ -244,6 +244,7 @@ Next, the interface presents additional features, grouped into a subsection with
 * **AnnoTEP mode (Additional features)**
   * **TIR filter:** Filter TIRs without annotated domains. Enabling this filter can substantially reduce false positives, but may also result in the loss of some true positives (false negatives).
   * **Annot. type:** Specify whether to annotate the genome using a RepeatMasker-based librar. Enabling this option may negatively affect the filtering step and compromise benchmark results. 
+  * **Run LAI:**  LAI calculations must be performed on haploid assemblies. If you have a diploid or polyploid genome, we recommend disabling this option.
 
 Finally, there is a section dedicated to additional input files, allowing users to include complementary files to streamline and enhance the analysis.
 * **Coding DNA Sequence:** Select a FASTA file containing the coding sequence (without introns, UTRs, or TEs) of the genome or a close relative. This helps in excluding non-transposable elements.
