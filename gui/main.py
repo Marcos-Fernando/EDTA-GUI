@@ -325,15 +325,35 @@ def annotation_panedta():
     return Response(status=204)
 
 @app.route("/status")
+# def status():
+#     subfolders = sorted(
+#         [os.path.join(RESULTS_DIR, p) for p in os.listdir(RESULTS_DIR)],
+#         key=lambda p: os.path.getctime(p),
+#         reverse=True
+#     )[:10]
+
+#     data = [read_page_status(p) for p in subfolders]
+#     return jsonify(data)
+
 def status():
-    subfolders = sorted(
-        [os.path.join(RESULTS_DIR, p) for p in os.listdir(RESULTS_DIR)],
-        key=lambda p: os.path.getctime(p),
-        reverse=True
-    )[:10]
+    subfolders = [
+        os.path.join(RESULTS_DIR, p)
+        for p in os.listdir(RESULTS_DIR)
+        if os.path.isdir(os.path.join(RESULTS_DIR, p))
+    ]
 
     data = [read_page_status(p) for p in subfolders]
-    return jsonify(data)
+
+    # mais recente primeiro: usa `end` (epoch) ou `start` (ISO) como fallback
+    data.sort(
+    key=lambda x: (
+        0 if x.get("end") is None else 1,  # abertos (sem end) = 0 → vêm antes
+        x.get("end") or 0,                  # depois ordena pelo end real
+        x.get("start") or ""
+        )
+    )
+
+    return jsonify(data[:10])
 
 def read_page_status(folder):
     try:
