@@ -344,11 +344,11 @@ def status():
 
     data = [read_page_status(p) for p in subfolders]
 
-    # mais recente primeiro: usa `end` (epoch) ou `start` (ISO) como fallback
+    # latest first: use `end` (epoch) or `start` (ISO) as fallback
     data.sort(
     key=lambda x: (
-        0 if x.get("end") is None else 1,  # abertos (sem end) = 0 → vêm antes
-        x.get("end") or 0,                  # depois ordena pelo end real
+        0 if x.get("end") is None else 1,  # open (without end) = 0 → come before
+        x.get("end") or 0,                  # then sort by actual end
         x.get("start") or ""
         )
     )
