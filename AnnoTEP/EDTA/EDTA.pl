@@ -1053,7 +1053,8 @@ if ($anno == 1){
 	# `cp $genome.out $genome.out.txt`;
 	`cat $genome.out | grep -v LARD | grep -v TRIM | grep -v LARD-like | grep -v TRIM-like | grep -v MITE | grep -v "RC/Helitron-like" | grep -v Unknown | grep -v SINE | grep -v "TIR/Unknown" | grep -v "LINE-like" > to-mask.out`;
 	#
-	`perl $make_masked -genome temp2.fasta -rmout to-mask.out -maxdiv 20 -minscore 1000 -minlen 1000 -hardmask 0 -threads $threads -maxdiv 35 -minscore 1000 -minlen 1000`; 
+	#`perl $make_masked -genome temp2.fasta -rmout to-mask.out -maxdiv 20 -minscore 1000 -minlen 1000 -hardmask 0 -threads $threads -maxdiv 35 -minscore 1000 -minlen 1000`; 
+	`perl $make_masked -genome temp2.fasta -rmout to-mask.out -maxdiv 20 -minscore 1000 -minlen 1000 -hardmask 0 -threads $threads`; 
 	`pullseq -i temp2.fasta.new.masked -m 1 > ../$genome-Softmasked.fa`;
 	#
 	`rm -f temp.txt ; rm -f mask.gff ; rm -f temp2.fasta* ; rm -f *.new ; rm -f *.bed ; rm -f *.cbi ; rm -f *.new.masked ; rm -f to-mask.out `; 
