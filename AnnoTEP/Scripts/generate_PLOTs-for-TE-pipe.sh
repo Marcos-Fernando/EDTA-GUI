@@ -24,8 +24,16 @@ if [ -f "$source_file" ]; then
     # Creates or updates the symbolic link in the current folder
     ln -sf "$source_file" "${genome}.mod.cat.gz"
     echo "Symbolic link created ${genome}.mod.cat.gz -> $source_file"
+elif [ -f "${source_file%.gz}" ]; then
+    # RepeatMasker only compresses the .cat file for genomes larger than 10 Mb.
+    # The compressed copy is written here, the .anno folder is left untouched.
+    echo "File found: ${source_file%.gz} (uncompressed, genome smaller than 10 Mb)"
+    rm -f "${genome}.mod.cat.gz"
+    gzip -c "${source_file%.gz}" > "${genome}.mod.cat.gz"
+    echo "Compressed copy created ${genome}.mod.cat.gz"
 else
-    echo "Error: file $source_file not found. Aborting execution."
+    echo "Error: neither $source_file nor ${source_file%.gz} was found. Aborting execution."
+    echo "These files come from the whole-genome annotation step (--anno 1)."
     exit 1
 fi
 #

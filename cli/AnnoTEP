@@ -31,7 +31,9 @@ run_in "$ANNOTEP_ENV" "$EXTRA" "$ROOT/AnnoTEP/EDTA/EDTA.pl" "$@"
 
 [ -n "$genome" ] || exit 0
 genome="$(basename "$genome")"
-if [ ! -f "${genome}.mod.EDTA.anno/${genome}.mod.cat.gz" ]; then
+# .cat.gz, or .cat for genomes smaller than 10 Mb (RepeatMasker does not compress it).
+cat_file="${genome}.mod.EDTA.anno/${genome}.mod.cat"
+if [ ! -f "${cat_file}.gz" ] && [ ! -f "$cat_file" ]; then
   echo "Charts and reports skipped: they need the genome-wide annotation (--anno 1)." >&2
   exit 0
 fi
