@@ -4,7 +4,13 @@ import divsumRaw from './__fixtures__/sample.divsum?raw'
 import ageRaw from './__fixtures__/age-copia.txt?raw'
 import nwk from './__fixtures__/all.nwk?raw'
 import clsRaw from './__fixtures__/te.cls.tsv?raw'
-import { getGeneralCategories, getLeafCategories, parseTEReport } from './parse/teReport'
+import {
+  getChartLabel,
+  getGeneralCategories,
+  getLeafCategories,
+  parseTEReport,
+  type TENode,
+} from './parse/teReport'
 import { normalizeDivsum, parseDivsum, stackedAxisMax } from './parse/divsum'
 import { buildHistogram, mean, median, parseInsertionAges } from './parse/insertionTime'
 import {
@@ -33,6 +39,28 @@ describe('report parsers (real TAIR10 chr1 outputs)', () => {
     const leaves = getLeafCategories(tree)
     expect(leaves.length).toBeGreaterThan(5)
     expect(leaves.every((n) => (n.elements ?? 0) > 0)).toBe(true)
+  })
+
+  it('leaves out nested Unclassified/Unknown and shortens chart labels', () => {
+    const node = (name: string, elements: number, children: TENode[] = []): TENode => ({
+      name,
+      elements,
+      lengthBp: elements * 1000,
+      percentage: 1,
+      children,
+    })
+    const tree = [
+      node('LTR/Copia', 5, [node('Ale', 3), node('Unclassified', 2)]),
+      node('TIRs', 4, [node('EnSpm_CACTA', 3), node('Unknown', 1)]),
+      node('Unclassified', 7),
+    ]
+    expect(getLeafCategories(tree).map((n) => n.name)).toEqual([
+      'Ale',
+      'EnSpm_CACTA',
+      'Unclassified',
+    ])
+    expect(getChartLabel('EnSpm_CACTA')).toBe('CACTA')
+    expect(getChartLabel('Ale')).toBe('Ale')
   })
 
   it('reads the .divsum table and normalizes by genome size', () => {

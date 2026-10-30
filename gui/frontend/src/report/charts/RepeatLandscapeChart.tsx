@@ -31,9 +31,11 @@ export function RepeatLandscapeChart({
     title: { text: 'Repeat landscape' },
     xAxis: {
       title: { text: 'Kimura substitution level' },
-      tickInterval: 5,
-      min: 0,
+      // Columns are centred on each level: half a level on each side keeps the first
+      // column (Kimura 0) off the Y axis line. Explicit ticks, or the axis starts at "-1".
+      min: -0.5,
       max: maxDiv + 0.5,
+      tickPositions: Array.from({ length: Math.floor(maxDiv / 5) + 1 }, (_, i) => i * 5),
     },
     yAxis: {
       title: { text: 'Percent of the genome' },

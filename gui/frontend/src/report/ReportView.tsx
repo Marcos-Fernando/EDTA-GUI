@@ -240,7 +240,7 @@ function Report({
           note={largeNote(null)}
         >
           {distMode === 'interactive' && parsedLite ? (
-            <TECharts tree={parsedLite.tree} />
+            <TECharts tree={parsedLite.tree} genomeBp={genomeBp} />
           ) : m.images.distribution ? (
             <ImageGallery runId={runId} images={m.images.distribution} />
           ) : null}

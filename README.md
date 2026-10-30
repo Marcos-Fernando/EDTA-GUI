@@ -8,6 +8,9 @@
 
   ![Linux version](https://img.shields.io/badge/PLATFORM-Linux_64-orange) ![InterfaceGUI](https://img.shields.io/badge/Interface-GUI-1C9997) ![Docker](https://img.shields.io/badge/Container-Docker-4682B4) ![Singularity](https://img.shields.io/badge/Container-Singularity-yellow)  ![License](https://img.shields.io/badge/LICENSE-GPL_v3.0-D3D3D3)
 
+  <!-- [![Docker pulls](https://img.shields.io/docker/pulls/annotep/edta-gui?label=Docker%20pulls)](https://hub.docker.com/r/annotep/edta-gui)  -->
+  [![GitHub downloads](https://img.shields.io/github/downloads/Marcos-Fernando/EDTA-GUI/total?label=Downloads)](https://github.com/Marcos-Fernando/EDTA-GUI/releases)
+
 </div>
 
 

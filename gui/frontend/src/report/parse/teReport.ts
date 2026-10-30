@@ -147,15 +147,39 @@ export function getGeneralCategories(tree: TENode[]): TENode[] {
   return found
 }
 
-/** Leaf categories with at least one element (whatever the genome has). */
+/** Generic names that, when nested (e.g. inside LTR/Copia or TIRs), stay out of the leaves. */
+const NESTED_GENERIC_NAMES = ['unclassified', 'unknown']
+
+/**
+ * Leaf categories with at least one element (whatever the genome has). Nested
+ * "Unclassified"/"Unknown" are left out, as in the TE-Report2 bar plot of the pipeline:
+ * only the global category is kept.
+ */
 export function getLeafCategories(tree: TENode[]): TENode[] {
   const leaves: TENode[] = []
-  const walk = (nodes: TENode[]) => {
+  const walk = (nodes: TENode[], depth: number) => {
     for (const node of nodes) {
-      if (node.children.length) walk(node.children)
-      else if (node.elements !== null && node.elements > 0) leaves.push(node)
+      if (node.children.length) {
+        walk(node.children, depth + 1)
+        continue
+      }
+      const nestedGeneric = depth > 0 && NESTED_GENERIC_NAMES.includes(node.name.toLowerCase())
+      if (!nestedGeneric && node.elements !== null && node.elements > 0) leaves.push(node)
     }
   }
-  walk(tree)
+  walk(tree, 0)
   return leaves
+}
+
+/** Short names used in the charts of the pipeline (TE-Report2-bar.png). */
+const SHORT_LABELS: Record<string, string> = {
+  'BARE-2': 'BARE2',
+  EnSpm_CACTA: 'CACTA',
+  'MuDR_Mutator/MULE': 'MuDR/MULE',
+  PIF_Harbinger: 'Harbinger',
+  'RC/Helitron': 'Helitron',
+}
+
+export function getChartLabel(name: string): string {
+  return SHORT_LABELS[name] ?? name
 }
