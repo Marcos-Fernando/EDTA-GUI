@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# AnnoTEP mode from the command line. Runs AnnoTEP/EDTA/EDTA.pl in the annotepgui_3_11
+# environment and then, as the GUI does, the charts and reports
+# (AnnoTEP/Scripts/generate_PLOTs-for-TE-pipe.sh, in the REPORT/ folder).
+#
+#   AnnoTEP --genome genome.fa --species others --step all --sensitive 1 --anno 1 --threads 10
+#   AnnoTEP --help     (all AnnoTEP EDTA.pl options)
+#
+# The analysis runs in the current folder. Options are passed to EDTA.pl unchanged.
+# The charts need the genome-wide annotation (--anno 1); without it they are skipped.
+set -euo pipefail
+source "$(dirname "$(readlink -f "$0")")/_common.sh"
+
+[ $# -eq 0 ] && set -- --help
+
+# Genome name, for the charts: --genome X, -genome X or --genome=X (EDTA.pl writes its
+# outputs in the current folder, named after the file name without its path).
+genome=""
+args=("$@")
+for ((i = 0; i < ${#args[@]}; i++)); do
+  case "${args[i]}" in
+    --genome | -genome) genome="${args[i + 1]:-}" ;;
+    --genome=* | -genome=*) genome="${args[i]#*=}" ;;
+  esac
+done
+
+# AnnoTEP/Scripts: break_fasta.pl and the other helper scripts (no sudo cp to /usr/local/bin).
+EXTRA="$ROOT/AnnoTEP/EDTA/util:$ROOT/AnnoTEP/Scripts"
+
+run_in "$ANNOTEP_ENV" "$EXTRA" "$ROOT/AnnoTEP/EDTA/EDTA.pl" "$@"
+
+[ -n "$genome" ] || exit 0
+genome="$(basename "$genome")"
+if [ ! -f "${genome}.mod.EDTA.anno/${genome}.mod.cat.gz" ]; then
+  echo "Charts and reports skipped: they need the genome-wide annotation (--anno 1)." >&2
+  exit 0
+fi
+
+# Same markers as the GUI log.
+echo "################## AnnoTEP annotation completed successfully ##################"
+echo " "
+echo "################## Starting report and chart generation #######################"
+run_in "$ANNOTEP_ENV" "$EXTRA" bash "$ROOT/AnnoTEP/Scripts/generate_PLOTs-for-TE-pipe.sh" "$genome"

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# panEDTA from the command line. Runs panEDTA.sh in the EDTAgui environment.
+#
+#   panEDTA -g genomes.list -c cds.fa -t 10
+#   panEDTA            (without options: all panEDTA.sh options)
+#
+# The analysis runs in the current folder. Options are passed to panEDTA.sh unchanged.
+set -euo pipefail
+source "$(dirname "$(readlink -f "$0")")/_common.sh"
+
+run_in "$EDTA_ENV" "$ROOT/bin" bash "$ROOT/panEDTA.sh" "$@"

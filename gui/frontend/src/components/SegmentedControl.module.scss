@@ -1,0 +1,58 @@
+.segmented {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--panel-2);
+
+  button {
+    height: 30px;
+    border: none;
+    border-right: 1px solid var(--line);
+    background: transparent;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: background 0.12s;
+
+    &:last-child {
+      border-right: none;
+    }
+    &:hover:not(.active):not(:disabled) {
+      background: var(--panel-3);
+    }
+    &:focus-visible {
+      outline-offset: -2px;
+    }
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
+
+  .active {
+    background: var(--mode-accent);
+    color: var(--on-accent);
+    font-weight: 600;
+  }
+}
+
+// Large variant: pipeline mode switch.
+.lg {
+  border-radius: var(--r-lg);
+  padding: 3px;
+  gap: 2px;
+
+  button {
+    height: 34px;
+    border: none;
+    border-radius: 7px;
+    font-family: var(--sans);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+}

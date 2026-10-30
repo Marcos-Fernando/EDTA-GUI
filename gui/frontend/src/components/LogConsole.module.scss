@@ -1,0 +1,55 @@
+.console {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.75;
+  color: var(--console-ink);
+  background: var(--console-bg);
+  overflow: auto;
+  padding: var(--s-4) var(--s-5);
+  min-height: 0;
+
+  &:focus-visible {
+    outline-offset: -2px;
+  }
+}
+
+.line {
+  display: grid;
+  grid-template-columns: 3.5ch minmax(0, 1fr);
+  gap: var(--s-3);
+  white-space: pre-wrap;
+  word-break: break-word;
+  tab-size: 4;
+}
+
+.gutter {
+  color: var(--console-muted);
+  text-align: right;
+  user-select: none;
+}
+
+.ok {
+  color: var(--console-ok);
+}
+.warn {
+  color: var(--console-warn);
+}
+.error {
+  color: var(--console-error);
+}
+
+.cursor {
+  display: inline-block;
+  width: 7px;
+  height: 13px;
+  background: var(--accent);
+  vertical-align: middle;
+  animation: blink 1s step-end infinite;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}

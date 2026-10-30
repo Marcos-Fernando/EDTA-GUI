@@ -1,0 +1,266 @@
+@use '../styles/breakpoints' as bp;
+
+.page {
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--s-6) var(--s-8);
+  display: grid;
+  gap: var(--s-5);
+  align-content: start;
+
+  @include bp.below-narrow {
+    padding: var(--s-4);
+    overflow: visible;
+  }
+}
+
+.head {
+  padding-bottom: var(--s-4);
+  border-bottom: 1px solid var(--line);
+
+  h2 {
+    font-family: var(--serif);
+    font-size: 24px;
+    margin: 0;
+  }
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 4px;
+  font-weight: 600;
+}
+
+.sub {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: var(--s-8);
+  align-items: start;
+
+  @include bp.below-narrow {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-5);
+  }
+}
+
+/* table of contents */
+.toc {
+  position: sticky;
+  top: 0;
+  font-size: 12.5px;
+
+  @include bp.below-narrow {
+    position: static;
+  }
+
+  ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 2px;
+  }
+
+  a {
+    display: flex;
+    gap: var(--s-2);
+    padding: 6px var(--s-2);
+    border-radius: var(--r-md);
+    color: var(--ink-2);
+    text-decoration: none;
+
+    &:hover {
+      background: var(--panel-3);
+      color: var(--ink);
+    }
+
+    &[aria-current] {
+      background: var(--mode-tint);
+      color: var(--ink);
+    }
+  }
+}
+
+.tocLabel {
+  margin: var(--s-4) 0 var(--s-1);
+  padding: 0 var(--s-2);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.num {
+  font-family: var(--mono);
+  color: var(--mode-accent);
+  flex: none;
+}
+
+/* text */
+.article {
+  max-width: 880px;
+  min-width: 0;
+  display: grid;
+  gap: var(--s-8);
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--ink-2);
+}
+
+.partTitle {
+  margin: 0;
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--line);
+  font-family: var(--serif);
+  font-size: 22px;
+  color: var(--ink);
+}
+
+.section {
+  min-width: 0;
+
+  h2 {
+    display: flex;
+    gap: var(--s-3);
+    align-items: baseline;
+    margin: 0 0 var(--s-2);
+    font-family: var(--serif);
+    font-size: 19px;
+    color: var(--ink);
+    scroll-margin-top: var(--s-4);
+
+    &:focus {
+      outline: none;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--mode-accent);
+      outline-offset: 4px;
+    }
+  }
+
+  h3 {
+    margin: var(--s-5) 0 var(--s-2);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  p {
+    margin: 0 0 var(--s-3);
+  }
+
+  ul,
+  ol {
+    margin: 0 0 var(--s-3);
+    padding-left: var(--s-5);
+    display: grid;
+    gap: var(--s-1);
+  }
+
+  strong {
+    color: var(--ink);
+  }
+
+  a {
+    color: var(--mode-accent);
+    overflow-wrap: anywhere;
+  }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.9em;
+    padding: 1px 4px;
+    border-radius: var(--r-sm);
+    background: var(--panel-3);
+    color: var(--ink);
+    overflow-wrap: anywhere;
+  }
+}
+
+.lead {
+  font-size: 14.5px;
+  color: var(--ink);
+}
+
+.note {
+  padding: var(--s-3) var(--s-4);
+  border-left: 3px solid var(--mode-accent);
+  border-radius: var(--r-md);
+  background: var(--mode-tint);
+  color: var(--ink);
+}
+
+.steps li::marker {
+  font-family: var(--mono);
+  color: var(--mode-accent);
+}
+
+.code {
+  margin: 0 0 var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  overflow-x: auto;
+  border-radius: var(--r-md);
+  background: var(--console-bg);
+  color: var(--console-ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.55;
+
+  code {
+    padding: 0;
+    background: none;
+    color: inherit;
+    overflow-wrap: normal;
+  }
+}
+
+.tableWrap {
+  margin: 0 0 var(--s-3);
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+
+  th,
+  td {
+    padding: var(--s-2) var(--s-3);
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--line);
+  }
+
+  th {
+    background: var(--panel-2);
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  td:first-child {
+    color: var(--ink);
+    font-weight: 500;
+  }
+}

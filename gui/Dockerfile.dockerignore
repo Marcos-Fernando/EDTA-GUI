@@ -1,0 +1,51 @@
+# Used only by gui/Dockerfile (BuildKit reads <Dockerfile>.dockerignore instead of the root
+# .dockerignore). Context = repository root.
+
+# Version control, editors, caches
+.git
+.gitignore
+**/__pycache__
+**/*.py[cod]
+**/.pytest_cache
+**/.ruff_cache
+.vscode
+.idea
+
+# Secrets and local settings: never inside the image
+**/.env
+**/.env.*
+!**/.env.example
+**/mail.env
+config.py
+config_s.py
+
+# Annotation results: they stay on the user's machine (volumes)
+gui/backend/results
+
+# Frontend: dependencies and build are made inside the image
+gui/frontend/node_modules
+gui/frontend/dist
+
+# Legacy Flask GUI and image (not used by the new GUI)
+gui/app.py
+gui/main.py
+gui/templates
+gui/static
+gui/extensions
+gui/.flaskenv
+gui_docker
+dockerfile
+
+# Not needed at run time
+/docs
+gui/backend/tests
+
+# Same as the .gitignore: internal notes, personal files and exported images
+CLAUDE.md
+**/CLAUDE.md
+.claude
+**/.claude
+teste.wav
+gui/Comando_start.txt
+**/*.sif
+**/edtagui*.tar

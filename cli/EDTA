@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# EDTA mode from the command line. Runs EDTA.pl in the EDTAgui environment.
+#
+#   EDTA --genome genome.fa --species others --step all --anno 1 --threads 10
+#   EDTA --help        (all EDTA.pl options)
+#
+# The analysis runs in the current folder. Options are passed to EDTA.pl unchanged.
+set -euo pipefail
+source "$(dirname "$(readlink -f "$0")")/_common.sh"
+
+[ $# -eq 0 ] && set -- --help
+run_in "$EDTA_ENV" "$ROOT/bin" "$ROOT/EDTA.pl" "$@"

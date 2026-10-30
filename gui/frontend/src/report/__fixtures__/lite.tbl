@@ -1,0 +1,131 @@
+======================================================================
+file name: TAIR10_chr1.fa.mod.filtered
+sequences:             1
+total length:   30427671 bp  (30263782 bp excl N/X-runs)
+bases masked:    3615303 bp ( 11.88 %)
+======================================================================
+               			number of      length   percentage
+               			elements*    occupied  of sequence
+----------------------------------------------------------------------
+----------------------------Class I:Results---------------------------
+Class I Total:			  1001	   1193141 bp	 3.92 %
+----------------------------------------------------------------------
+|-Non-LTR:			   247	    108701 bp	 0.36 %
+|  |-SINEs:			    45	      5630 bp	 0.02 %
+|  |-LINEs:			   202	    103071 bp	 0.34 %
+|
+|-LTR
+|   |-LTR Non-auto:		    12	     16887 bp	 0.06 %
+|   |  |-LARDs:			     4	      8936 bp	 0.03 %
+|   |  |-TRIMs:			     0	         0 bp	 0.00 %
+|   |  |-TR_GAG:		     0	         0 bp	 0.00 %
+|   |  |-BARE-2:		     8	      7951 bp	 0.03 %
+|   |
+|   |-LTR auto:			   742	   1067553 bp	 3.51 %
+|     |
+|     |-LTR/Copia:		   205	    285063 bp	 0.94 %
+|     |  |-Ale:			    90	    143355 bp    0.47 %
+|     |  |-Alesia:		     0	         0 bp	 0.00 %
+|     |  |-Angela:		     0	         0 bp	 0.00 %
+|     |  |-Bianca:		    23	     32872 bp	 0.11 %
+|     |  |-Bryco:		     0	         0 bp	 0.00 %
+|     |  |-Lyco:		     0	         0 bp	 0.00 %
+|     |  |-Gymco-I:		     0	         0 bp	 0.00 %
+|     |  |-Gymco-II:		     0	         0 bp	 0.00 %
+|     |  |-Gymco-III:		     0	         0 bp	 0.00 %
+|     |  |-Gymco-IV:		     0	         0 bp	 0.00 %
+|     |  |-Ikeros:		     0	         0 bp	 0.00 %
+|     |  |-Ivana:		    45	     57128 bp	 0.19 %
+|     |  |-Osser:		     0	         0 bp	 0.00 %
+|     |  |-SIRE:		    14	     24103 bp	 0.08 %
+|     |  |-TAR:			     0	         0 bp	 0.00 %
+|     |  |-Tork:		    33	     27605 bp	 0.09 %
+|     |  |-Alexandra:		     0	         0 bp	 0.00 %
+|     |  |-Ferco:		     0	         0 bp	 0.00 %
+|     |  |-Bryana:		     0	         0 bp	 0.00 %
+|     |  |-Unclassified:	     0	         0 bp	 0.00 %
+|     |
+|     |
+|     |-LTR/Gypsy:		   537	    782490 bp	 2.57 %
+|       |
+|       |-Unclassified:		     0	         0 bp	 0.00 %
+|       |-non-chromovirus:	   459	    665994 bp	 2.19 %
+|       |  |-outgroup:		     0	         0 bp	 0.00 %
+|       |  |-Phygy:		     0	         0 bp	 0.00 %
+|       |  |-Selgy:		     0	         0 bp	 0.00 %
+|       |  |-OTA:		   459	    665994 bp	 2.19 %
+|       |     |-Athila:		   392	    566756 bp	 1.86 %
+|       |     |-Tatius:		     0	         0 bp	 0.00 %
+|       |     |-Tat:		    67	     99238 bp	 0.33 %
+|       |        |-TatI:	     0	         0 bp	 0.00 %
+|       |        |-TatII:	     0	         0 bp	 0.00 %
+|       |        |-TatIII:	     0	         0 bp	 0.00 %
+|       |        |-Ogre:	     0	         0 bp	 0.00 %
+|       |        |-Retand:	    67	     99238 bp	 0.33 %
+|       |
+|       |-chromovirus:		    78	    116496 bp	 0.38 %
+|          |-Chlamyvir:		     0	         0 bp	 0.00 %
+|          |-Tcn1:		     0	         0 bp	 0.00 %
+|          |-chromo-outgroup:	     0	         0 bp	 0.00 %
+|          |-CRM:		    21	     13718 bp	 0.05 %
+|          |-Galadriel:		     0	         0 bp	 0.00 %
+|          |-Tekay/Del:		    28	     67946 bp	 0.22 %
+|          |-Reina:		    29	     34832 bp	 0.11 %
+|          |-Ferney:		     0	         0 bp	 0.00 %
+|
+|-Class I others:		     0	         0 bp	 0.00 %
+|  |-Penelope:			     0	         0 bp	 0.00 %
+|  |-DIRS:			     0	         0 bp	 0.00 %
+|  |-Pararetrovirus:		     0	         0 bp	 0.00 %
+|-Class I Unknown:		     0	         0 bp	 0.00 %
+
+-----------------------------Class II:Results--------------------------
+Class II Total:			  2691	   1851724 bp	 6.09 %
+-----------------------------------------------------------------------
+-Subclass_1
+|  |-TIRs:			  1248	    780040 bp	 2.56 %
+|     |-non-autonomous
+|     |  |-MITEs:		    43	      6187 bp	 0.02 %
+|     |-autonomous
+|        |-EnSpm_CACTA:		    59	     58935 bp	 0.19 %
+|        |-hAT:			    41	     23879 bp	 0.08 %
+|        |-Kolobok:		     0	         0 bp	 0.00 %
+|        |-Merlin:		     0	         0 bp	 0.00 %
+|        |-MuDR_Mutator/MULE:	    46	     40616 bp	 0.13 %
+|        |-Novosib:		     0	         0 bp	 0.00 %
+|        |-P element:		     0	         0 bp	 0.00 %
+|        |-PIF_Harbinger:	     0	         0 bp	 0.00 %
+|        |-Ginger:		     0	         0 bp	 0.00 %
+|        |-PiggyBac:		     0	         0 bp	 0.00 %
+|        |-Sola1:		     0	         0 bp	 0.00 %
+|        |-Sola2:		     0	         0 bp	 0.00 %
+|        |-Sola3:		     0	         0 bp	 0.00 %
+|        |-Tc1_Mariner:		     0	         0 bp	 0.00 %
+|        |-Transib:		     0	         0 bp	 0.00 %
+|        |-Unknown:		  1059	    650423 bp	 2.14 %
+-Subclass_2
+|  |-RC/Helitron:		  1443	   1071684 bp	 3.52 %
+|
+|-Class II Unknown:		     0           0 bp    0.00 %
+-----------------------------------------------------------------------
+
+-Unclassified:			  2274	    570438 bp	 1.87 %
+
+-----------------------------------------------------------------------
+=======================================================================
+
+* most repeats fragmented by insertions or deletions
+  have been counted as one element
+                                                      
+
+The query species was assumed to be viridiplantae 
+RepeatMasker version 4.1.7-p1 , sensitive mode
+                                   
+run with rmblastn version 2.14.1+
+
+
+Plant TEs classification based on Orozco-Arias et al.,2019
+Based on TEsorter classification and REXdb 4.0 (LTR,TIRs and etc), and
+Kapitonov, et al., 2009 (LINE) databases
+
+=======================================================================

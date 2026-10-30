@@ -1,0 +1,127 @@
+@use '../styles/breakpoints' as bp;
+
+// Big, high-contrast and persistent on purpose: the start and end of a run must be
+// impossible to miss, also for people with low vision.
+.stack {
+  position: fixed;
+  top: calc(var(--header-h) + 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: min(600px, calc(100vw - 32px));
+  display: grid;
+  gap: 12px;
+}
+
+.notice {
+  --tone: var(--ok);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  padding: 20px 22px;
+  background: var(--panel);
+  color: var(--ink);
+  border: 2px solid var(--tone);
+  border-left-width: 10px;
+  border-radius: var(--r-lg);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.3);
+  animation: enter 0.25s ease-out;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+.started,
+.queued {
+  --tone: var(--run);
+}
+.finished {
+  --tone: var(--ok);
+}
+.failed {
+  --tone: var(--danger);
+}
+
+.icon {
+  color: var(--tone);
+}
+
+.body {
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.message {
+  margin: 6px 0 0;
+  font-size: 1.125rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.primary,
+.close {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 20px;
+  border-radius: var(--r-md);
+  font: inherit;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+
+  &:focus-visible {
+    outline: 3px solid var(--tone);
+    outline-offset: 3px;
+  }
+}
+
+.primary {
+  background: var(--tone);
+  color: var(--on-accent);
+  border: 2px solid var(--tone);
+}
+
+.close {
+  background: transparent;
+  color: var(--ink);
+  border: 2px solid var(--line-strong);
+
+  &:hover {
+    border-color: var(--ink);
+  }
+}
+
+@include bp.below-narrow {
+  .stack {
+    top: 12px;
+  }
+  .notice {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}

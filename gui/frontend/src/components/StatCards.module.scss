@@ -1,0 +1,73 @@
+@use '../styles/breakpoints' as bp;
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  margin: 0;
+
+  @include bp.below-wide {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.stat {
+  padding: var(--s-4) var(--s-5);
+  border-right: 1px solid var(--line);
+  min-width: 0;
+
+  &:last-child {
+    border-right: none;
+  }
+
+  @include bp.below-wide {
+    &:nth-child(2) {
+      border-right: none;
+    }
+    &:nth-child(-n + 2) {
+      border-bottom: 1px solid var(--line);
+    }
+  }
+}
+
+.k {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.v {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 21px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.num {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 19px;
+  font-variant-numeric: tabular-nums;
+}
+
+.running {
+  color: var(--run);
+}
+.ok {
+  color: var(--ok);
+}
+.error {
+  color: var(--danger);
+}
+.warn {
+  color: var(--warn);
+}

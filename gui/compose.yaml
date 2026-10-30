@@ -1,0 +1,45 @@
+# EDTA-GUI / AnnoTEP with Docker. The easy way is ./start.sh (it fills the variables below).
+# start.sh carries a copy of this service (without build:) for standalone use: keep in sync.
+# Manual use, from this folder (gui/):
+#   mkdir -p ~/results-edtagui
+#   LOCAL_UID=$(id -u) LOCAL_GID=$(id -g) RESULTS_HOST_DIR=~/results-edtagui docker compose up -d --build
+#   then open http://localhost:8000
+name: edta-gui
+
+services:
+  edta-gui:
+    # Published image (Docker Hub). Without internet, or before it is published, ./start.sh
+    # builds the same image locally from the build section below.
+    image: ${EDTA_GUI_IMAGE:-annotep/edta-gui:v2.0}
+    pull_policy: missing
+    build:
+      context: ..
+      dockerfile: gui/Dockerfile
+      args:
+        VERSION: local
+    container_name: edta-gui
+    # Results belong to the user of this machine, not to root.
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    # Only this computer can open the interface (it has no login).
+    ports:
+      - "127.0.0.1:${EDTA_GUI_PORT:-8000}:8000"
+    volumes:
+      # Results, on the user's machine (start.sh: ~/results-edtagui)
+      - ${RESULTS_HOST_DIR:-./backend/results}:/usr/local/EDTA/gui/backend/results
+    environment:
+      # Show the folders with their address on this machine, not inside the container
+      DISPLAY_PATH_MAP: /usr/local/EDTA/gui/backend/results=${RESULTS_HOST_DIR:-./backend/results}
+      MAX_CONCURRENT_RUNS: ${MAX_CONCURRENT_RUNS:-1}
+    # Optional e-mail settings (MAIL_*). Without this file, e-mails are simply not sent.
+    env_file:
+      - path: ./mail.env
+        required: false
+    # Large genomes start many processes (about 10000 per thread): without these limits the
+    # pipeline is killed. Same as "docker run --pids-limit 300000 --memory-swap -1" and
+    # "ulimit -u 300000" (30 threads). More threads: EDTA_GUI_PIDS_LIMIT=<threads x 10000>.
+    pids_limit: ${EDTA_GUI_PIDS_LIMIT:-300000}
+    ulimits:
+      nproc: ${EDTA_GUI_PIDS_LIMIT:-300000}
+    memswap_limit: -1
+    # Reaps the pipeline's child processes and forwards stop signals.
+    init: true

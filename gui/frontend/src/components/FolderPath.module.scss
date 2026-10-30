@@ -1,0 +1,58 @@
+.path {
+  margin: 6px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--muted);
+
+  svg {
+    flex: none;
+  }
+}
+
+.pathText {
+  min-width: 0;
+  color: var(--ink-2);
+  word-break: break-all;
+  user-select: all;
+}
+
+.copy {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--ink-2);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--panel-3);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mode-accent);
+    outline-offset: 1px;
+  }
+}
+
+.copyStatus {
+  font-family: var(--sans);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

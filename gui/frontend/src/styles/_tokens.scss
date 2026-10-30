@@ -1,0 +1,113 @@
+// Design tokens of the interface (colors, fonts, spacing).
+// Theme: data-theme="light|dark" on <html>; without it, the OS preference applies.
+// Mode accent: data-mode="annotep" on <html> switches wine → green.
+
+@mixin dark-palette {
+  --wine: #d0647a;
+  --wine-soft: #e07e91;
+  --green: #5cbf93;
+  --green-soft: #7bd0a9;
+  --accent: #e0bb4a;
+  --bg: #121110;
+  --panel: #1a1917;
+  --panel-2: #211f1c;
+  --panel-3: #2a2724;
+  --line: #2f2c28;
+  --line-strong: #403b35;
+  --ink: #ece6dc;
+  --ink-2: #cfc8bc;
+  --muted: #9a9286;
+  --placeholder: #6c665d;
+  --ok: #5cbf93;
+  --run: #e0bb4a;
+  --run-ring: rgba(224, 187, 74, 0.2);
+  --pending: #3a3631;
+  --danger: #e07e7e;
+  --warn: #e0bb4a;
+  --on-accent: #141312;
+  --console-bg: #0c0b0a;
+  --console-line: #24211e;
+  --mode-tint: rgba(208, 100, 122, 0.12);
+  color-scheme: dark;
+}
+
+:root {
+  // brand
+  --wine: #7a1f2b;
+  --wine-soft: #9c3444;
+  --green: #2f7d5c;
+  --green-soft: #3f9a72;
+  --accent: #c9a227;
+
+  // surfaces & text (light)
+  --bg: #f4f2ee;
+  --panel: #ffffff;
+  --panel-2: #faf9f6;
+  --panel-3: #efece6;
+  --line: #e2ded7;
+  --line-strong: #cfc8bc;
+  --ink: #232323;
+  --ink-2: #4a4640;
+  --muted: #6f685d;
+  --placeholder: #a39c8f;
+
+  // state
+  --ok: #2f7d5c;
+  --run: #a8841a;
+  --run-ring: rgba(201, 162, 39, 0.22);
+  --pending: #d8d2c6;
+  --danger: #b3261e;
+  --warn: #a8841a;
+  --on-accent: #ffffff;
+
+  // console (always dark)
+  --console-bg: #1c1a17;
+  --console-line: #2c2924;
+  --console-ink: #e9e2d6;
+  --console-muted: #8a8378;
+  --console-ok: #7fbf9e;
+  --console-warn: #e0bb4a;
+  --console-error: #f08c8c;
+
+  // type
+  --mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+  --serif: 'Source Serif 4', Georgia, serif;
+  --sans: 'Inter', -apple-system, system-ui, sans-serif;
+
+  // scale
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --r-sm: 4px;
+  --r-md: 6px;
+  --r-lg: 10px;
+  --sidebar-w: 360px;
+  --header-h: 60px;
+  --statusbar-h: 28px;
+
+  // mode
+  --mode-accent: var(--wine);
+  --mode-accent-soft: var(--wine-soft);
+  --mode-tint: rgba(122, 31, 43, 0.08);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    @include dark-palette;
+  }
+}
+
+:root[data-theme='dark'] {
+  @include dark-palette;
+}
+
+:root[data-mode='annotep'] {
+  --mode-accent: var(--green);
+  --mode-accent-soft: var(--green-soft);
+  --mode-tint: rgba(47, 125, 92, 0.1);
+}

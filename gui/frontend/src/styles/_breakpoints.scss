@@ -1,0 +1,15 @@
+// Breakpoints of the layout.
+$wide: 1180px;
+$narrow: 820px;
+
+@mixin below-wide {
+  @media (max-width: $wide) {
+    @content;
+  }
+}
+
+@mixin below-narrow {
+  @media (max-width: $narrow) {
+    @content;
+  }
+}

@@ -1,7 +1,58 @@
-gui/.flaskenv
-gui/results/*
-!gui/results/example_20250726-103151
+# ---------------------------------------------------------------- annotation results
+# Real data: never versioned (Docker/start.sh saves them in ~/results-edtagui, outside the
+# repository; EDTA-GUI without Docker saves them here). The folder goes empty (.gitkeep).
+gui/backend/results/*
+!gui/backend/results/.gitkeep
 
-gui_docker/
+# ---------------------------------------------------------------- internal development notes
+# Kept on the local machine only.
+CLAUDE.md
+**/CLAUDE.md
+.claude/
+/docs/
+
+# ---------------------------------------------------------------- personal files
+teste.wav
+gui/Comando_start.txt
+
+# ---------------------------------------------------------------- secrets / local config
+# E-mail credentials (MAIL_*) and other settings. Only the *.example files are versioned.
+.env
+.env.*
+!.env.example
+mail.env
+# Legacy GUI (Flask): its settings files could hold the e-mail password.
+gui/.flaskenv
 config_s.py
 config.py
+
+# ---------------------------------------------------------------- containers
+# Folder of the legacy image (root dockerfile, annotep/edta-gui:v1.1)
+gui_docker/
+# Exported / converted images (Docker save, Singularity .sif): several GB each
+*.sif
+edtagui*.tar
+
+# ---------------------------------------------------------------- Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# ---------------------------------------------------------------- frontend (React + Vite)
+# The interface is built by install.sh / EDTA-GUI --build, or inside the Docker image.
+node_modules/
+gui/frontend/dist/
+coverage/
+*.tsbuildinfo
+.vite/
+
+# ---------------------------------------------------------------- editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp

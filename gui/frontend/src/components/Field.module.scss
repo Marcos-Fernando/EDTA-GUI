@@ -1,0 +1,122 @@
+// Shared styles of form fields.
+
+.field {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.label {
+  font-size: 12px;
+  color: var(--ink-2);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-width: 0;
+}
+
+.labelCompact {
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.flag {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.required {
+  color: var(--mode-accent);
+}
+
+.input {
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--ink);
+  font-size: 12.5px;
+  font-family: var(--mono);
+  min-width: 0;
+
+  &:focus {
+    outline: none;
+    border-color: var(--mode-accent);
+    box-shadow: 0 0 0 3px var(--mode-tint);
+  }
+  &::placeholder {
+    color: var(--placeholder);
+  }
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  &[aria-invalid='true'] {
+    border-color: var(--danger);
+  }
+}
+
+.num {
+  text-align: right;
+}
+
+.select {
+  appearance: auto;
+  cursor: pointer;
+}
+
+.browseRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: var(--s-2);
+}
+
+.btnSecondary {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: var(--r-md);
+  background: var(--panel-3);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  &:hover:not(:disabled) {
+    border-color: var(--line-strong);
+  }
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.iconBtn {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  justify-content: center;
+}
+
+.hint {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.error {
+  font-size: 11px;
+  color: var(--danger);
+  line-height: 1.45;
+}

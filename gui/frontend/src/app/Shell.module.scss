@@ -1,0 +1,214 @@
+@use '../styles/breakpoints' as bp;
+
+.shell {
+  display: grid;
+  grid-template-rows: var(--header-h) minmax(0, 1fr) var(--statusbar-h);
+  height: 100vh;
+  overflow: hidden;
+
+  @include bp.below-narrow {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+    grid-template-rows: auto 1fr auto;
+  }
+}
+
+.main {
+  min-height: 0;
+  display: grid;
+}
+
+/* ---------------- header ---------------- */
+
+.header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--s-4);
+  padding: 0 var(--s-6);
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+
+  @include bp.below-narrow {
+    grid-template-columns: 1fr auto;
+    padding: var(--s-3) var(--s-4);
+    row-gap: var(--s-3);
+  }
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-width: 0;
+
+  h1 {
+    font-family: var(--serif);
+    font-size: 18px;
+    line-height: 1.1;
+    margin: 0;
+    font-weight: 700;
+    color: var(--mode-accent);
+    transition: color 0.25s;
+  }
+
+  p {
+    margin: 2px 0 0;
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.brandText {
+  min-width: 0;
+}
+
+.mark {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+// Page tabs: same look as the pipeline mode switch.
+.pages {
+  display: inline-grid;
+  grid-auto-flow: column;
+  gap: 2px;
+  padding: 3px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+
+  a {
+    padding: 7px 18px;
+    border-radius: 7px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--muted);
+    text-decoration: none;
+    text-align: center;
+    white-space: nowrap;
+    transition: 0.15s;
+
+    &:hover:not(.active) {
+      color: var(--ink);
+    }
+  }
+
+  .active {
+    background: var(--mode-accent);
+    color: var(--on-accent);
+  }
+
+  @include bp.below-narrow {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: stretch;
+    grid-auto-columns: 1fr;
+
+    a {
+      padding: 7px 8px;
+    }
+  }
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--s-2);
+}
+
+.aboutBtn {
+  height: 34px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--panel-2);
+  color: var(--ink-2);
+  font-size: 12.5px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: 0.15s;
+
+  &:hover,
+  &[aria-current] {
+    background: var(--panel-3);
+    color: var(--ink);
+  }
+
+  &[aria-current] {
+    border-color: var(--mode-accent);
+  }
+}
+
+.iconBtn {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--panel-2);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: 0.15s;
+
+  &:hover {
+    background: var(--panel-3);
+    color: var(--ink);
+  }
+}
+
+/* ---------------- status bar ---------------- */
+
+.statusbar {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto auto;
+  align-items: center;
+  gap: var(--s-5);
+  padding: 0 var(--s-5);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--muted);
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+
+  @include bp.below-narrow {
+    grid-template-columns: auto 1fr auto;
+    min-height: var(--statusbar-h);
+  }
+}
+
+.dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ok);
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.dotMock {
+  background: var(--accent);
+}
+
+.dotError {
+  background: var(--danger);
+}
+
+.hideSm {
+  @include bp.below-narrow {
+    display: none;
+  }
+}

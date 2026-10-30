@@ -1,0 +1,40 @@
+#TE	Order	Superfamily	Clade	Complete	Strand	Domains
+TE_00000005	LTR	Copia	Ale	no	+	GAG|Ale PROT|Ale INT|Ale RH|Ale
+TE_00000006	LTR	Copia	Ale	yes	+	GAG|Ale PROT|Ale INT|Ale RT|Ale RH|Ale
+TE_00000016	LTR	Copia	Ivana	yes	+	GAG|Ivana PROT|Ivana INT|Ivana RT|Ivana RH|Ivana
+TE_00000018	LTR	Copia	Ale	no	+	RT|Ale RH|Ale
+TE_00000021	LTR	Copia	Bianca	no	+	RT|Bianca RH|Bianca
+TE_00000024	LTR	Copia	Ale	yes	+	GAG|Ale PROT|Ale INT|Ale RT|Ale RH|Ale
+TE_00000028	LTR	Gypsy	Reina	yes	+	GAG|Reina PROT|Reina RT|Reina RH|Reina INT|Reina CHD|Reina
+TE_00000030	LTR	Copia	SIRE	yes	+	GAG|SIRE PROT|SIRE INT|SIRE RT|SIRE RH|SIRE
+TE_00000035	LTR	Gypsy	Tekay	yes	+	GAG|Tekay PROT|Tekay RT|Tekay RH|Tekay INT|Tekay CHD|Tekay
+TE_00000039	LTR	Gypsy	Reina	yes	+	GAG|Reina PROT|Reina RT|Reina RH|Reina INT|Reina CHD|Reina
+TE_00000042	LTR	Gypsy	Reina	yes	+	GAG|Reina PROT|Reina RT|Reina RH|Reina INT|Reina CHD|Reina
+TE_00000045	LTR	Copia	Tork	yes	+	GAG|Tork PROT|Tork INT|Tork RT|Tork RH|Tork
+TE_00000046	LTR	Gypsy	Athila	no	+	GAG|Athila PROT|Athila
+TE_00000048	LTR	Gypsy	Athila	no	+	GAG|Athila PROT|Athila
+TE_00000051	LTR	Gypsy	CRM	no	+	GAG|CRM CHDCR|CRM
+TE_00000057	LTR	Copia	SIRE	no	+	GAG|SIRE PROT|SIRE RT|SIRE RH|SIRE
+TE_00000058	LTR	Copia	Ale	yes	+	GAG|Ale PROT|Ale INT|Ale RT|Ale RH|Ale
+TE_00000059	LTR	Gypsy	Retand	yes	+	GAG|Retand PROT|Retand RT|Retand RH|Retand INT|Retand
+TE_00000062	LTR	Copia	Ale	yes	+	GAG|Ale PROT|Ale INT|Ale RT|Ale RH|Ale
+TE_00000065	LTR	Copia	Ale	yes	+	GAG|Ale PROT|Ale INT|Ale RT|Ale RH|Ale
+TE_00000068	LTR	Copia	Ivana	no	+	GAG|Ivana PROT|Ivana RH|Ivana
+TE_00000070	LTR	Gypsy	Retand	no	+	GAG|Retand PROT|Retand RT|Retand aRH|Retand INT|Retand
+TE_00000074	LTR	Gypsy	Reina	no	+	GAG|Reina
+TE_00000076	LTR	Copia	Ale	yes	+	GAG|Ale PROT|Ale INT|Ale RT|Ale RH|Ale
+TE_00000079	LTR	Copia	Ale	yes	+	GAG|Ale PROT|Ale INT|Ale RT|Ale RH|Ale
+TE_00000088	LTR	Copia	Ivana	yes	+	GAG|Ivana PROT|Ivana INT|Ivana RT|Ivana RH|Ivana
+TE_00000110	LTR	Copia	Ale	yes	+	GAG|Ale PROT|Ale INT|Ale RT|Ale RH|Ale
+TE_00000111	LTR	Copia	Ale	yes	+	GAG|Ale PROT|Ale INT|Ale RT|Ale RH|Ale
+TE_00000114	LTR	Copia	Ivana	yes	+	GAG|Ivana PROT|Ivana INT|Ivana RT|Ivana RH|Ivana
+TE_00000117	LTR	Copia	Ale	yes	+	GAG|Ale PROT|Ale INT|Ale RT|Ale RH|Ale
+TE_00000134	LTR	Copia	Ale	yes	+	GAG|Ale PROT|Ale INT|Ale RT|Ale RH|Ale
+TE_00000161	LTR	Copia	Bianca	no	+	RH|Bianca
+TE_00000176	LTR	Copia	Ale	yes	+	GAG|Ale PROT|Ale INT|Ale RT|Ale RH|Ale
+TE_00000209	LTR	Gypsy	Athila	no	+	GAG|Athila
+TE_00000286	LTR	Gypsy	Athila	no	+	RT|Athila RH|Athila INT|Athila
+TE_00000301	LTR	Gypsy	Athila	no	+	RH|Athila INT|Athila
+TE_00000316	LTR	Gypsy	Athila	no	+	PROT|Athila
+TE_00000350	LTR	Copia	Ivana	no	+	RH|Ivana
+TE_00000353	LTR	Copia	Tork	no	+	PROT|Tork

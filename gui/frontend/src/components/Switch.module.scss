@@ -1,0 +1,37 @@
+.switch {
+  width: 32px;
+  height: 18px;
+  border-radius: 20px;
+  background: var(--line-strong);
+  position: relative;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  flex-shrink: 0;
+  transition: background 0.15s;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    transition: left 0.15s;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  }
+
+  &[aria-checked='true'] {
+    background: var(--mode-accent);
+    &::after {
+      left: 16px;
+    }
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}

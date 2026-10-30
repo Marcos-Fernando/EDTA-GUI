@@ -1,0 +1,26 @@
+[project]
+name = "edta-gui-backend"
+version = "0.1.0"
+description = "FastAPI backend of EDTA-GUI / AnnoTEP"
+requires-python = ">=3.11"
+# Dependencies live in the conda environment (annotep_env_3_11.yml at the repository root).
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "S"]
+ignore = [
+  "S101",  # assert in tests and for type narrowing
+  "S603",  # subprocess with an argv list (no shell) is the intended design
+  "RUF001", "RUF002", "RUF003",  # typographic characters in strings/comments
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore:Using `httpx` with `starlette.testclient`"]
