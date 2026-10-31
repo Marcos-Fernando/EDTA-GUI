@@ -48,6 +48,8 @@ perl EDTA_raw.pl [options]
 	--mdust		[path]	Path to the mdust program. (default: find from ENV)
 	--repeatmasker	[path]	Path to the RepeatMasker program. (default: find from ENV)
 	--repeatmodeler	[path]	Path to the RepeatModeler2 program. (default: find from ENV)
+	--wholeelement	[0|1]	Keep LTR-RTs as whole elements instead of
+				splitting into LTR/INT regions. Default: 0
 	--threads|-t	[int]	Number of theads to run this script. Default: 4
 	--help|-h	Display this help info
 \n";
@@ -59,6 +61,7 @@ my $type = 'all';
 my $RMlib = 'null';
 my $overwrite = 0; #0, no rerun. 1, rerun even old results exist.
 my $convert_name = 1; #0, use original seq names; 1 shorten names.
+my $wholeelement = 0; #0, split LTR library into LTR/INT (default); 1, keep whole elements
 my $maxint = 5000; #maximum interval length (bp) between TIRs (for GRF in TIR-Learner)
 my $miu = 1.3e-8; #mutation rate, per bp per year, from rice
 my $threads = 4;
@@ -70,6 +73,7 @@ my $rename_RM = "$script_path/bin/rename_RM_TE.pl";
 my $filter_gff = "$script_path/bin/filter_gff3.pl";
 my $rename_tirlearner = "$script_path/bin/rename_tirlearner.pl";
 my $call_seq = "$script_path/bin/call_seq_by_list.pl";
+my $seqid_codec = "$script_path/bin/seqid_codec.pl";
 my $output_by_list = "$script_path/bin/output_by_list.pl";
 my $cleanup_tandem = "$script_path/bin/cleanup_tandem.pl";
 my $get_ext_seq = "$script_path/bin/get_ext_seq.pl";
@@ -87,7 +91,7 @@ my $mdust = ''; #path to mdust
 my $trf = ''; #path to trf
 my $GRF = ''; #path to GRF
 my $annosine = ""; #path to the AnnoSINE program
-my $TIR_Learner = ""; #path to TIR-Learner3 program  #tianyulu
+my $TIR_Learner = ""; #path to TIR-Learner program
 my $LTR_FINDER = ""; #path to LTR_FINDER_parallel program  #tianyulu
 my $LTR_HARVEST = ""; #path to LTR_HARVEST_parallel program  #tianyulu
 my $HelitronScanner = ""; #path to HelitronScanner program  #tianyulu
@@ -109,6 +113,7 @@ foreach (@ARGV){
 	$repeatmasker = $ARGV[$k+1] if /^--repeatmasker$/i and $ARGV[$k+1] !~ /^-/;
 	$repeatmodeler = $ARGV[$k+1] if /^--repeatmodeler$/i and $ARGV[$k+1] !~ /^-/;
 	$annosine = $ARGV[$k+1] if /^--annosine$/i and $ARGV[$k+1] !~ /^-/;
+	$TIR_Learner = $ARGV[$k+1] if /^--tirlearner$/i and $ARGV[$k+1] !~ /^-/;
 	$LTR_retriever = $ARGV[$k+1] if /^--ltrretriever/i and $ARGV[$k+1] !~ /^-/;
 	$TEsorter = $ARGV[$k+1] if /^--tesorter$/i and $ARGV[$k+1] !~ /^-/;
 	$blastplus = $ARGV[$k+1] if /^--blastplus$/i and $ARGV[$k+1] !~ /^-/;
@@ -116,6 +121,7 @@ foreach (@ARGV){
 	$trf = $ARGV[$k+1] if /^--trf_path$/i and $ARGV[$k+1] !~ /^-/;
 	$GRF = $ARGV[$k+1] if /^--GRF$/i and $ARGV[$k+1] !~ /^-/;
 	$threads = $ARGV[$k+1] if /^--threads$|^-t$/i and $ARGV[$k+1] !~ /^-/;
+	$wholeelement = $ARGV[$k+1] if /^--wholeelement$/i and $ARGV[$k+1] !~ /^-/;
 	$help = 1 if /^--help$|^-h$/i;
 	$k++;
 	}
@@ -254,6 +260,7 @@ if ($TIR_Learner eq "") {
 `$TIR_Learner 2>/dev/null`;
 die "Error: TIR-Learner is not found in the path $TIR_Learner!\n" if $?==32256 || $?==2;
 
+
 # LTR_FINDER_parallel  #tianyuLu
 $LTR_FINDER =~ s/\s+$//;
 if ($LTR_FINDER eq "") {
@@ -311,12 +318,8 @@ if ($RMlib ne 'null'){
 	}
 
 # check if duplicated sequences found
-my $id_mode = 0; #record the mode of id conversion.
-my $id_len = `grep \\> $genome|perl -ne 'chomp; s/>//g; my \$len=length \$_; \$max=\$len if \$max<\$len; print "\$max\\n"'`; #find out the longest sequence ID length in the genome
-$id_len =~ s/\s+$//;
-$id_len = (split /\s+/, $id_len)[-1];
-my $raw_id = `grep \\> $genome|wc -l`;
-my $old_id = `grep \\> $genome|sort -u|wc -l`;
+my $raw_id = `grep -a \\> $genome|wc -l`;
+my $old_id = `grep -a \\> $genome|sort -u|wc -l`;
 if ($raw_id > $old_id){
 	chomp ($date = `date`);
 	die "$date\tERROR: Identical sequence IDs found in the provided genome! Please resolve this issue and try again.\n";
@@ -325,44 +328,31 @@ if ($raw_id > $old_id){
 if ($convert_name == 1){
 if (-s "$genome.mod"){
 	$genome = "$genome.mod";
+	chomp ($date = `date`);
+	print "$date\tExisting normalized genome $genome found, will use it.\n\n";
 	} else {
-
-# remove sequence annotations (content after the first space in sequence names) and replace special characters with _, convert non-ATGC bases into Ns
-`perl -nle 'my \$info=(split)[0]; \$info=~s/[\\~!@#\\\$%\\^&\\*\\(\\)\\+\\\-\\=\\?\\[\\]\\{\\}\\:;",\\<\\/\\\\\|]+/_/g; \$info=~s/_+/_/g; \$info=~s/[^ATGCN]/N/gi unless /^>/; print \$info' $genome > $genome.$rand.mod`;
-
-# try to shortern sequences
-my $id_len_max = 13; # allowed longest length of a sequence ID in the input file
-if ($id_len > $id_len_max){
+	# Normalize genome: clean IDs, encode if needed
 	chomp ($date = `date`);
-	print "$date\tThe longest sequence ID in the genome contains $id_len characters, which is longer than the limit ($id_len_max)\n";
-	print "\tTrying to reformat seq IDs...\n\t\tAttempt 1...\n";
-	`perl -lne 'chomp; if (s/^>+//) {s/^\\s+//; \$_=(split)[0]; s/(.{1,$id_len_max}).*/>\$1/g;} print "\$_"' $genome.$rand.mod > $genome.$rand.temp`;
-	my $new_id = `grep \\> $genome.$rand.temp|sort -u|wc -l`;
-	chomp ($date = `date`);
-	if ($old_id == $new_id){
-		$id_mode = 1;
-		`mv $genome.$rand.temp $genome.mod`;
-		`rm $genome.$rand.mod 2>/dev/null`;
-		print "$date\tSeq ID conversion successful!\n\n";
-		} else {
-		print "\t\tAttempt 2...\n";
-		`perl -ne 'chomp; if (/^>/) {\$_=">\$1" if /([0-9]+)/;} print "\$_\n"' $genome.$rand.mod > $genome.$rand.temp`;
-		$new_id = `grep \\> $genome.$rand.temp|sort -u|wc -l`;
-		if ($old_id == $new_id){
-			$id_mode = 2;
-			`mv $genome.$rand.temp $genome.mod`;
-			`rm $genome.$rand.mod 2>/dev/null`;
-			print "$date\tSeq ID conversion successful!\n\n";
-			} else {
-			`rm $genome.$rand.temp $genome.$rand.mod 2>/dev/null`;
-			die "$date\tERROR: Fail to convert seq IDs to <= $id_len_max characters! Please provide a genome with shorter seq IDs.\n\n";
-			}
+	print "$date\tCleaning and normalizing sequence IDs...\n";
+	`perl $seqid_codec encode_fasta $genome $genome.mod.seqid.map $genome.mod`;
+	if ($? != 0){
+		die "$date\tERROR: Genome normalization failed. Check error messages above.\n";
 		}
-	} else {
-	`mv $genome.$rand.mod $genome.mod`;
+	$genome = "$genome.mod";
+	if (-s "$genome.seqid.map"){
+		print "\tSequence IDs encoded. Mapping file: $genome.seqid.map\n\n";
+		} else {
+		print "\tSequence IDs are short enough, no encoding needed.\n\n";
+		}
+	# Verify unique ID count
+	my $new_id = `grep -a \\> $genome|sort -u|wc -l`;
+	chomp $new_id;
+	chomp $old_id;
+	if ($old_id != $new_id){
+		chomp ($date = `date`);
+		die "$date\tERROR: Seq ID normalization produced non-unique IDs. Please check your genome file.\n";
+		}
 	}
-$genome = "$genome.mod";
-}
 }
 # pre-set parameters
 my $genome_file_real_path=File::Spec->rel2abs($genome); # the genome file with real path
@@ -414,18 +404,24 @@ if ($overwrite eq 0 and -s "$genome.finder.combine.scn"){
 
 # run LTR_retriever
 my $status = 0;
-if ($overwrite eq 0 and -s "$genome.LTRlib.fa"){
-	print STDERR "$date\tExisting LTR_retriever result $genome.LTRlib.fa found!\n\t\tWill use this for further analyses.\n\n";
+if ($overwrite eq 0 and (-s "$genome.mod.LTRlib.fa" or -s "$genome.LTRlib.fa")){
+	print STDERR "$date\tExisting LTR_retriever result found!\n\t\tWill use this for further analyses.\n\n";
 	} else {
 	`cat $genome.harvest.combine.scn $genome.finder.combine.scn > $genome.rawLTR.scn`;
-	$status = system("${LTR_retriever}LTR_retriever -genome $genome -inharvest $genome.rawLTR.scn -u $miu -threads $threads -noanno -trf_path $trf -blastplus $blastplus -repeatmasker $repeatmasker -salvage 1");
+	my $we_flag = $wholeelement ? "-wholeelement" : "";
+	$status = system("${LTR_retriever}LTR_retriever -genome $genome -inharvest $genome.rawLTR.scn -u $miu -threads $threads -noanno $we_flag -trf_path $trf -blastplus $blastplus -repeatmasker $repeatmasker -salvage 1 -convert_seq_name 0");
 	}
 
-# get full-length LTR from pass.list
-`awk '{if (\$1 !~ /#/) print \$1"\\t"\$1}' $genome.pass.list | perl $call_seq - -C $genome > $genome.LTR.intact.fa.ori`;
-`perl -i -nle 's/\\|.*//; print \$_' $genome.LTR.intact.fa.ori`;
-`perl $rename_LTR $genome.LTR.intact.fa.ori $genome.defalse > $genome.LTR.intact.fa.anno`;
-`mv $genome.LTR.intact.fa.anno $genome.LTR.intact.fa.ori`;
+# get full-length LTR from pass.list (or use LTR_retriever's whole-element output)
+if ($wholeelement and -s "$genome.LTR.intact.fa"){
+	# whole-element mode: LTR_retriever already produced annotated intact elements
+	`cp $genome.LTR.intact.fa $genome.LTR.intact.fa.ori`;
+} else {
+	`awk '{if (\$1 !~ /#/) print \$1"\\t"\$1}' $genome.pass.list | perl $call_seq - -C $genome > $genome.LTR.intact.fa.ori`;
+	`perl -i -nle 's/\\|.*//; print \$_' $genome.LTR.intact.fa.ori`;
+	`perl $rename_LTR $genome.LTR.intact.fa.ori $genome.defalse > $genome.LTR.intact.fa.anno`;
+	`mv $genome.LTR.intact.fa.anno $genome.LTR.intact.fa.ori`;
+}
 
 # remove simple repeats and candidates with simple repeats at terminals
 `${mdust}mdust $genome.LTR.intact.fa.ori > $genome.LTR.intact.fa.ori.dusted`;
@@ -446,10 +442,14 @@ if (-s "$genome.LTR.intact.fa.ori.dusted.cln"){
 `cp $genome.LTR.intact.raw.fa.anno.list ../`;
 
 # generate annotated output and gff
-`perl $output_by_list 1 $genome.LTR.intact.fa.ori 1 $genome.LTR.intact.raw.fa -FA -ex|grep \\>|perl -nle 's/>//; print "Name\\t\$_"' > $genome.LTR.intact.fa.ori.rmlist`;
+`perl $output_by_list 1 $genome.LTR.intact.fa.ori 1 $genome.LTR.intact.raw.fa -FA -ex|grep -a \\>|perl -nle 's/>//; print "Name\\t\$_"' > $genome.LTR.intact.fa.ori.rmlist`;
 `perl $filter_gff $genome.pass.list.gff3 $genome.LTR.intact.fa.ori.rmlist | perl -nle 's/LTR_retriever/EDTA/gi; print \$_' > $genome.LTR.intact.raw.gff3`;
-`rm $genome`;
 	}
+
+# remove the short-ID genome symlink created above (line ~380). Done outside the
+# else block so it also runs on resume (--overwrite 0), when that block is skipped
+# and the symlink would otherwise be left behind. Nothing downstream reads it.
+`rm -f $genome 2>/dev/null`;
 
 # copy result files out
 `touch $genome.LTRlib.fa` unless -e "$genome.LTRlib.fa";
@@ -458,6 +458,7 @@ if (-s "$genome.LTR.intact.fa.ori.dusted.cln"){
 `cp $genome.LTR.intact.raw.fa $genome.LTR.intact.raw.gff3 ../ 2>/dev/null`;
 `cp $genome.LTR.intact.fa ../$genome.LTR.intact.raw.fa` if -s "$genome.LTR.intact.fa";
 `cp $genome.LTR.intact.gff3 ../$genome.LTR.intact.raw.gff3` if -s "$genome.LTR.intact.gff3";
+`cp $genome.LTRlib.fa.LTRbound ../$genome.LTRlib.fa.LTRbound 2>/dev/null` if $wholeelement;
 chdir '../..';
 
 # check results
@@ -492,7 +493,8 @@ my $status; # record status of AnnoSINE execution
 if (-s "Seed_SINE.fa"){
 	print STDERR "$date\tExisting result file Seed_SINE.fa found!\n\t\tWill keep this file without rerunning this module.\n\t\tPlease specify --overwrite 1 if you want to rerun AnnoSINE_v2.\n\n";
 	} else { 
-	$status = system("python3 ${annosine}AnnoSINE_v2 --temp_dir $genome_file_real_path.EDTA.raw/SINE/ -t $threads -a 2 --num_alignments 50000 -rpm 0 --copy_number 3 --shift 100 -auto 1 3 $genome ./ > /dev/null 2>&1");
+	$status = system("python3 ${annosine}AnnoSINE_v2 --temp_dir $genome_file_real_path.EDTA.raw/SINE/ -t $threads -a 2 --num_alignments 50000 -rpm 0 --copy_number 3 --shift 100 -auto 1 3 $genome ./ 2>/dev/null");
+	#$status = system("python3 ${annosine}AnnoSINE_v2 --temp_dir $genome_file_real_path.EDTA.raw/SINE/ -t $threads -a 2 --num_alignments 50000 -rpm 0 --copy_number 3 --shift 100 -auto 1 3 $genome ./ > /dev/null 2>&1");
 	}
 
 # filter and reclassify AnnoSINE candidates with TEsorter and make SINE library
@@ -564,10 +566,14 @@ if ($overwrite eq 0 and -s "$genome-families.fa"){
 	$status = system("${repeatmodeler}RepeatModeler -engine ncbi -threads $threads -database $genome  > repeatmodeler.log 2>&1");
 	if ($status != 0) {
 		# Execute the old version of RepeatModeler
+		warn "RepeatModeler failed with -threads, retrying with -pa...\n";
 		$status = system("${repeatmodeler}RepeatModeler -engine ncbi -pa $threads -database $genome > repeatmodeler.log 2>&1");
-		print "ERROR: RepeatModeler did not run correctly. Please test run this command:
-			${repeatmodeler}RepeatModeler -engine ncbi -pa $threads -database $genome
-			" and exit unless $status == 0;
+		if ($status != 0) {
+			print "ERROR: RepeatModeler did not run correctly. Please test run this command:
+				${repeatmodeler}RepeatModeler -engine ncbi -pa $threads -database $genome
+				ERROR\n";
+			exit;
+			}
 		}
 	`rm $genome*nal $genome*nhr $genome*nin $genome*nnd $genome*nni $genome*nog $genome*nsq $genome*njs $genome*translation 2>/dev/null`;
 	}
@@ -634,13 +640,13 @@ if ($overwrite eq 0 and (-s "$genome.TIR.intact.raw.fa" or -s "$genome.TIR.intac
 	if ($overwrite eq 0 and -s "./TIR-Learner-Result/TIR-Learner_FinalAnn.fa"){
 		print STDERR "$date\tExisting raw result TIR-Learner_FinalAnn.fa found!\n\t\tWill use this for further analyses.\n\t\tPlease specify --overwrite 1 if you want to rerun this module.\n\n";
 		} else {
-		$status = system("$TIR_Learner -f $genome_file_real_path -s $species -t $threads -l $maxint -c -o $genome_file_real_path.EDTA.raw/TIR --grf_path $grfp --gt_path $genometools --working_dir $genome_file_real_path.EDTA.raw/TIR/");  #TianyuLu
+		$status = system("$TIR_Learner -f $genome_file_real_path -s $species -p $threads -l $maxint -o $genome_file_real_path.EDTA.raw/TIR");
 		}
 
 	# clean raw predictions with flanking alignment
-	`perl $rename_tirlearner ./TIR-Learner-Result/TIR-Learner_FinalAnn.fa | perl -nle 's/TIR-Learner_//g; print \$_' > $genome.TIR`;
+	`perl $rename_tirlearner ./TIR-Learner-Result/TIR-Learner_FinalAnn.fa | perl -nle 's/TIR-Learner_//gi; print \$_' > $genome.TIR`;
 	`perl $get_ext_seq $genome $genome.TIR`;
-	`perl $flank_filter -genome $genome -query $genome.TIR.ext30.fa -miniden 90 -mincov 0.9 -maxct 20 -blastplus $blastplus -t $threads`;
+	`perl $flank_filter -genome $genome -query $genome.TIR.ext30.fa -miniden 90 -mincov 0.9 -maxct 20 -blastplus $blastplus -t $threads -overwrite $overwrite`;
 
 	# recover superfamily info
 	`perl $output_by_list 1 $genome.TIR 1 $genome.TIR.ext30.fa.pass.fa -FA -MSU0 -MSU1 > $genome.TIR.ext30.fa.pass.fa.ori`;
@@ -713,14 +719,14 @@ if ($overwrite eq 0 and (-s "$genome.HelitronScanner.draw.hel.fa" and -s "$genom
 #cat $genome.HelitronScanner.draw.hel.fa $genome.HelitronScanner.draw.rc.hel.fa
 	print STDERR "$date\tExisting HelitronScanner result files $genome.HelitronScanner.draw.hel.fa $genome.HelitronScanner.draw.rc.hel.fa found!\n\t\tWill keep these files without rerunning HelitronScanner\n\t\tPlease specify --overwrite 1 if you want to rerun this module.\n\n";
 	} else {
-	$status = system("$HelitronScanner_Runner --genome $genome --cpu $threads --hsdir \"$HelitronScanner\"");
+	$status = system("python3 $HelitronScanner_Runner --genome $genome --cpu $threads --hsdir \"$HelitronScanner\" 2>/dev/null");
 	}
 
 # filter candidates based on repeatness of flanking regions
 `perl $format_helitronscanner -genome $genome -sitefilter 1 -minscore 12 -keepshorter 1 -extlen 30 -extout 0`;
 `perl $format_helitronscanner -genome $genome -sitefilter 1 -minscore 12 -keepshorter 1 -extlen 30 -extout 1`;
-`perl $flank_filter -genome $genome -query $genome.HelitronScanner.filtered.ext.fa -miniden 90 -mincov 0.9 -maxct 5 -blastplus $blastplus -t $threads`; #more relaxed
-#`perl $flank_filter -genome $genome -query $genome.HelitronScanner.filtered.ext.fa -miniden 80 -mincov 0.8 -maxct 5 -blastplus $blastplus -t $threads`; #more stringent
+`perl $flank_filter -genome $genome -query $genome.HelitronScanner.filtered.ext.fa -miniden 90 -mincov 0.9 -maxct 5 -blastplus $blastplus -t $threads -overwrite $overwrite`; #more relaxed
+#`perl $flank_filter -genome $genome -query $genome.HelitronScanner.filtered.ext.fa -miniden 80 -mincov 0.8 -maxct 5 -blastplus $blastplus -t $threads -overwrite $overwrite`; #more stringent
 
 # remove simple repeats and candidates with simple repeats at terminals
 `perl $output_by_list 1 $genome.HelitronScanner.filtered.fa 1 $genome.HelitronScanner.filtered.ext.fa.pass.fa -FA > $genome.HelitronScanner.filtered.fa.pass.fa`;

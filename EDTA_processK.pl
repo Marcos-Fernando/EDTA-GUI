@@ -21,7 +21,7 @@ use File::Basename;
 #	$genome.EDTA.fa.stg1
 
 my $usage = "\nPerform EDTA basic and advance filtering for raw TE candidates and generate the stage 1 library
-	perl EDTA_processF.pl [options]
+	perl EDTA_processK.pl [options]
 		-genome	[File]	The genome FASTA
 		-ltr	[File]	The raw LTR library FASTA
 		-ltrint	[File]	The intact LTR library FASTA
@@ -31,7 +31,7 @@ my $usage = "\nPerform EDTA basic and advance filtering for raw TE candidates an
 		-helitron	[File]	The raw Helitron library FASTA
 		-mindiff_ltr	[float]	The minimum fold difference in richness between LTRs and contaminants (default: 1)
 		-mindiff_tir	[float]	The minimum fold difference in richness between TIRs and contaminants (default: 1)
-		-mindiff_hel	[float]	The minimum fold difference in richness between Helitrons and contaminants (default: 2)
+		-mindiff_hel	[float]	The minimum fold difference in richness between Helitrons and contaminants (default: 1.5)
 		-repeatmasker [path]	The directory containing RepeatMasker (default: read from ENV)
 		-blast [path]	The directory containing Blastn (default: read from ENV)
 		-threads|-t	[int]	Number of theads to run this script
@@ -114,12 +114,25 @@ my $HEL = "$genome.Helitron.intact.raw.fa";
 
 # enter the combine folder for EDTA processing
 chdir "$genome.EDTA.combine";
-`cp ../$LTRraw $LTR` unless -s "$LTR";
-`cp ../$LTRintact $LTRint` unless -s "$LTRint";
-`cp ../$SINEraw $SINE` unless -s "$SINE";
-`cp ../$LINEraw $LINE` unless -s "$LINE";
-`cp ../$TIRraw $TIR` unless -s "$TIR";
-`cp ../$HELraw $HEL` unless -s "$HEL";
+
+# --- Resume support (added 2026-08-24) --------------------------------------
+# EDTA_processK.pl originally had no restart logic: every invocation redid the
+# whole filtering stage from scratch. On an 11 Gb genome that stage takes far
+# longer than one wall-clock window, so a timeout used to throw away every
+# completed step. Each block below now drops a dot-stamp on completion and is
+# skipped if its stamp is present. Stamps are named ".<step>.done" -- the
+# leading dot keeps them clear of the `rm $genome*` / `rm *.ndb` cleanups in
+# this script and in EDTA.pl, both of which glob on non-dot names.
+# Remove ./.step*.done (or pass --overwrite 1 to EDTA.pl) to force a rerun.
+sub done { return (-e ".$_[0].done") ? 1 : 0; }
+sub mark { `touch ".$_[0].done"`; }
+# ----------------------------------------------------------------------------
+`cp ../$LTRraw $LTR`;
+`cp ../$LTRintact $LTRint`;
+`cp ../$SINEraw $SINE`;
+`cp ../$LINEraw $LINE`;
+`cp ../$TIRraw $TIR`;
+`cp ../$HELraw $HEL`;
 
 
 ##################################
@@ -143,68 +156,103 @@ sub Purifier() {
 
 ## Purge contaminants in redundant libraries
 # purify raw LTR (clean LTR library is better than dirty intact LTR for purging LTRs from other TEs)
-&Purifier("$LTR", "$TIR", $mindiff_LTR);
-&Purifier("$LTR.HQ", "$HEL", $mindiff_LTR);
-`mv $LTR.HQ.HQ $LTR.HQ`;
+unless (&done("step1_LTR_vs_TIR")){
+	&Purifier("$LTR", "$TIR", $mindiff_LTR);
+	&mark("step1_LTR_vs_TIR");
+	}
+unless (&done("step2_LTR_vs_HEL")){
+	&Purifier("$LTR.HQ", "$HEL", $mindiff_LTR);
+	`mv $LTR.HQ.HQ $LTR.HQ`;
+	&mark("step2_LTR_vs_HEL");
+	}
 
 # purify Helitron
-&Purifier("$HEL", "$TIR", $mindiff_HEL);
-&Purifier("$HEL.HQ", "$LTR", $mindiff_LTR);
-`perl $cleanup_tandem -misschar l -Nscreen 1 -nc 50000 -nr 0.8 -minlen 80 -cleanN 1 -cleanT 0 -minrm 1 -trf 0 -f $HEL.HQ-$LTR.fa > $HEL.int.cln`; # more relaxed in filtering intact helitrons
-`mv $HEL.HQ.HQ $HEL.cln`;
+unless (&done("step3_HEL_vs_TIR")){
+	&Purifier("$HEL", "$TIR", $mindiff_HEL);
+	&mark("step3_HEL_vs_TIR");
+	}
+unless (&done("step4_HEL_vs_LTR")){
+	&Purifier("$HEL.HQ", "$LTR", $mindiff_LTR);
+	`perl $cleanup_tandem -misschar l -Nscreen 1 -nc 50000 -nr 0.8 -minlen 80 -cleanN 1 -cleanT 0 -minrm 1 -trf 0 -f $HEL.HQ-$LTR.fa > $HEL.int.cln`; # more relaxed in filtering intact helitrons
+	`mv $HEL.HQ.HQ $HEL.cln`;
+	&mark("step4_HEL_vs_LTR");
+	}
 
 # purify TIR
-&Purifier("$TIR", "$LTR", $mindiff_TIR);
-&Purifier("$TIR.HQ", "$HEL", $mindiff_TIR);
-`perl $cleanup_tandem -misschar l -Nscreen 1 -nc 50000 -nr 0.8 -minlen 80 -cleanN 1 -cleanT 0 -minrm 1 -trf 0 -f $TIR.HQ-$HEL.fa > $TIR.int.cln`; # more relaxed in filtering intact TIRs
-`mv $TIR.HQ.HQ $TIR.cln`;
+unless (&done("step5_TIR_vs_LTR")){
+	&Purifier("$TIR", "$LTR", $mindiff_TIR);
+	&mark("step5_TIR_vs_LTR");
+	}
+unless (&done("step6_TIR_vs_HEL")){
+	&Purifier("$TIR.HQ", "$HEL", $mindiff_TIR);
+	`perl $cleanup_tandem -misschar l -Nscreen 1 -nc 50000 -nr 0.8 -minlen 80 -cleanN 1 -cleanT 0 -minrm 1 -trf 0 -f $TIR.HQ-$HEL.fa > $TIR.int.cln`; # more relaxed in filtering intact TIRs
+	`mv $TIR.HQ.HQ $TIR.cln`;
+	&mark("step6_TIR_vs_HEL");
+	}
 
 # purify intact LTR from TIRs. Including Helitron is too damaging for now.
-&Purifier("$LTRint", "$TIR.cln", 10); # 10 is permissive
-`perl $cleanup_tandem -misschar l -Nscreen 1 -nc 50000 -nr 0.8 -minlen 80 -cleanN 1 -cleanT 0 -minrm 1 -trf 0 -f $LTRint-$TIR.cln.fa > $LTRint.cln`;
+unless (&done("step7_LTRint_vs_TIRcln")){
+	&Purifier("$LTRint", "$TIR.cln", 10); # 10 is permissive
+	`perl $cleanup_tandem -misschar l -Nscreen 1 -nc 50000 -nr 0.8 -minlen 80 -cleanN 1 -cleanT 0 -minrm 1 -trf 0 -f $LTRint-$TIR.cln.fa > $LTRint.cln`;
+	&mark("step7_LTRint_vs_TIRcln");
+	}
 #&Purifier("$LTRint.HQ", "$HEL.cln", 10); # 10 is permissive
 #`perl $cleanup_tandem -misschar l -Nscreen 1 -nc 50000 -nr 0.8 -minlen 80 -cleanN 1 -cleanT 0 -minrm 1 -trf 0 -f $LTRint.HQ-$HEL.cln.fa > $LTRint.cln`; # more relaxed in filtering intact LTRs
 
 ## Purge contaminants in non-redundant libraries
 # clean LINEs in LTRs
-if (-s "$LINE"){
+if (&done("step8_LINE_in_LTR")){
+	# skip: $LTR.cln already produced
+	} elsif (-s "$LINE"){
 	$err = `${repeatmasker}RepeatMasker -e ncbi -pa $threads -q -no_is -nolow -div 40 -lib $LINE $LTR 2>&1`;
 	if ($err !~ /done/) {
-        	`ln -s $LTR $LTR.masked` if $err =~ s/^.*(No repetitive sequences were detected.*)\s+$/Warning: No sequences were masked/s;
+        	`ln -s $LTR $LTR.masked` if $err =~ s/^.*(No repetitive sequences were detected.*)\s+$/Warning: No sequences were masked/si;
 	        print STDERR "\n$err\n";
         	}
 	`perl $cleanup_tandem -misschar N -nc 50000 -nr 0.9 -minlen 80 -minscore 3000 -trf 0 -cleanN 1 -cleanT 1 -f $LTR.masked > $LTR.cln`;
+	&mark("step8_LINE_in_LTR");
 	} else {
 		`cp $LTR $LTR.cln`;
+		&mark("step8_LINE_in_LTR");
 	}
 
 # clean LINEs and LTRs in SINEs
-if (-s "$SINE"){
+if (&done("step9_LINE_LTR_in_SINE")){
+	# skip: $SINE.cln already produced
+	} elsif (-s "$SINE"){
 	`cat $LTR.cln $LINE > $genome.LINE_LTR.raw.fa`;
 	$err = `${repeatmasker}RepeatMasker -e ncbi -pa $threads -q -no_is -nolow -div 40 -lib $genome.LINE_LTR.raw.fa $SINE 2>&1`;
 	if ($err !~ /done/) {
-        	`ln -s $SINE $SINE.masked` if $err =~ s/^.*(No repetitive sequences were detected.*)\s+$/Warning: No sequences were masked/s;
+        	`ln -s $SINE $SINE.masked` if $err =~ s/^.*(No repetitive sequences were detected.*)\s+$/Warning: No sequences were masked/si;
 	        print STDERR "\n$err\n";
         	}
 	`perl $cleanup_tandem -misschar N -nc 50000 -nr 0.9 -minlen 80 -minscore 3000 -trf 0 -cleanN 1 -f $SINE.masked > $SINE.cln`;
+	&mark("step9_LINE_LTR_in_SINE");
 	} else {
 		`cp $SINE $SINE.cln`;
+		&mark("step9_LINE_LTR_in_SINE");
 	}
 
 
 ## clean LTRs and nonLTRs in TIRs and Helitrons
-`cat $TIR.cln $HEL.cln | perl -nle 's/>/\\n>/g unless /^>/; print \$_' > $genome.TIR.Helitron.fa.stg1.raw`;
-`cat $LTR.HQ $SINE.cln $LINE > $genome.LTR.SINE.LINE.fa`;
-$err = `${repeatmasker}RepeatMasker -e ncbi -pa $threads -q -no_is -nolow -div 40 -lib $genome.LTR.SINE.LINE.fa $genome.TIR.Helitron.fa.stg1.raw 2>&1`;
-if ($err !~ /done/) {
-	`ln -s $genome.TIR.Helitron.fa.stg1.raw $genome.TIR.Helitron.fa.stg1.raw.masked` if $err =~ s/^.*(No repetitive sequences were detected.*)\s+$/Warning: No sequences were masked/s;
-	print STDERR "\n$err\n";
+unless (&done("step10_mask_TIR_HEL")){
+	`cat $TIR.cln $HEL.cln | perl -nle 's/>/\\n>/g unless /^>/; print \$_' > $genome.TIR.Helitron.fa.stg1.raw`;
+	`cat $LTR.HQ $SINE.cln $LINE > $genome.LTR.SINE.LINE.fa`;
+	$err = `${repeatmasker}RepeatMasker -e ncbi -pa $threads -q -no_is -nolow -div 40 -lib $genome.LTR.SINE.LINE.fa $genome.TIR.Helitron.fa.stg1.raw 2>&1`;
+	if ($err !~ /done/) {
+		`ln -s $genome.TIR.Helitron.fa.stg1.raw $genome.TIR.Helitron.fa.stg1.raw.masked` if $err =~ s/^.*(No repetitive sequences were detected.*)\s+$/Warning: No sequences were masked/si;
+		print STDERR "\n$err\n";
+		}
+	`perl $cleanup_tandem -misschar N -nc 50000 -nr 0.9 -minlen 80 -minscore 3000 -trf 0 -cleanN 1 -cleanT 1 -f $genome.TIR.Helitron.fa.stg1.raw.masked > $genome.TIR.Helitron.fa.stg1.raw.cln`;
+	&mark("step10_mask_TIR_HEL");
 	}
-`perl $cleanup_tandem -misschar N -nc 50000 -nr 0.9 -minlen 80 -minscore 3000 -trf 0 -cleanN 1 -cleanT 1 -f $genome.TIR.Helitron.fa.stg1.raw.masked > $genome.TIR.Helitron.fa.stg1.raw.cln`;
 
 
 ## cluster TIRs and Helitrons and make stg1 raw library
-`perl $cleanup_nested -in $genome.TIR.Helitron.fa.stg1.raw.cln -threads $threads -minlen 80 -cov 0.95 -blastplus $blast`;
+unless (&done("step11_cleanup_nested")){
+	`perl $cleanup_nested -in $genome.TIR.Helitron.fa.stg1.raw.cln -threads $threads -minlen 80 -cov 0.95 -blastplus $blast`;
+	&mark("step11_cleanup_nested");
+	}
 `cat $LTR.cln $LINE $SINE.cln $genome.TIR.Helitron.fa.stg1.raw.cln.cln > $genome.EDTA.fa.stg1`;
 
 ## generate clean intact TEs

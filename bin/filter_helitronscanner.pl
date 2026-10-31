@@ -58,7 +58,7 @@ while (<Hel>){
 	my ($chr, $str, $end) = ($1, $2, $3) if $loc =~ /^(.*)_#SUB_([0-9]+)-([0-9]+)$/;
 
 	$dir =~ s/[\[\]]+//g;
-	$alt5 =~ s/Multi_5'_ends://;
+	$alt5 =~ s/Multi_5'_ends://i;
 
 	# get shorter coordinates for candidates with alternative 5'end available.
 	if ($keep_shorter == 1 and $alt5 ne ''){
@@ -80,7 +80,7 @@ while (<Hel>){
 		$new_end = $end - $ext_len;
 		}
 	my $pos = "$chr:$new_str..$new_end";
-	$score =~ s/scores=//;
+	$score =~ s/scores=//i;
 	print List "$chr-$str-$end-$ext_len-$dir-$score\t$pos\n";
 	}
 close Hel;
@@ -188,6 +188,7 @@ sub filter(){
 	while ($try<10){ #try 10 times to guarantee the blast is run correctly
 		@blast_end5=qx(bash -c '$exec' 2> /dev/null) if defined $end5;
 		last if $? == 0;
+		last if ($? >> 8) == 137; #KILLed (timeout/OOM) -> do not retry; a detonating (e.g. microsatellite) end times out once, then counts as NA -> false
 		$try++;
 		}
 	my $end5_count=0;
@@ -208,6 +209,7 @@ sub filter(){
 	while ($try<10){
 		@blast_end3=qx(bash -c '$exec' 2> /dev/null) if defined $end3;
 		last if $? == 0;
+		last if ($? >> 8) == 137; #KILLed (timeout/OOM) -> do not retry; a detonating (e.g. microsatellite) end times out once, then counts as NA -> false
 		$try++;
 		}
 #print "$id\t$end3_len\n@blast_end3\n";
@@ -231,6 +233,7 @@ sub filter(){
 		while ($try<10){
 			@blast_flank=qx(bash -c '$exec' 2> /dev/null) if defined $flank;
 			last if $? == 0;
+			last if ($? >> 8) == 137; #KILLed (timeout/OOM) -> do not retry; a detonating (e.g. microsatellite) end times out once, then counts as NA -> false
 			$try++;
 			}
 		if ($#blast_flank>0){

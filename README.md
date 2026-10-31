@@ -75,7 +75,7 @@ AnnoTEP --genome genome.fa --species others --step all --sensitive 1 --anno 1 --
 
 ## What is new in version 2.0
 * **New interface** (React + FastAPI) replacing the Flask version: a live execution timeline and log, a queue for several runs, and a button to cancel a run.
-* **Interactive report** for AnnoTEP runs: genome masked by repeats (donut chart), TE distribution, repeat landscape, density by chromosome and the LTR phylogenetic tree, all exportable.
+* **Interactive report** for AnnoTEP runs and EDTA runs with the genome-wide annotation: genome masked by repeats (donut chart), TE distribution, repeat landscape, density by chromosome and the LTR phylogenetic tree, all exportable.
 * **One-command start with Docker** (`start.sh`): the results are saved in `~/results-edtagui`, owned by you.
 * **One-command setup with conda** (`install.sh`): no `conda activate`, no `sudo` and no manual RepeatMasker edits.
 * **Command line**: type `EDTA`, `AnnoTEP` or `panEDTA` in any folder.
@@ -276,13 +276,23 @@ MAIL_DEFAULT_SENDER=your.name@gmail.com
 📎 Return to [Table of contents](#table-of-contents)
 
 ## Testing
-Test EDTA-GUI with the 1-Mb toy genome of the `test/` folder, which takes a few minutes. If the test finishes without errors (warnings are OK), EDTA-GUI is correctly installed. If the test is OK but your data fail, check your files for formatting or naming mistakes (see the FASTA headers note above).
+Test EDTA-GUI with the 1.2-Mb toy genome of the `test/` folder, which takes a few minutes. If the test finishes without errors (warnings are OK), EDTA-GUI is correctly installed. If the test is OK but your data fail, check your files for formatting or naming mistakes (see the FASTA headers note above).
+
+**One click:** the **Run test analysis** button, at the top of the EDTA-GUI and panEDTA-GUI pages, fills in the form with the test data and starts the run after a confirmation (the e-mail and the number of threads are kept):
+
+| Page | Test data | Time with 10 threads |
+|---|---|---|
+| EDTA-GUI, EDTA mode | `test/TAIR10_chr1.fa`, Sensitivity and Annotation on (charts included) | about 1 hour |
+| EDTA-GUI, AnnoTEP mode | `test/TAIR10_chr1.fa` | about 1h20 |
+| panEDTA-GUI | `test/Col.test.fa` (with `test/genome.cds.fa`) and `test/Ler.test.fa`, CDS `test/genome.cds.fa`, library `database/athrep.updated.nonredun.fasta` | about 5 min |
+
+In EDTA-GUI, the results folder is named `Test_genome_<date-time>`. The steps below test the EDTA mode by hand, with the faster toy genome:
 
 **1.** Pipeline mode: **EDTA**.
 
 **2.** Genome sequence: `test/genome.fa`.
 
-**3.** Advanced options: enable Overwrite, Sensitivity and Annotation.
+**3.** Advanced options: enable Overwrite, Sensitivity, Annotation and MAKER mask (needed for the exclusion file).
 
 **4.** Threads: the number of threads you wish to use.
 
@@ -316,11 +326,11 @@ Each run has its own folder in the results directory:
 
 | Folder | Created by |
 |---|---|
-| `<genome>_<YYYYmmdd-HHMMSS>/` | EDTA and AnnoTEP modes (e.g. `At_20261006-225503`) |
+| `<genome>_<YYYYmmdd-HHMMSS>/` | EDTA and AnnoTEP modes (e.g. `At_20261006-225503`); in the interface, the optional **Run name** field replaces the genome name (e.g. `TAIR10_test_20261031-102519`) |
 | `panGenome_<YYYYmmdd-HHMMSS>/` | panEDTA-GUI |
 
 Inside each folder:
-* the outputs of EDTA (identical to the original EDTA) or of AnnoTEP (EDTA outputs plus the `REPORT/` folder, described in the next section);
+* the outputs of EDTA (identical to the original EDTA) or of AnnoTEP, plus the `REPORT/` folder (charts and reports, described in the next section) for AnnoTEP runs and EDTA runs with `--anno 1`;
 * `log.txt`: everything the pipeline wrote (stdout and stderr);
 * `status.txt`: created at the end, with `Annotation finalised` or `Error in the annotation step`;
 * `run.json`: the options and the command of the run, used by the interface.
@@ -341,7 +351,7 @@ panEDTA -g genomes.list -c cds.fa -t 10
 * The analysis runs in the **current folder**, and the results stay there.
 * No `conda activate` is needed: each command uses its environment (`EDTAgui` for EDTA and panEDTA, `annotepgui_3_11` for AnnoTEP).
 * The options are passed unchanged. Without options, each command shows the original help (`EDTA --help`, `AnnoTEP --help`, `panEDTA`).
-* `AnnoTEP` also generates the charts and reports in `REPORT/` at the end, when the run includes the genome-wide annotation (`--anno 1`).
+* `EDTA` and `AnnoTEP` also generate the charts and reports in `REPORT/` at the end, when the run includes the genome-wide annotation (`--anno 1`). For EDTA, LTRs are classified down to superfamily (Copia, Gypsy), so the charts show no lineages.
 
 **Interface fields → command-line options** (help of each option: `EDTA --help` or `AnnoTEP --help`):
 
@@ -357,13 +367,14 @@ panEDTA -g genomes.list -c cds.fa -t 10
 | Sensitivity | `--sensitive` | `0` / `1` | `0` | off; **always `1` in AnnoTEP** |
 | Annotation | `--anno` | `0` / `1` | `0` | off; **always `1` in AnnoTEP** |
 | Evaluate | `--evaluate` | `0` / `1` (needs `--anno 1`) | `1` (EDTA), **`0` (AnnoTEP)** | off |
+| MAKER mask (EDTA) | `--maker` | `0` / `1` (needs `--anno 1`) | `0` | off |
 | Force | `--force` | `0` / `1` | `0` | off |
 | TIR filter (AnnoTEP) | `--TIR_filter` | `0` / `1` | `0` | off |
 | Annot. type (AnnoTEP) | `--ANNOT_TYPE` | `0` / `1` | `0` | off |
 | Run LAI (AnnoTEP) | `--run_LAI` | `0` / `1` | `1` | on |
 | Coding DNA sequence | `--cds` | FASTA file | – | optional |
 | Curated library | `--curatedlib` | FASTA file | – | optional |
-| Exclusion of masked regions | `--exclude` | BED file (needs `--anno 1`) | – | optional |
+| Exclusion of masked regions | `--exclude` | BED file (needs `--anno 1`; in EDTA, also `--maker 1`) | – | optional |
 | RepeatModeler library | `--rmlib` | classified FASTA (skips RepeatModeler) | – | optional |
 | RepeatMasker library | `--rmout` | RepeatMasker `.out` (needs `--anno 1`) | – | optional |
 

@@ -3,7 +3,8 @@ Test data of EDTA-GUI
 
 Files
 -----
-genome.fa             1 Mb toy genome (rice Chr2), for the EDTA mode (a few minutes)
+genome.fa             1.2 Mb toy genome (rice Chr2 + a small synthetic sequence), for the
+                      EDTA mode (a few minutes)
 genome.cds.fa         coding sequences of the toy genome
 genome.exclude.bed    regions excluded from TE masking
 Col.test.fa, Ler.test.fa, Alyrata.test.fa
@@ -25,12 +26,17 @@ folder first, so the results do not mix with the repository:
 
 Graphical interface
 -------------------
-Start it with EDTA-GUI (conda installation) or bash start.sh (Docker), then:
+Start it with EDTA-GUI (conda installation) or bash start.sh (Docker).
+
+The "Run test analysis" button, at the top of the EDTA-GUI and panEDTA-GUI pages, fills in
+the form and starts the run: TAIR10_chr1.fa in the EDTA and AnnoTEP modes (results folder
+Test_genome_<date-time>), and the panEDTA example below in panEDTA-GUI. To fill in the
+forms by hand:
 
 EDTA mode
   Pipeline mode: EDTA
   Genome sequence: genome.fa
-  Advanced options: Overwrite, Sensitivity and Annotation on
+  Advanced options: Overwrite, Sensitivity, Annotation and MAKER mask on
   Coding DNA sequence: genome.cds.fa
   Curated library: rice7.0.0.liban (folder database/ of the repository)
   Exclusion of masked regions: genome.exclude.bed
@@ -49,7 +55,7 @@ Command line (conda installation: bash ~/EDTA-GUI/install.sh)
 ------------------------------------------------------------
 No "conda activate" is needed. Run in the work folder:
 
-# EDTA
+# EDTA (with --anno 1, also writes the charts and reports in REPORT/)
 nohup EDTA --genome genome.fa --cds genome.cds.fa --curatedlib ~/EDTA-GUI/database/rice7.0.0.liban --exclude genome.exclude.bed --overwrite 1 --sensitive 1 --anno 1 --evaluate 1 --threads 10 > EDTA.test 2>&1 &
 
 # AnnoTEP (also writes the charts and reports in REPORT/)
