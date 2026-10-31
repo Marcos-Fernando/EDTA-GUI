@@ -11,7 +11,12 @@
 </div>
 
 > [!NOTE]
-> **Update in progress:** the EDTA included in EDTA-GUI is being updated to a newer version over the course of this week. Further changes to the repository may appear in the coming days.
+> **Update (October 2026), EDTA-GUI 2.0:**
+> * **New interface:** live timeline and log, a queue for several runs, interactive report and results page. Details in [What is new in version 2.0](#what-is-new-in-version-20);
+> * **EDTA also makes charts and reports** (`REPORT/`), as AnnoTEP does, when Annotation is on;
+> * **Run test analysis** button in the interface: fills in the form with the test data and starts the run;
+> * **Automation by scripts:** `install.sh` sets up everything at once, and the `EDTA`, `AnnoTEP` and `panEDTA` commands run from any folder, without `conda activate`;
+> * **New Docker image** `annotep/edta-gui:v2.0`, started with a single script (`start.sh`). If you already use it, run `bash start.sh update`.
 
 ## Table of Contents
   - [Introduction](#introduction)
@@ -79,6 +84,8 @@ AnnoTEP --genome genome.fa --species others --step all --sensitive 1 --anno 1 --
 * **One-command start with Docker** (`start.sh`): the results are saved in `~/results-edtagui`, owned by you.
 * **One-command setup with conda** (`install.sh`): no `conda activate`, no `sudo` and no manual RepeatMasker edits.
 * **Command line**: type `EDTA`, `AnnoTEP` or `panEDTA` in any folder.
+* **EDTA v2.3.3** in the EDTA mode, with the **MAKER mask** option and the optional **Run name** for the results folder.
+* **Run test analysis** button: one click to check the installation with the test data.
 * **About** button with the user guide inside the interface.
 
 Version 2.0 keeps the folder format of version 1.x (`<genome>_<date>-<time>/` with `log.txt` and `status.txt`), so old runs can be opened in the new interface.
