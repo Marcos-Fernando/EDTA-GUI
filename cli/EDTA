@@ -1,12 +1,43 @@
 #!/usr/bin/env bash
-# EDTA mode from the command line. Runs EDTA.pl in the EDTAgui environment.
+# EDTA mode from the command line. Runs EDTA.pl in the EDTAgui environment and then, as
+# the GUI does, the charts and reports (AnnoTEP/Scripts/generate_PLOTs-for-EDTA.sh, in the
+# REPORT/ folder, run in the annotepgui_3_11 environment, which has the chart packages).
 #
 #   EDTA --genome genome.fa --species others --step all --anno 1 --threads 10
 #   EDTA --help        (all EDTA.pl options)
 #
 # The analysis runs in the current folder. Options are passed to EDTA.pl unchanged.
+# The charts need the genome-wide annotation (--anno 1); without it they are skipped.
 set -euo pipefail
 source "$(dirname "$(readlink -f "$0")")/_common.sh"
 
 [ $# -eq 0 ] && set -- --help
+
+# Genome name, for the charts: --genome X, -genome X or --genome=X (EDTA.pl writes its
+# outputs in the current folder, named after the file name without its path).
+genome=""
+args=("$@")
+for ((i = 0; i < ${#args[@]}; i++)); do
+  case "${args[i]}" in
+    --genome | -genome) genome="${args[i + 1]:-}" ;;
+    --genome=* | -genome=*) genome="${args[i]#*=}" ;;
+  esac
+done
+
 run_in "$EDTA_ENV" "$ROOT/bin" "$ROOT/EDTA.pl" "$@"
+
+[ -n "$genome" ] || exit 0
+genome="$(basename "$genome")"
+# .cat.gz, or .cat for genomes smaller than 10 Mb (RepeatMasker does not compress it).
+cat_file="${genome}.mod.EDTA.anno/${genome}.mod.cat"
+if [ ! -f "${cat_file}.gz" ] && [ ! -f "$cat_file" ]; then
+  echo "Charts and reports skipped: they need the genome-wide annotation (--anno 1)." >&2
+  exit 0
+fi
+
+# Same markers as the GUI log.
+echo "################## EDTA annotation completed successfully #####################"
+echo " "
+echo "################## Starting report and chart generation #######################"
+# AnnoTEP/Scripts: break_fasta.pl and the other helper scripts.
+run_in "$ANNOTEP_ENV" "$ROOT/AnnoTEP/Scripts" bash "$ROOT/AnnoTEP/Scripts/generate_PLOTs-for-EDTA.sh" "$genome"
