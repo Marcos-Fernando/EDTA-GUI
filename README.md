@@ -16,7 +16,7 @@
 > * **EDTA also makes charts and reports** (`REPORT/`), as AnnoTEP does, when Annotation is on;
 > * **Run test analysis** button in the interface: fills in the form with the test data and starts the run;
 > * **Automation by scripts:** `install.sh` sets up everything at once, and the `EDTA`, `AnnoTEP` and `panEDTA` commands run from any folder, without `conda activate`;
-> * **New Docker image** `annotep/edta-gui:v2.0`, started with a single script (`start.sh`). If you already use it, run `bash start.sh update`.
+> * **One Docker image for everything:** instead of two images, `annotep/edta-gui:v2.0` runs both the interface (started with a single script, `start.sh`) and the command line (`docker run ... AnnoTEP`, `EDTA` or `panEDTA`). If you already use it, run `bash start.sh update`.
 
 ## Table of Contents
   - [Introduction](#introduction)
@@ -81,7 +81,7 @@ AnnoTEP --genome genome.fa --species others --step all --sensitive 1 --anno 1 --
 ## What is new in version 2.0
 * **New interface** (React + FastAPI) replacing the Flask version: a live execution timeline and log, a queue for several runs, and a button to cancel a run.
 * **Interactive report** for AnnoTEP runs and EDTA runs with the genome-wide annotation: genome masked by repeats (donut chart), TE distribution, repeat landscape, density by chromosome and the LTR phylogenetic tree, all exportable.
-* **One-command start with Docker** (`start.sh`): the results are saved in `~/results-edtagui`, owned by you.
+* **One Docker image** for the interface and the command line, started with one command (`start.sh`): the results are saved in `~/results-edtagui`, owned by you.
 * **One-command setup with conda** (`install.sh`): no `conda activate`, no `sudo` and no manual RepeatMasker edits.
 * **Command line**: type `EDTA`, `AnnoTEP` or `panEDTA` in any folder.
 * **EDTA v2.3.3** in the EDTA mode, with the **MAKER mask** option and the optional **Run name** for the results folder.
@@ -144,6 +144,8 @@ The image already contains everything: the pipelines, the conda environments and
 | `bash start.sh stop` | Stops it. If an annotation is running, it asks first, because stopping interrupts it |
 | `bash start.sh update` | Downloads a new version of the image and starts it |
 | `bash start.sh logs` | Shows the server messages (useful when reporting an error). Leave with Ctrl+C |
+| `bash start.sh install-cli` | Installs the `AnnoTEP`, `EDTA` and `panEDTA` commands, which run in the image (see [Docker commands and file paths](#docker-commands-and-file-paths)). If the conda installation already has these names, they are installed as `AnnoTEP-docker`, `EDTA-docker` and `panEDTA-docker`, so both can be used |
+| `bash start.sh uninstall-cli` | Removes them |
 
 | Variable | Default | Use |
 |---|---|---|
@@ -152,6 +154,21 @@ The image already contains everything: the pipelines, the conda environments and
 | `EDTA_GUI_PIDS_LIMIT` | `300000` | Process limit of the container. Use threads × 10 000 when running with more than 30 threads |
 
 The interface only accepts connections from your own computer: other machines on the network cannot open it.
+
+#### Docker commands and file paths
+
+The container only sees the folder where you run the command (and its subfolders). Input files must be inside it:
+
+```sh
+cd ~/my-project
+cp ~/genomes/genome.fa .
+AnnoTEP-docker --genome genome.fa --anno 1 --threads 10
+```
+
+- Relative paths (`genome.fa`, `inputs/genome.fa`) and absolute paths inside the folder both work.
+- A file outside the folder (for example `../genome.fa`) is refused with a message before anything runs: copy it into the folder, or run the command from a parent folder.
+- Results are written to the current folder and belong to your user.
+- The EDTA libraries are at `/usr/local/EDTA/database/` (for example `-l /usr/local/EDTA/database/athrep.updated.nonredun.fasta`).
 
 📎 Return to [Table of contents](#table-of-contents)
 
@@ -358,6 +375,7 @@ panEDTA -g genomes.list -c cds.fa -t 10
 * The analysis runs in the **current folder**, and the results stay there.
 * No `conda activate` is needed: each command uses its environment (`EDTAgui` for EDTA and panEDTA, `annotepgui_3_11` for AnnoTEP).
 * The options are passed unchanged. Without options, each command shows the original help (`EDTA --help`, `AnnoTEP --help`, `panEDTA`).
+* Long runs keep going after the terminal is closed when started with `nohup`, for example `nohup AnnoTEP --genome genome.fa ... > AnnoTEP.log 2>&1 &` (follow it with `tail -f AnnoTEP.log`).
 * `EDTA` and `AnnoTEP` also generate the charts and reports in `REPORT/` at the end, when the run includes the genome-wide annotation (`--anno 1`). For EDTA, LTRs are classified down to superfamily (Copia, Gypsy), so the charts show no lineages.
 
 **Interface fields → command-line options** (help of each option: `EDTA --help` or `AnnoTEP --help`):
@@ -397,7 +415,8 @@ panEDTA: `-g` genome list (genome and, optionally, CDS per line), `-c` CDS file 
 | Where | How |
 |---|---|
 | Conda installation | After `install.sh`, the commands work in any folder |
-| Docker | `docker run --rm -u $(id -u):$(id -g) --pids-limit 300000 --memory-swap -1 -v "$PWD":/data -w /data annotep/edta-gui:v2.0 AnnoTEP --genome genome.fa ...` |
+| Docker | Run `bash start.sh install-cli` once; then the same commands work in any folder (named `AnnoTEP-docker`, `EDTA-docker` and `panEDTA-docker` when the conda installation is also present). See [Docker commands and file paths](#docker-commands-and-file-paths) |
+| Docker, without `install-cli` | `docker run --rm -u $(id -u):$(id -g) --pids-limit 300000 --memory-swap -1 -v "$PWD":/data -w /data annotep/edta-gui:v2.0 AnnoTEP --genome genome.fa ...` |
 | Singularity | `singularity exec edta-gui_v2.0.sif AnnoTEP --genome genome.fa ...` |
 
 📎 Return to [Table of contents](#table-of-contents)
