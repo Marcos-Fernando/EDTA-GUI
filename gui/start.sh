@@ -6,6 +6,8 @@
 #   ./start.sh update   download the image again (after a new version), then start
 #   ./start.sh build    build the image on this computer instead of downloading (about 1 hour)
 #   ./start.sh logs     follow the server messages
+#   ./start.sh install-cli     AnnoTEP, EDTA and panEDTA commands that run in this image
+#   ./start.sh uninstall-cli   remove them
 #
 # Results are saved in ~/results-edtagui, on this computer and owned by you
 # (another folder: EDTA_GUI_RESULTS=/path/to/folder ./start.sh).
@@ -31,6 +33,149 @@ docker info >/dev/null 2>&1 ||
   fail "Docker is not running, or your user cannot use it.
 Start Docker, or add your user to the docker group:
   sudo usermod -aG docker \$USER   (then log out and log in again)"
+
+# ------------------------------------------------------------------ command line (no interface)
+# install-cli writes small scripts in ~/.local/bin (AnnoTEP, EDTA, panEDTA). Each one runs the
+# pipeline in this image, in the current folder, with the same limits as the interface:
+#   AnnoTEP --genome genome.fa --anno 1 --threads 10
+# When these names are already taken (e.g. by the conda installation of EDTA-GUI), the scripts
+# are named AnnoTEP-docker, EDTA-docker and panEDTA-docker, so both installations can be used.
+# Another folder for the scripts: EDTA_GUI_BIN=/path/to/bin ./start.sh install-cli
+CLI_BIN="${EDTA_GUI_BIN:-$HOME/.local/bin}"
+CLI_COMMANDS=(AnnoTEP EDTA panEDTA)
+CLI_SUFFIX="-docker"
+CLI_MARK="# Installed by start.sh install-cli (EDTA-GUI, Docker)"
+RC="$HOME/.bashrc"
+RC_MARK="# EDTA-GUI Docker commands (added by start.sh install-cli)"
+
+# Is $1 a script written by install-cli?
+our_cli() { [ -f "$1" ] && [ ! -L "$1" ] && sed -n 2p "$1" | grep -qF "$CLI_MARK"; }
+
+# Is the name $1 already used by something else (a file in CLI_BIN or a command in the PATH)?
+name_taken() {
+  local found
+  if [ -e "$CLI_BIN/$1" ] || [ -L "$CLI_BIN/$1" ]; then
+    our_cli "$CLI_BIN/$1" && return 1
+    return 0
+  fi
+  found="$(command -v "$1" 2>/dev/null)" || return 1
+  ! our_cli "$found"
+}
+
+# write_cli <script name> <command inside the image>
+write_cli() {
+  cat >"${CLI_BIN:?}/${1:?}" <<SCRIPT
+#!/usr/bin/env bash
+$CLI_MARK
+# Runs $2 in the Docker image, in the current folder (it becomes /data in the container).
+# Only this folder and its subfolders are visible: copy input files from elsewhere into it.
+# Remove with: start.sh uninstall-cli
+set -euo pipefail
+image="\${EDTA_GUI_IMAGE:-$IMAGE}"
+# Large genomes start about 10000 processes per thread (300000 = 30 threads).
+pids="\${EDTA_GUI_PIDS_LIMIT:-300000}"
+# The current folder is /data in the container. File arguments: inside it, absolute paths
+# become /data/...; outside it (../genome.fa, ~/libs/x.fa) they would not exist there.
+here="\$(pwd -P)"
+args=()
+for arg in "\$@"; do
+  prefix=""
+  file="\$arg"
+  case "\$arg" in --*=*) prefix="\${arg%%=*}="; file="\${arg#*=}" ;; esac
+  if [ -e "\$file" ]; then
+    real="\$(readlink -f -- "\$file")"
+    case "\$real/" in
+      "\$here"/*)
+        case "\$file" in /*) arg="\${prefix}/data\${real#"\$here"}" ;; esac ;;
+      *)
+        echo "$1: '\$file' is outside the current folder (\$here)." >&2
+        echo "The container only sees this folder and its subfolders: copy the file here," >&2
+        echo "or run the command from a folder that contains it." >&2
+        exit 2 ;;
+    esac
+  fi
+  args+=("\$arg")
+done
+# Terminal: Ctrl+C stops the run. No terminal (nohup, scripts): plain output.
+tty=()
+if [ -t 0 ] && [ -t 1 ]; then tty=(-it); fi
+# --no-healthcheck: the image checks the web interface, which does not run here.
+exec docker run --rm --init --no-healthcheck "\${tty[@]}" -u "\$(id -u):\$(id -g)" \\
+  --pids-limit "\$pids" --ulimit "nproc=\$pids:\$pids" --memory-swap -1 \\
+  -v "\$here":/data -w /data "\$image" $2 "\${args[@]}"
+SCRIPT
+  chmod +x "${CLI_BIN:?}/${1:?}"
+}
+
+install_cli() {
+  local c suffix="" names=()
+  mkdir -p "$CLI_BIN"
+  # Any name taken: all three get the suffix (AnnoTEP-docker, EDTA-docker, panEDTA-docker).
+  for c in "${CLI_COMMANDS[@]}"; do
+    if name_taken "$c"; then suffix="$CLI_SUFFIX"; fi
+  done
+  for c in "${CLI_COMMANDS[@]}"; do
+    # Never replace a file that is not ours.
+    if [ -n "$suffix" ] && name_taken "$c$suffix"; then
+      fail "$c$suffix already exists and was not made by start.sh. Nothing was changed.
+Choose another folder: EDTA_GUI_BIN=/path/to/bin ./start.sh install-cli"
+    fi
+    names+=("$c$suffix")
+  done
+  for c in "${CLI_COMMANDS[@]}"; do
+    write_cli "$c$suffix" "$c"
+    echo "$CLI_BIN/$c$suffix"
+  done
+
+  local new_terminal=0
+  case ":$PATH:" in
+    *":$CLI_BIN:"*) ;;
+    *)
+      if ! grep -qF "$RC_MARK" "$RC" 2>/dev/null; then
+        # Appended at the end of the PATH: never hides a command with the same name.
+        printf '\n%s\nexport PATH="$PATH:%s"\n' "$RC_MARK" "$CLI_BIN" >>"$RC"
+        echo "Added $CLI_BIN to the PATH in $RC"
+      fi
+      new_terminal=1
+      ;;
+  esac
+  docker image inspect "$IMAGE" >/dev/null 2>&1 ||
+    echo "Note: ${IMAGE} is not downloaded yet; the first command downloads it (several GB)."
+
+  say "Installed: ${names[*]} (Docker image ${IMAGE})."
+  if [ -n "$suffix" ]; then
+    echo "AnnoTEP, EDTA and panEDTA already exist on this computer (e.g. the conda installation),"
+    echo "so the Docker commands end with ${suffix}. Both can be used."
+  fi
+  if [ "$new_terminal" = 1 ]; then
+    echo "Open a NEW terminal (or run: source $RC) before using them."
+  fi
+  echo "Run them in the folder of your genome, e.g.: ${names[0]} --genome genome.fa --anno 1 --threads 10"
+}
+
+uninstall_cli() {
+  local c name
+  for c in "${CLI_COMMANDS[@]}"; do
+    for name in "$c" "$c$CLI_SUFFIX"; do
+      if our_cli "$CLI_BIN/$name"; then
+        rm -f -- "${CLI_BIN:?}/${name:?}"
+        echo "Removed $CLI_BIN/$name"
+      fi
+    done
+  done
+  if [ -f "$RC" ] && grep -qF "$RC_MARK" "$RC"; then
+    # The marker line and the export line after it.
+    awk -v m="$RC_MARK" '$0 == m { skip = 1; next } skip { skip = 0; next } { print }' "$RC" >"${RC:?}.edta-tmp"
+    cat "${RC:?}.edta-tmp" >"$RC" && rm -f -- "${RC:?}.edta-tmp"
+    echo "Removed the PATH line from $RC"
+  fi
+  say "Done."
+}
+
+case "${1:-}" in
+  install-cli) install_cli; exit 0 ;;
+  uninstall-cli) uninstall_cli; exit 0 ;;
+esac
 
 # The container runs as you, so the results belong to you (not to root).
 export LOCAL_UID LOCAL_GID RESULTS_HOST_DIR EDTA_GUI_PORT="$PORT" EDTA_GUI_IMAGE="$IMAGE"
@@ -180,6 +325,6 @@ case "${1:-start}" in
     docker compose logs -f
     ;;
   *)
-    fail "Unknown option: $1 (use: start, stop, update, build or logs)"
+    fail "Unknown option: $1 (use: start, stop, update, build, logs, install-cli or uninstall-cli)"
     ;;
 esac
