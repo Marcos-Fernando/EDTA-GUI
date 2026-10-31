@@ -61,6 +61,15 @@ log = logging.getLogger("edta_gui")
 MAX_LISTED_FILES = 2_000
 REPORT_DIR = "REPORT"
 COPY_CHUNK = 1024 * 1024
+# Files of the "Run test analysis" buttons, relative to the repository root (also in the
+# Docker image). Only these names can be downloaded.
+TEST_FILES = {
+    "TAIR10_chr1.fa": Path("test"),
+    "Col.test.fa": Path("test"),
+    "Ler.test.fa": Path("test"),
+    "genome.cds.fa": Path("test"),
+    "athrep.updated.nonredun.fasta": Path("database"),
+}
 
 
 class ApiError(Exception):
@@ -235,6 +244,7 @@ def create_app(
             anno=switches.anno,
             evaluate=switches.evaluate,
             run_lai=cfg.mode == "annotep" and switches.run_lai,
+            charts=cfg.mode == "edta" and switches.anno,
         )
         file_names = {k: secure_filename(up.filename or "") for k, up in extra_ups.items()}
         cmd_input = EdtaCommandInput(
@@ -249,7 +259,8 @@ def create_app(
         )
 
         created = previous is None
-        loc = previous or store.create_run_dir(f"{strip_extension(genome_name)}_{timestamp()}")
+        run_name = (cfg.run_name or "").strip() or strip_extension(genome_name)
+        loc = previous or store.create_run_dir(f"{run_name}_{timestamp()}")
         try:
             if not created:
                 # Legacy behaviour when continuing a run: status.txt removed, log restarted.
@@ -271,10 +282,13 @@ def create_app(
         extra_path = (
             [str(settings.annotep_root / "EDTA" / "util")]
             if cfg.mode == "annotep"
-            else [str(settings.edta_dir / "bin")]
+            # AnnoTEP/Scripts: break_fasta.pl, used by the EDTA charts script.
+            else [str(settings.edta_dir / "bin"), str(settings.annotep_root / "Scripts")]
         )
+        # EDTA charts: the R/Python packages of the charts are in the AnnoTEP env.
+        command_envs = [conda_env, settings.annotep_conda_env] if options.charts else []
         mail.send_checking(cfg.email, "\n".join(format_command(c) for c in display))
-        runner.submit(Job(loc, commands, conda_env, extra_path, options, cfg.email))
+        runner.submit(Job(loc, commands, conda_env, extra_path, options, cfg.email, command_envs))
         return RunCreated(run_id=loc.id)
 
     @app.post("/api/runs/pan", status_code=202, response_model=RunCreated, response_model_by_alias=True)
@@ -426,6 +440,16 @@ def create_app(
                 "X-Content-Type-Options": "nosniff",
             },
         )
+
+    @app.get("/api/test-data/{name}")
+    def test_data(name: str) -> FileResponse:
+        folder = TEST_FILES.get(name)
+        if folder is None:
+            raise _error(404, "Unknown test file.")
+        target = settings.edta_dir / folder / name
+        if not target.is_file():
+            raise _error(404, f"Test file not found on the server ({folder / name}).")
+        return FileResponse(target, filename=name)
 
     # ------------------------------------------------------------ web interface
 

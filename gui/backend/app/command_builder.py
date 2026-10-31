@@ -24,6 +24,8 @@ EXTRA_FILES: tuple[tuple[str, str], ...] = (
     ("rmout", "--rmout"),
 )
 ANNO_ONLY_FILES = ("exclude", "rmout")
+# EDTA mode: also need --maker 1 (EDTA.pl v2.3 only uses them for MAKER.masked).
+MAKER_ONLY_FILES = ("exclude",)
 
 
 @dataclass(frozen=True)
@@ -31,6 +33,7 @@ class ScriptPaths:
     edta: str
     annotep: str
     annotep_report: str
+    edta_report: str
     pan: str
 
     @classmethod
@@ -39,6 +42,7 @@ class ScriptPaths:
             edta=str(edta_dir / "EDTA.pl"),
             annotep=str(annotep_dir / "EDTA" / "EDTA.pl"),
             annotep_report=str(annotep_dir / "Scripts" / "generate_PLOTs-for-TE-pipe.sh"),
+            edta_report=str(annotep_dir / "Scripts" / "generate_PLOTs-for-EDTA.sh"),
             pan=str(edta_dir / "panEDTA.sh"),
         )
 
@@ -48,6 +52,7 @@ DISPLAY_SCRIPTS = ScriptPaths(
     edta="EDTA.pl",
     annotep="AnnoTEP/EDTA/EDTA.pl",
     annotep_report="AnnoTEP/Scripts/generate_PLOTs-for-TE-pipe.sh",
+    edta_report="AnnoTEP/Scripts/generate_PLOTs-for-EDTA.sh",
     pan="panEDTA.sh",
 )
 
@@ -94,6 +99,9 @@ def build_edta_commands(cmd: EdtaCommandInput, genome_name: str, scripts: Script
     # AnnoTEP: Annotation is always 1. With --anno 1, --evaluate is always explicit.
     if annotep or s.anno:
         args += ["--anno", "1", "--evaluate", _bit(s.evaluate)]
+    # --maker exists only in the root EDTA.pl.
+    if not annotep and s.maker:
+        args += ["--maker", "1"]
     if s.force:
         args += ["--force", "1"]
     mu = normalize_mutation_rate(cmd.mutation_rate)
@@ -117,6 +125,9 @@ def build_edta_commands(cmd: EdtaCommandInput, genome_name: str, scripts: Script
     commands = [args]
     if annotep:
         commands.append(["bash", scripts.annotep_report, genome_name])
+    elif s.anno:
+        # The charts need the whole-genome annotation (--anno 1).
+        commands.append(["bash", scripts.edta_report, genome_name])
     return commands
 
 

@@ -96,13 +96,14 @@ export class MockPipelineService implements PipelineService {
 
     const runId = previous
       ? previous.summary.id
-      : this.uniqueId(`${stripExtension(genome)}_${folderTimestamp(this.now())}`)
+      : this.uniqueId(`${cfg.runName ?? stripExtension(genome)}_${folderTimestamp(this.now())}`)
     const options: TimelineContext = {
       kind: cfg.mode,
       step: cfg.step,
       anno: cfg.mode === 'annotep' || cfg.switches.anno,
       evaluate: cfg.switches.evaluate,
       runLai: cfg.mode === 'annotep' && cfg.switches.runLai,
+      charts: cfg.mode === 'edta' && cfg.switches.anno,
     }
     this.launch(runId, cfg.mode, genome, options, edtaScript(cfg, genome))
     return { runId }
@@ -185,6 +186,10 @@ export class MockPipelineService implements PipelineService {
 
   fileUrl(runId: string, path: string): string {
     return `#mock/${runId}/${path}`
+  }
+
+  async loadTestFile(name: string): Promise<File> {
+    return new File(['>chr1\nACGTACGTACGT\n'], name)
   }
 
   /* ------------------------------ internals -------------------------- */
@@ -324,6 +329,7 @@ export class MockPipelineService implements PipelineService {
       mode,
       email: null,
       genome: fake(genome),
+      runName: null,
       species: 'others',
       step: 'all',
       previousRunId: null,
@@ -332,6 +338,7 @@ export class MockPipelineService implements PipelineService {
         sensitive: mode === 'annotep',
         anno: true,
         evaluate: mode === 'edta',
+        maker: false,
         force: false,
         tirFilter: false,
         annotType: false,
@@ -348,6 +355,7 @@ export class MockPipelineService implements PipelineService {
       anno: true,
       evaluate,
       runLai: kind === 'annotep',
+      charts: kind === 'edta',
     })
 
     const stamp = (h: number) => folderTimestamp(at(h))

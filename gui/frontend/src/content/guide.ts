@@ -318,7 +318,7 @@ export const GUIDE: readonly GuideSection[] = [
         ['Final TE library', '3 min'],
         ['Whole-genome annotation and LAI', '12 min'],
         ['Annotation evaluation', '10 min'],
-        ['Charts and reports (AnnoTEP)', '3 min'],
+        ['Charts and reports', '3 min'],
       ),
       p(
         'Larger genomes take longer; more threads take less. A step quiet for hours, such as ' +
@@ -353,7 +353,12 @@ export const GUIDE: readonly GuideSection[] = [
           'folder: they can be opened, not continued.',
       ),
       h('The report'),
-      p('The charts come from the AnnoTEP report: an EDTA run shows mainly the summary and files.'),
+      p(
+        'AnnoTEP runs, and EDTA runs with "Annotation" on, end with the charts and reports ' +
+          'step (REPORT/). EDTA classifies LTRs down to superfamily (Copia, Gypsy), so its ' +
+          'charts have no lineages, and its LTR tree uses the TEsorter database for all ' +
+          'eukaryotes.',
+      ),
       table(
         ['Part', 'What it shows'],
         [
@@ -433,7 +438,7 @@ export const GUIDE: readonly GuideSection[] = [
           '├── At.fasta.mod.MAKER.masked             masked genome for MAKER',
           '├── At.fasta.mod.LAI                      LAI report (AnnoTEP)',
           '├── At.fasta.mod.EDTA.raw/ .combine/ .final/ .anno/   working files per step',
-          '└── REPORT/                               AnnoTEP report: tables and figures',
+          '└── REPORT/                               charts and reports: tables and figures',
           '    ├── At.fasta.mod-LITE.tbl / -COMPLETE.tbl',
           '    ├── TE-Report-*.png / .pdf            distribution charts',
           '    ├── kimura_distance_plot.png          repeat landscape',

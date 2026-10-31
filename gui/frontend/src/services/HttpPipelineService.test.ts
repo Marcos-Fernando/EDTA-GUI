@@ -36,6 +36,7 @@ const edtaCfg: EdtaRunConfig = {
   mode: 'annotep',
   email: 'a@b.org',
   genome: file('genome.fa'),
+  runName: 'TAIR10_test',
   species: 'rice',
   step: 'all',
   previousRunId: null,
@@ -44,6 +45,7 @@ const edtaCfg: EdtaRunConfig = {
     sensitive: true,
     anno: true,
     evaluate: true,
+    maker: false,
     force: false,
     tirFilter: true,
     annotType: false,
@@ -68,6 +70,7 @@ describe('HttpPipelineService', () => {
     expect(JSON.parse(form.get('config') as string)).toEqual({
       mode: 'annotep',
       email: 'a@b.org',
+      runName: 'TAIR10_test',
       species: 'rice',
       step: 'all',
       previousRunId: null,
@@ -147,6 +150,21 @@ describe('HttpPipelineService', () => {
     expect(form.has('pairs.0.cds')).toBe(false)
     expect((form.get('pairs.1.cds') as File).name).toBe('B.cds.fa')
     expect((form.get('cds') as File).name).toBe('g.cds.fa')
+  })
+
+  it('loads a test file as a form file, or reports the server message', async () => {
+    const fetchFn = vi
+      .fn()
+      .mockResolvedValueOnce(new Response('>chr1\nACGT\n'))
+      .mockResolvedValueOnce(jsonResponse({ message: 'Test file not found on the server.' }, 404))
+    const svc = new HttpPipelineService({ fetchFn })
+    const f = await svc.loadTestFile('TAIR10_chr1.fa')
+    expect(fetchFn.mock.calls[0][0]).toBe('/api/test-data/TAIR10_chr1.fa')
+    expect(f.name).toBe('TAIR10_chr1.fa')
+    expect(await f.text()).toBe('>chr1\nACGT\n')
+    await expect(svc.loadTestFile('Col.test.fa')).rejects.toThrow(
+      'Test file not found on the server.',
+    )
   })
 
   it('fills defaults for fields missing in the summary', async () => {

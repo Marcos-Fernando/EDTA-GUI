@@ -4,7 +4,7 @@
  * Flag order follows the legacy GUI (main.py).
  */
 import type { EdtaRunConfig, PanRunConfig } from '../types'
-import { ANNOTEP_REPORT_SCRIPT, EXTRA_FILES, MODES } from './edtaFields'
+import { ANNOTEP_REPORT_SCRIPT, EDTA_REPORT_SCRIPT, EXTRA_FILES, MODES } from './edtaFields'
 import { PAN_FIXED_ARGS, PAN_SCRIPT } from './panFields'
 import { secureFilename } from '../utils/files'
 
@@ -36,6 +36,8 @@ export function buildEdtaCommands(cfg: EdtaRunConfig, genomeName: string): strin
   if (s.overwrite) args.push('--overwrite', '1')
   // AnnoTEP: Annotation is always 1. With --anno 1, --evaluate is always explicit.
   if (isAnnotep || s.anno) args.push('--anno', '1', '--evaluate', bit(s.evaluate))
+  // --maker exists only in the root EDTA.pl.
+  if (!isAnnotep && s.maker) args.push('--maker', '1')
   if (s.force) args.push('--force', '1')
   if (cfg.mutationRate !== null) args.push('--u', cfg.mutationRate)
   if (cfg.maxDiv !== null) args.push('--maxdiv', String(cfg.maxDiv))
@@ -52,6 +54,8 @@ export function buildEdtaCommands(cfg: EdtaRunConfig, genomeName: string): strin
 
   const commands = [args]
   if (isAnnotep) commands.push(['bash', ANNOTEP_REPORT_SCRIPT, genomeName])
+  // The EDTA charts need the whole-genome annotation (--anno 1).
+  else if (s.anno) commands.push(['bash', EDTA_REPORT_SCRIPT, genomeName])
   return commands
 }
 

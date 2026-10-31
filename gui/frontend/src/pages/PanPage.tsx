@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react'
 import { Minus, Plus } from 'lucide-react'
-import type { TimelineContext } from '../types'
-import { PAN_FILE_EXTENSIONS, PAN_PARAMS, panListName } from '../config/panFields'
-import { toPanRunConfig, validatePan } from '../config/rules'
+import type { PanRunConfig, TimelineContext } from '../types'
+import { PAN_FILE_EXTENSIONS, PAN_PARAMS, PAN_TEST_RUN, panListName } from '../config/panFields'
+import { panTestFileNames, testPanState, toPanRunConfig, validatePan } from '../config/rules'
 import { buildPanCommand } from '../config/commandBuilder'
 import { FileInput } from '../components/FileInput'
 import { FormSection } from '../components/FormSection'
 import { RunWorkspace } from '../components/RunWorkspace'
+import { TestRunButton } from '../components/TestRunButton'
 import { TextField } from '../components/TextField'
 import fieldStyles from '../components/Field.module.scss'
 import { useEmailHint } from '../hooks/useEmailHint'
@@ -47,12 +48,12 @@ export function PanPage() {
     return [buildPanCommand(toPanRunConfig(form), panListName('<timestamp>'))]
   }, [form])
 
-  const submit = async () => {
+  const start = async (cfg: PanRunConfig) => {
     setServerError(null)
     setSubmitting(true)
     askNotificationPermission() // still inside the click: browsers require it
     try {
-      const { runId } = await service.startPanRun(toPanRunConfig(form))
+      const { runId } = await service.startPanRun(cfg)
       dispatch({ type: 'run/active', page: 'pan', runId })
       runStarted(runId)
     } catch (e) {
@@ -62,10 +63,33 @@ export function PanPage() {
     }
   }
 
+  const submit = () => start(toPanRunConfig(form))
+
+  const testGenomes = PAN_TEST_RUN.pairs.map((p) => p.genome).join(' and ')
+  const runTest = async () => {
+    const names = panTestFileNames()
+    const files = await Promise.all(names.map((n) => service.loadTestFile(n)))
+    const next = testPanState(form, new Map(names.map((n, i) => [n, files[i]])))
+    dispatch({ type: 'pan/replace', state: next })
+    // An invalid e-mail or thread count stays highlighted in the form instead.
+    if (Object.keys(validatePan(next)).length === 0) await start(toPanRunConfig(next))
+  }
+
   return (
     <div className={styles.app}>
       <aside className={styles.sidebar} aria-label="panEDTA configuration">
         <div className={styles.sidebarScroll}>
+          <TestRunButton
+            description={`EDTA toy example: ${testGenomes} (1 Mb each), CDS ${PAN_TEST_RUN.cds} and library ${PAN_TEST_RUN.library}. ${PAN_TEST_RUN.duration} with 10 threads.`}
+            confirmText={
+              'Start the panEDTA test analysis now?\n\n' +
+              `Genomes: ${testGenomes} (Arabidopsis toy genomes, 1 Mb each)\n` +
+              `CDS: ${PAN_TEST_RUN.cds}; library: ${PAN_TEST_RUN.library}\n` +
+              `Duration: ${PAN_TEST_RUN.duration} with 10 threads.\n\n` +
+              'The form is replaced by the test settings (e-mail and threads are kept).'
+            }
+            onRun={runTest}
+          />
           <FormSection num="01" title="Input data" help="inputPan">
             <TextField
               label="Email address"

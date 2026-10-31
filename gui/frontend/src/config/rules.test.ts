@@ -3,21 +3,27 @@ import type { PanFormState } from '../types'
 import {
   addPanPair,
   applyMode,
+  fileDisabledReason,
   initialEdtaState,
   initialPanState,
   isFileEnabled,
   isSwitchLocked,
   isSwitchVisible,
+  switchLockReason,
   removePanPair,
   setExtraFile,
   setPanPairFile,
   setStep,
   setSwitch,
+  testEdtaState,
+  testPanState,
+  panTestFileNames,
   toEdtaRunConfig,
   toPanRunConfig,
   validateEdta,
   validateMaxDiv,
   validateMutationRate,
+  validateRunName,
   validatePan,
 } from './rules'
 
@@ -101,13 +107,15 @@ describe('Annotation / Evaluate rules', () => {
     expect(s.switches.anno).toBe(true)
   })
 
-  it('turning Annotation off turns Evaluate off and clears exclude/rmout', () => {
+  it('turning Annotation off turns Evaluate and MAKER mask off and clears exclude/rmout', () => {
     let s = setSwitch(initialEdtaState(), 'evaluate', true)
+    s = setSwitch(s, 'maker', true)
     s = setExtraFile(s, 'exclude', file('regions.bed'))
     s = setExtraFile(s, 'rmout', file('genome.out'))
     s = setExtraFile(s, 'cds', file('genome.cds.fa'))
     s = setSwitch(s, 'anno', false)
     expect(s.switches.evaluate).toBe(false)
+    expect(s.switches.maker).toBe(false)
     expect(s.files.exclude).toBeNull()
     expect(s.files.rmout).toBeNull()
     expect(s.files.cds?.name).toBe('genome.cds.fa')
@@ -120,7 +128,75 @@ describe('Annotation / Evaluate rules', () => {
     expect(isFileEnabled(off, 'cds')).toBe(true)
     expect(setExtraFile(off, 'exclude', file('a.bed'))).toBe(off)
     const on = setSwitch(off, 'anno', true)
-    expect(isFileEnabled(on, 'exclude')).toBe(true)
+    expect(isFileEnabled(on, 'rmout')).toBe(true)
+  })
+})
+
+describe('run name', () => {
+  it('accepts empty and folder-safe names; refuses spaces, leading symbols and long names', () => {
+    expect(validateRunName('')).toBeNull()
+    expect(validateRunName('  TAIR10_test-1.2  ')).toBeNull()
+    expect(validateRunName('my run')).toMatch(/no spaces/)
+    expect(validateRunName('-x')).not.toBeNull()
+    expect(validateRunName('_x')).not.toBeNull()
+    expect(validateRunName('a/b')).not.toBeNull()
+    expect(validateRunName('a'.repeat(81))).toMatch(/at most 80/)
+  })
+
+  it('is sent trimmed, null when empty, and ignored when reusing a previous run', () => {
+    const base = { ...initialEdtaState(), genome: new File(['x'], 'g.fa') }
+    expect(toEdtaRunConfig({ ...base, runName: ' TAIR10 ' }).runName).toBe('TAIR10')
+    expect(toEdtaRunConfig(base).runName).toBeNull()
+    const reuse = {
+      ...setStep(base, 'final'),
+      previousRunId: 'r_20261031-102519',
+      runName: 'bad name',
+    }
+    expect(validateEdta(reuse).runName).toBeUndefined()
+    expect(toEdtaRunConfig(reuse).runName).toBeNull()
+  })
+})
+
+describe('step "anno"', () => {
+  it('turns Annotation on and locks it; other steps unlock it', () => {
+    let s = setStep(initialEdtaState(), 'anno')
+    expect(s.switches.anno).toBe(true)
+    expect(isSwitchLocked(s, 'anno')).toBe(true)
+    expect(switchLockReason(s, 'anno')).toMatch(/step "anno"/)
+    expect(setSwitch(s, 'anno', false)).toBe(s)
+    s = setStep(s, 'final')
+    expect(isSwitchLocked(s, 'anno')).toBe(false)
+    expect(setSwitch(s, 'anno', false).switches.anno).toBe(false)
+  })
+
+  it('keeps Annotation on when going back from AnnoTEP to EDTA', () => {
+    const s = applyMode(applyMode(setStep(initialEdtaState(), 'anno'), 'annotep'), 'edta')
+    expect(s.switches.anno).toBe(true)
+  })
+})
+
+describe('MAKER mask rules', () => {
+  it('turning MAKER mask on turns Annotation on and enables exclude', () => {
+    const s = setSwitch(initialEdtaState(), 'maker', true)
+    expect(s.switches.anno).toBe(true)
+    expect(isFileEnabled(s, 'exclude')).toBe(true)
+  })
+
+  it('in EDTA mode exclude needs MAKER mask; turning it off clears exclude', () => {
+    const anno = setSwitch(initialEdtaState(), 'anno', true)
+    expect(isFileEnabled(anno, 'exclude')).toBe(false)
+    expect(fileDisabledReason(anno, 'exclude')).toMatch(/MAKER mask/)
+    let s = setExtraFile(setSwitch(anno, 'maker', true), 'exclude', file('a.bed'))
+    s = setSwitch(s, 'maker', false)
+    expect(s.files.exclude).toBeNull()
+    expect(s.switches.anno).toBe(true)
+  })
+
+  it('AnnoTEP mode: MAKER mask hidden and off, exclude needs only Annotation', () => {
+    const s = applyMode(setSwitch(initialEdtaState(), 'maker', true), 'annotep')
+    expect(s.switches.maker).toBe(false)
+    expect(isSwitchVisible('annotep', 'maker')).toBe(false)
+    expect(isFileEnabled(s, 'exclude')).toBe(true)
   })
 })
 
@@ -185,7 +261,7 @@ describe('validateEdta', () => {
   it('validates email and extra file extensions', () => {
     expect(validateEdta({ ...valid(), email: 'nope' }).email).toBeDefined()
     expect(validateEdta({ ...valid(), email: 'a@b.org' }).email).toBeUndefined()
-    const s = setSwitch(valid(), 'anno', true)
+    const s = setSwitch(valid(), 'maker', true)
     expect(validateEdta(setExtraFile(s, 'exclude', file('x.txt')))['files.exclude']).toBeDefined()
     expect(validateEdta(setExtraFile(s, 'rmout', file('x.out')))['files.rmout']).toBeUndefined()
   })
@@ -265,5 +341,51 @@ describe('panEDTA rules', () => {
     expect(validatePan({ ...s, copies: '2' }).copies).toBeDefined()
     expect(validatePan({ ...s, copies: '3' }).copies).toBeUndefined()
     expect(validatePan({ ...s, threads: '9' }).threads).toBeDefined()
+  })
+})
+
+describe('test analysis forms', () => {
+  it('EDTA: test genome, Test_genome, step all, Sensitivity and Annotation on; keeps e-mail and threads', () => {
+    const dirty = {
+      ...setStep(initialEdtaState(), 'final'),
+      email: 'a@b.org',
+      threads: '16',
+      maxDiv: '30',
+      previousRunId: 'x',
+    }
+    const s = testEdtaState(dirty, file('TAIR10_chr1.fa'))
+    expect(s).toMatchObject({
+      mode: 'edta',
+      email: 'a@b.org',
+      threads: '16',
+      maxDiv: '40',
+      step: 'all',
+      previousRunId: null,
+      runName: 'Test_genome',
+    })
+    expect(s.switches).toMatchObject({ sensitive: true, anno: true, maker: false, runLai: false })
+    expect(validateEdta(s)).toEqual({})
+  })
+
+  it('AnnoTEP: same genome, AnnoTEP defaults', () => {
+    const s = testEdtaState(applyMode(initialEdtaState(), 'annotep'), file('TAIR10_chr1.fa'))
+    expect(s.mode).toBe('annotep')
+    expect(s.switches).toMatchObject({ sensitive: true, anno: true, runLai: true })
+  })
+
+  it('panEDTA: each file once; Col with CDS, Ler without', () => {
+    const names = panTestFileNames()
+    expect(names).toEqual([
+      'Col.test.fa',
+      'genome.cds.fa',
+      'Ler.test.fa',
+      'athrep.updated.nonredun.fasta',
+    ])
+    const s = testPanState(initialPanState(), new Map(names.map((n) => [n, file(n)])))
+    expect(s.pairs.map((p) => [p.genome?.name, p.cds?.name ?? null])).toEqual([
+      ['Col.test.fa', 'genome.cds.fa'],
+      ['Ler.test.fa', null],
+    ])
+    expect(validatePan(s)).toEqual({})
   })
 })

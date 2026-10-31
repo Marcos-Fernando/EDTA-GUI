@@ -33,9 +33,15 @@ from .step_detector import final_message_found
 
 log = logging.getLogger("edta_gui.runner")
 
-# Lines the legacy GUI echoed between EDTA.pl and the AnnoTEP report script.
+# Lines the legacy GUI echoed between EDTA.pl and the AnnoTEP report script
+# (EDTA runs with charts get the same lines).
 ANNOTEP_MARKERS = [
     "################## AnnoTEP annotation completed successfully ##################",
+    " ",
+    "################## Starting report and chart generation #######################",
+]
+EDTA_MARKERS = [
+    "################## EDTA annotation completed successfully #####################",
     " ",
     "################## Starting report and chart generation #######################",
 ]
@@ -55,6 +61,8 @@ class Job:
     extra_path: list[str]
     options: TimelineContext
     email: str | None = None
+    # Conda env per command (index); commands beyond the list use conda_env.
+    command_envs: list[str] = field(default_factory=list)
     cancelled: bool = False
     process: RunningProcess | None = None
     done: threading.Event = field(default_factory=threading.Event)
@@ -172,12 +180,14 @@ class Runner:
                 for i, argv in enumerate(job.commands):
                     if job.cancelled:
                         break
-                    if i > 0 and job.options.kind == "annotep":
-                        logf.write(("\n".join(ANNOTEP_MARKERS) + "\n").encode())
+                    if i > 0 and job.options.kind in ("annotep", "edta"):
+                        markers = ANNOTEP_MARKERS if job.options.kind == "annotep" else EDTA_MARKERS
+                        logf.write(("\n".join(markers) + "\n").encode())
                         logf.flush()
+                    conda_env = job.command_envs[i] if i < len(job.command_envs) else job.conda_env
                     full = [
                         self.settings.conda_exe, "run", "--no-capture-output",
-                        "-n", job.conda_env, *argv,
+                        "-n", conda_env, *argv,
                     ]  # fmt: skip
                     proc = self.executor.start(full, cwd=job.loc.path, env=env, log=logf)
                     job.process = proc

@@ -56,14 +56,27 @@ def test_defaults_are_omitted_and_values_kept():
             anno=True,
             overwrite=True,
             force=True,
+            maker=True,
             files={"cds": "my_cds.fa", "exclude": "regions.bed"},
         )
     )
     assert t == (
         "EDTA.pl --genome genome.fa --species others --step all --sensitive 0 --threads 20 "
-        "--overwrite 1 --anno 1 --evaluate 0 --force 1 --u 7e-9 --maxdiv 30 "
+        "--overwrite 1 --anno 1 --evaluate 0 --maker 1 --force 1 --u 7e-9 --maxdiv 30 "
         "--cds my_cds.fa --exclude regions.bed"
     )
+
+
+def test_edta_charts_only_with_anno():
+    assert len(build_edta_commands(cmd(), "genome.fa", DISPLAY_SCRIPTS)) == 1
+    _, charts = build_edta_commands(cmd(anno=True), "genome.fa", DISPLAY_SCRIPTS)
+    assert charts == ["bash", "AnnoTEP/Scripts/generate_PLOTs-for-EDTA.sh", "genome.fa"]
+
+
+def test_maker_only_in_edta_mode():
+    assert "--anno 1 --evaluate 0 --maker 1" in text(cmd(anno=True, maker=True))
+    assert "--maker" not in text(cmd(anno=True))
+    assert "--maker" not in text(cmd(mode="annotep", maker=True))
 
 
 def test_annotep_forces_sensitive_anno_and_adds_report():

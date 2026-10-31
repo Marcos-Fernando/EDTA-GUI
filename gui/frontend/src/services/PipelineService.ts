@@ -34,6 +34,8 @@ export interface PipelineService {
   readText(runId: string, path: string): Promise<string>
   /** URL of a file in the run folder; inline=true shows it in the browser instead of downloading. */
   fileUrl(runId: string, path: string, inline?: boolean): string
+  /** Test file stored on the server (TAIR10_chr1.fa, Col.test.fa...), as a form file. */
+  loadTestFile(name: string): Promise<File>
 }
 
 /** Error reported by the service. fieldErrors maps form fields to messages. */

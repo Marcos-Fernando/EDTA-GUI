@@ -9,13 +9,15 @@ from collections.abc import Mapping
 
 from pydantic import ValidationError
 
-from .command_builder import ANNO_ONLY_FILES, EXTRA_FILES
+from .command_builder import ANNO_ONLY_FILES, EXTRA_FILES, MAKER_ONLY_FILES
 from .files import FASTA_EXTENSIONS, has_allowed_extension, secure_filename
 from .models import EdtaConfigIn, PanConfigIn, Switches
 
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 POSITIVE_FLOAT_RE = re.compile(r"^(\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?$")
 
+RUN_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+RUN_NAME_MAX = 80
 MIN_THREADS = 10
 MIN_PAN_COPIES = 3
 MAX_DIV_RANGE = (0, 100)
@@ -54,6 +56,18 @@ def validate_mutation_rate(value: str | None) -> str | None:
     return None
 
 
+def validate_run_name(value: str | None) -> str | None:
+    """Optional run folder name (the date and time are always added)."""
+    v = (value or "").strip()
+    if v == "":
+        return None
+    if len(v) > RUN_NAME_MAX:
+        return f"Use at most {RUN_NAME_MAX} characters."
+    if not RUN_NAME_RE.match(v):
+        return 'Use letters, numbers, ".", "_" or "-" (no spaces), starting with a letter or number.'
+    return None
+
+
 def validate_min_int(value: int, minimum: int) -> str | None:
     return None if value >= minimum else f"Enter a whole number of at least {minimum}."
 
@@ -74,15 +88,17 @@ def extension_error(name: str | None, allowed: tuple[str, ...]) -> str | None:
 
 
 def normalize_switches(cfg: EdtaConfigIn) -> Switches:
-    """Mode rules: AnnoTEP forces sensitive/anno; EDTA drops AnnoTEP-only switches.
-    Evaluate implies Annotation."""
+    """Mode rules: AnnoTEP forces sensitive/anno and drops MAKER mask; EDTA drops
+    AnnoTEP-only switches. Evaluate, MAKER mask and step "anno" imply Annotation
+    (EDTA.pl --step anno without --anno 1 ends right after the dependency check)."""
     s = cfg.switches.model_copy()
     if cfg.mode == "annotep":
         s.sensitive = True
         s.anno = True
+        s.maker = False
     else:
         s.tir_filter = s.annot_type = s.run_lai = False
-    if s.evaluate:
+    if s.evaluate or s.maker or cfg.step == "anno":
         s.anno = True
     return s
 
@@ -111,13 +127,18 @@ def validate_edta(
         put("previousRunId", "Select the previous run to continue from.")
     if not reusing and cfg.previous_run_id:
         put("previousRunId", 'A previous run can only be used when the step is not "all".')
+    if reusing and (cfg.run_name or "").strip():
+        put("runName", "A previous run keeps its folder name; leave the run name empty.")
+    put("runName", validate_run_name(cfg.run_name))
     if genome_name is None and not reusing:
         put("genome", "Select a genome FASTA file.")
     put("genome", extension_error(genome_name, FASTA_EXTENSIONS))
     if genome_name is not None and not secure_filename(genome_name):
         put("genome", "Invalid file name.")
 
-    anno = normalize_switches(cfg).anno
+    switches = normalize_switches(cfg)
+    anno = switches.anno
+    maker_needed = cfg.mode == "edta" and not switches.maker
     used: dict[str, str] = {}
     if genome_name:
         used[secure_filename(genome_name)] = "genome"
@@ -128,6 +149,8 @@ def validate_edta(
         field = f"files.{key}"
         if key in ANNO_ONLY_FILES and not anno:
             put(field, 'Enable "Annotation" to use this file.')
+        if key in MAKER_ONLY_FILES and maker_needed:
+            put(field, 'Enable "MAKER mask" to use this file.')
         put(field, extension_error(name, EXTRA_FILE_EXTENSIONS[key]))
         safe = secure_filename(name)
         if not safe:

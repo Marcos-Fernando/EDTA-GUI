@@ -11,7 +11,7 @@ from collections.abc import Iterable
 from .models import TimelineContext
 
 PAN_FINAL = re.compile(r"panEDTA annotation of .* is finished!")
-ANNOTEP_FINAL = re.compile(r"The generation of charts and reports has been completed")
+REPORT_FINAL = re.compile(r"The generation of charts and reports has been completed")
 EDTA_FINAL_LIBRARY = re.compile(r"EDTA final stage finished!")
 EDTA_FINAL_ANNO = re.compile(r"TE annotation using the EDTA library has finished!")
 EDTA_FINAL_EVALUATE = re.compile(r"Evaluation of TE annotation finished!")
@@ -23,10 +23,12 @@ def expected_final_message(ctx: TimelineContext | None) -> re.Pattern[str] | Non
     if ctx.kind == "pan":
         return PAN_FINAL
     if ctx.kind == "annotep":
-        return ANNOTEP_FINAL
+        return REPORT_FINAL
     if ctx.kind == "edta":
         if not ctx.anno:
             return EDTA_FINAL_LIBRARY
+        if ctx.charts:
+            return REPORT_FINAL
         return EDTA_FINAL_EVALUATE if ctx.evaluate else EDTA_FINAL_ANNO
     return None
 

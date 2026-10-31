@@ -2,6 +2,7 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import lite from './__fixtures__/lite.tbl?raw'
+import teannoSum from './__fixtures__/teanno.sum?raw'
 import nwk from './__fixtures__/all.nwk?raw'
 import { AppProvider } from '../state/AppProvider'
 import { MockPipelineService } from '../services/MockPipelineService'
@@ -79,6 +80,29 @@ describe('ReportView', () => {
       'data-title',
       'Genome masked by repeats',
     )
+  })
+
+  it('panEDTA: the EDTA summary of each genome as the same table and donut', async () => {
+    const ler = teannoSum.replace(/^Total {2,}.*$/m, 'Total   80   100000   10.00%')
+    renderReport({
+      'Col.test.fa.mod.EDTA.TEanno.sum': teannoSum,
+      'Ler.test.fa.mod.EDTA.TEanno.sum': ler,
+      'genome.cds.list.panEDTA.TElib.fa': '>x',
+    })
+    const region = await screen.findByRole('region', { name: 'Quantitative summary' })
+    expect(
+      await within(region).findByRole('treegrid', { name: 'TE classification' }),
+    ).toBeInTheDocument()
+    expect(within(region).getByText('Copia')).toBeInTheDocument()
+    expect(within(region).getByText('147519 bp ( 14.75 %)')).toBeInTheDocument()
+    // only genomes with a summary in the selector (not the pan-genome library)
+    const select = within(region).getByRole('combobox', { name: 'Genome' })
+    expect([...select.querySelectorAll('option')].map((o) => o.textContent)).toEqual([
+      'Col.test.fa',
+      'Ler.test.fa',
+    ])
+    await userEvent.setup().selectOptions(select, '1')
+    expect(await within(region).findByText('100000 bp ( 10.00 %)')).toBeInTheDocument()
   })
 
   it('normal genome: interactive charts, images on request, files with the folder path', async () => {

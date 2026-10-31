@@ -11,6 +11,7 @@ import {
 import { usePipelineService } from '../state/hooks'
 import { formatBp, formatBytes } from '../utils/files'
 import { useRunText, type TextState } from './useRunText'
+import { parseEdtaSum } from './parse/edtaSum'
 import { parseTEReport, type TESelection } from './parse/teReport'
 import { parseDivsum } from './parse/divsum'
 import { parseInsertionAges } from './parse/insertionTime'
@@ -135,11 +136,16 @@ function Report({
   const [ageMode, setAgeMode] = useMode(!!(copiaPath || gypsyPath))
   const [treeMode, setTreeMode] = useMode(!!treePath && !treeTooBig)
 
-  const genome = m.genomes[Math.min(genomeIdx, m.genomes.length - 1)] ?? null
+  // EDTA summary per genome (panEDTA, or EDTA without REPORT/): same table as LITE.tbl
+  const sumGenomes = m.genomes.filter((g) => g.teSum)
+  const genome = sumGenomes[Math.min(genomeIdx, sumGenomes.length - 1)] ?? null
   const teSum = useRunText(
     runId,
     parsedLite ? null : fetchable(m, genome?.teSum ?? null, LIMITS.tableFileBytes),
   )
+  // small file (a few dozen lines): parsed on each render (the React Compiler memoizes it)
+  const parsedSum = teSum.status === 'ready' ? parseEdtaSum(teSum.text, genome?.name ?? null) : null
+  const summaryTable = parsedLite ?? parsedSum
 
   const nothing =
     !m.liteTable && !m.genomes.length && !Object.keys(m.images).length && !m.reportTables.length
@@ -182,14 +188,17 @@ function Report({
           def={DEF.summary}
           note={parsedLite ? null : tooBig(m, m.liteTable, LIMITS.tableFileBytes)}
           actions={
-            m.genomes.length > 1 && !parsedLite ? (
+            sumGenomes.length > 1 && !parsedLite ? (
               <select
                 className={styles.select}
                 aria-label="Genome"
                 value={genomeIdx}
-                onChange={(e) => setGenomeIdx(Number(e.target.value))}
+                onChange={(e) => {
+                  setGenomeIdx(Number(e.target.value))
+                  setTeSelection(null)
+                }}
               >
-                {m.genomes.map((g, i) => (
+                {sumGenomes.map((g, i) => (
                   <option key={g.name} value={i}>
                     {g.name}
                   </option>
@@ -198,17 +207,17 @@ function Report({
             ) : null
           }
         >
-          {parsedLite ? (
-            parsedLite.tree.length ? (
+          {summaryTable ? (
+            summaryTable.tree.length ? (
               <div className={styles.summaryGrid}>
                 <MaskedDonutChart
-                  meta={parsedLite.meta}
+                  meta={summaryTable.meta}
                   selection={teSelection}
                   onReset={() => setTeSelection(null)}
                 />
                 <TETable
-                  meta={parsedLite.meta}
-                  tree={parsedLite.tree}
+                  meta={summaryTable.meta}
+                  tree={summaryTable.tree}
                   selectedKey={teSelection?.key ?? null}
                   onSelect={(sel) => setTeSelection((prev) => (prev?.key === sel.key ? null : sel))}
                 />

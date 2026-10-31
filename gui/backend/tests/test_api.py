@@ -50,7 +50,9 @@ def test_edta_run_end_to_end(ctx: Ctx):
     assert run["statusText"] == "Annotation finalised"
     assert run["finalMessageFound"] is True
     assert run["kind"] == "edta" and run["genome"] == "genome.fa" and run["readOnly"] is False
-    assert run["options"] == {"kind": "edta", "step": "all", "anno": True, "evaluate": True, "runLai": False}
+    assert run["options"] == {
+        "kind": "edta", "step": "all", "anno": True, "evaluate": True, "runLai": False, "charts": True,
+    }  # fmt: skip
 
     folder = ctx.settings.results_dir / run_id
     assert (folder / "status.txt").read_text() == "Annotation finalised"
@@ -66,11 +68,43 @@ def test_edta_run_end_to_end(ctx: Ctx):
         "--threads", "10", "--anno", "1", "--evaluate", "1", "--cds", "genome.cds.fa",
     ]  # fmt: skip
     assert call["cwd"] == folder
-    assert call["env"]["PATH"].endswith(str(ctx.settings.edta_dir / "bin"))
+    assert str(ctx.settings.edta_dir / "bin") in call["env"]["PATH"]
+    assert call["env"]["PATH"].endswith(str(ctx.settings.annotep_root / "Scripts"))
+
+    # --anno 1: EDTA charts afterwards, in the AnnoTEP env (R/Python chart packages).
+    charts = ctx.executor.calls[1]
+    assert charts["argv"][4] == "annotepgui_3_11"
+    assert charts["argv"][5:] == [
+        "bash", str(ctx.settings.annotep_root / "Scripts" / "generate_PLOTs-for-EDTA.sh"), "genome.fa",
+    ]  # fmt: skip
+    log_text = (folder / "log.txt").read_text()
+    assert log_text.index("Evaluation of TE annotation") < log_text.index(
+        "EDTA annotation completed successfully"
+    )
+    assert log_text.index("Starting report and chart generation") < log_text.index(
+        "charts and reports has been"
+    )
 
     meta = json.loads((folder / "run.json").read_text())
     assert meta["kind"] == "edta" and meta["exitCode"] == 0 and meta["finishedAt"]
     assert meta["condaEnv"] == "EDTAgui" and "email" not in meta
+
+
+def test_run_name_names_the_folder(ctx: Ctx):
+    run_id = ctx.post_edta({"runName": " TAIR10_test "}).json()["runId"]
+    assert re.match(r"^TAIR10_test_\d{8}-\d{6}$", run_id)
+    run = ctx.wait(run_id)
+    assert run["genome"] == "genome.fa" and run["status"] == "completed"
+    r = ctx.post_edta({"runName": "../evil name"})
+    assert r.status_code == 422 and "runName" in r.json()["fieldErrors"]
+
+
+def test_edta_library_only_has_no_charts(ctx: Ctx):
+    run_id = ctx.post_edta({}).json()["runId"]
+    run = ctx.wait(run_id)
+    assert run["status"] == "completed" and run["finalMessageFound"] is True
+    assert run["options"]["charts"] is False
+    assert len(ctx.executor.calls) == 1
 
 
 def test_annotep_runs_report_after_edta(ctx: Ctx):
@@ -148,7 +182,7 @@ def test_validation_errors_use_frontend_field_names(ctx: Ctx):
 
 def test_file_names_are_sanitized(ctx: Ctx):
     r = ctx.post_edta(
-        {"switches": {"anno": True}}, {"exclude": ("../../evil regions.bed", b"x")}, genome="My genome.fa"
+        {"switches": {"maker": True}}, {"exclude": ("../../evil regions.bed", b"x")}, genome="My genome.fa"
     )
     run_id = r.json()["runId"]
     assert run_id.startswith("My_genome_")
@@ -489,6 +523,20 @@ def test_mail_disabled_logs_a_warning(tmp_path: Path, caplog):
     with caplog.at_level("WARNING", logger="edta_gui.mail"):
         Mailer(settings).send_checking("a@b.org", "EDTA.pl --genome g.fa")
     assert "MAIL_SERVER is not configured" in caplog.text
+
+
+def test_test_data_download(ctx):
+    r = ctx.client.get("/api/test-data/TAIR10_chr1.fa")
+    assert r.status_code == 404 and "test/TAIR10_chr1.fa" in r.json()["message"]
+    (ctx.settings.edta_dir / "test").mkdir()
+    (ctx.settings.edta_dir / "test" / "TAIR10_chr1.fa").write_text(">chr1\nACGT\n")
+    r = ctx.client.get("/api/test-data/TAIR10_chr1.fa")
+    assert r.status_code == 200 and r.text == ">chr1\nACGT\n"
+    assert 'filename="TAIR10_chr1.fa"' in r.headers["content-disposition"]
+    # only the listed names
+    (ctx.settings.edta_dir / "test" / "secret.fa").write_text(">x\n")
+    assert ctx.client.get("/api/test-data/secret.fa").status_code == 404
+    assert ctx.client.get("/api/test-data/..%2Fsettings.py").status_code == 404
 
 
 def test_serves_frontend_build_when_present(tmp_path: Path):

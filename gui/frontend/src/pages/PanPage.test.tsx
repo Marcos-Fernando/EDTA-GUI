@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { screen } from '@testing-library/react'
 import { fasta, fileInputFor, renderApp } from '../test/utils'
 
@@ -37,6 +37,23 @@ describe('panEDTA-GUI page', () => {
     await user.clear(copies)
     await user.type(copies, '2')
     expect(screen.getByText('Enter a whole number of at least 3.')).toBeInTheDocument()
+  })
+
+  it('Run test analysis starts the EDTA toy example (Col with CDS, Ler without)', async () => {
+    const { user, service } = renderApp('#/pan')
+    const start = vi.spyOn(service, 'startPanRun')
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    await user.click(screen.getByRole('button', { name: /run test analysis/i }))
+    await vi.waitFor(() => expect(start).toHaveBeenCalledTimes(1))
+    const cfg = start.mock.calls[0][0]
+    expect(cfg.pairs.map((p) => [p.genome.name, p.cds?.name ?? null])).toEqual([
+      ['Col.test.fa', 'genome.cds.fa'],
+      ['Ler.test.fa', null],
+    ])
+    expect(cfg.cds.name).toBe('genome.cds.fa')
+    expect(cfg.library?.name).toBe('athrep.updated.nonredun.fasta')
+    expect(cfg.copies).toBe(3)
+    confirm.mockRestore()
   })
 
   it('flags a CDS without a genome in its row', async () => {

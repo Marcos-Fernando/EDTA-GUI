@@ -33,6 +33,17 @@ describe('buildEdtaCommands — EDTA mode', () => {
     expect(formatCommand(ev)).toContain('--anno 1 --evaluate 1')
   })
 
+  it('MAKER mask sends --maker 1 after --evaluate, and is omitted when off', () => {
+    const on = formatCommand(
+      buildEdtaCommands(cfgOf(setSwitch(base(), 'maker', true)), 'genome.fa')[0],
+    )
+    expect(on).toContain('--anno 1 --evaluate 0 --maker 1')
+    const off = formatCommand(
+      buildEdtaCommands(cfgOf(setSwitch(base(), 'anno', true)), 'genome.fa')[0],
+    )
+    expect(off).not.toContain('--maker')
+  })
+
   it('never sends AnnoTEP-only flags', () => {
     const s = { ...base(), switches: { ...base().switches, runLai: true, tirFilter: true } }
     const text = formatCommand(buildEdtaCommands(cfgOf(s), 'genome.fa')[0])
@@ -47,12 +58,13 @@ describe('buildEdtaCommands — EDTA mode', () => {
     )
     s = setSwitch(s, 'overwrite', true)
     s = setSwitch(s, 'force', true)
+    s = setSwitch(s, 'maker', true)
     s = setExtraFile(s, 'cds', file('my cds.fa'))
     s = setExtraFile(s, 'exclude', file('../regions.bed'))
     const text = formatCommand(buildEdtaCommands(cfgOf(s), 'genome.fa')[0])
     expect(text).toBe(
       'EDTA.pl --genome genome.fa --species others --step all --sensitive 0 --threads 20 ' +
-        '--overwrite 1 --anno 1 --evaluate 0 --force 1 --u 7e-9 --maxdiv 30 ' +
+        '--overwrite 1 --anno 1 --evaluate 0 --maker 1 --force 1 --u 7e-9 --maxdiv 30 ' +
         '--cds my_cds.fa --exclude regions.bed',
     )
   })
@@ -67,6 +79,12 @@ describe('buildEdtaCommands — AnnoTEP mode', () => {
         '--threads 10 --anno 1 --evaluate 0 --run_LAI 1',
     )
     expect(report).toEqual(['bash', 'AnnoTEP/Scripts/generate_PLOTs-for-TE-pipe.sh', 'genome.fa'])
+  })
+
+  it('never sends --maker (it does not exist in AnnoTEP/EDTA/EDTA.pl)', () => {
+    const s = { ...base(), switches: { ...base().switches, maker: true } }
+    const text = formatCommand(buildEdtaCommands(cfgOf(applyMode(s, 'annotep')), 'genome.fa')[0])
+    expect(text).not.toContain('--maker')
   })
 
   it('sends TIR_filter / ANNOT_TYPE only when on, and run_LAI 0 when off', () => {

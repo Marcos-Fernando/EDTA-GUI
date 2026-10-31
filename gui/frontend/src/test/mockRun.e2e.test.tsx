@@ -25,10 +25,11 @@ describe('mock run, end to end', () => {
     await waitFor(() => expect(statValue('Status')).toHaveTextContent('Completed'), {
       timeout: 5000,
     })
-    expect(statValue('Progress')).toHaveTextContent('6/6 steps')
+    // Annotation on: the EDTA charts are the seventh step.
+    expect(statValue('Progress')).toHaveTextContent('7/7 steps')
 
     const timeline = screen.getByRole('region', { name: 'Execution timeline' })
-    expect(within(timeline).getAllByText('completed')).toHaveLength(6)
+    expect(within(timeline).getAllByText('completed')).toHaveLength(7)
     const log = screen.getByRole('log', { name: 'Execution log' })
     expect(within(log).getByText(/Evaluation of TE annotation finished!/)).toBeInTheDocument()
 

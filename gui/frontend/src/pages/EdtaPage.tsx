@@ -1,18 +1,21 @@
 import { useId, useMemo, useState } from 'react'
-import type { TimelineContext } from '../types'
+import type { EdtaRunConfig, TimelineContext } from '../types'
 import {
   EXTRA_FILES,
   FASTA_EXTENSIONS,
   MODES,
   PARAMS,
+  RUN_NAME,
   SPECIES_OPTIONS,
   STEP_OPTIONS,
   SWITCHES,
+  TEST_RUN,
 } from '../config/edtaFields'
 import {
-  isFileEnabled,
-  isSwitchLocked,
+  fileDisabledReason,
   isSwitchVisible,
+  switchLockReason,
+  testEdtaState,
   toEdtaRunConfig,
   validateEdta,
 } from '../config/rules'
@@ -23,6 +26,7 @@ import { HelpPopover } from '../components/HelpPopover'
 import { RunWorkspace } from '../components/RunWorkspace'
 import { SegmentedControl } from '../components/SegmentedControl'
 import { Switch } from '../components/Switch'
+import { TestRunButton } from '../components/TestRunButton'
 import { TextField } from '../components/TextField'
 import fieldStyles from '../components/Field.module.scss'
 import { useEmailHint } from '../hooks/useEmailHint'
@@ -31,7 +35,7 @@ import { ServiceError } from '../services'
 import { askNotificationPermission } from '../notify/system'
 import { useNotify } from '../notify/NotifyContext'
 import { useAppDispatch, useAppState, usePipelineService } from '../state/hooks'
-import { secureFilename } from '../utils/files'
+import { secureFilename, stripExtension } from '../utils/files'
 import { sortRuns } from '../utils/runs'
 import { formatDateTime } from '../utils/time'
 import { SubmitFooter } from './SubmitFooter'
@@ -45,6 +49,7 @@ export function EdtaPage() {
   const emailHint = useEmailHint()
   const annotep = form.mode === 'annotep'
   const reusing = form.step !== 'all'
+  const genomeStem = form.genome ? stripExtension(secureFilename(form.genome.name)) : null
 
   const [submitting, setSubmitting] = useState(false)
   const [serverError, setServerError] = useState<ServiceError | null>(null)
@@ -80,14 +85,15 @@ export function EdtaPage() {
     anno: annotep || form.switches.anno,
     evaluate: form.switches.evaluate,
     runLai: annotep && form.switches.runLai,
+    charts: !annotep && form.switches.anno,
   }
 
-  const submit = async () => {
+  const start = async (cfg: EdtaRunConfig) => {
     setServerError(null)
     setSubmitting(true)
     askNotificationPermission() // still inside the click: browsers require it
     try {
-      const { runId } = await service.startEdtaRun(toEdtaRunConfig(form))
+      const { runId } = await service.startEdtaRun(cfg)
       dispatch({ type: 'run/active', page: 'edta', runId })
       runStarted(runId)
     } catch (e) {
@@ -95,6 +101,18 @@ export function EdtaPage() {
     } finally {
       setSubmitting(false)
     }
+  }
+
+  const submit = () => start(toEdtaRunConfig(form))
+
+  const modeLabel = MODES.find((m) => m.value === form.mode)?.label ?? form.mode
+  const testDuration = TEST_RUN.duration[form.mode]
+  const runTest = async () => {
+    const genome = await service.loadTestFile(TEST_RUN.genome)
+    const next = testEdtaState(form, genome)
+    dispatch({ type: 'edta/replace', state: next })
+    // An invalid e-mail or thread count stays highlighted in the form instead.
+    if (Object.keys(validateEdta(next)).length === 0) await start(toEdtaRunConfig(next))
   }
 
   const speciesLabel = useId()
@@ -120,6 +138,18 @@ export function EdtaPage() {
               onChange={(value) => dispatch({ type: 'edta/mode', mode: value })}
             />
           </div>
+
+          <TestRunButton
+            description={`${modeLabel} mode with ${TEST_RUN.genome} (Arabidopsis thaliana chromosome 1, 30 Mb): ${testDuration} with 10 threads, charts included.`}
+            confirmText={
+              `Start the ${modeLabel} test analysis now?\n\n` +
+              `Genome: ${TEST_RUN.genome} (Arabidopsis thaliana chromosome 1, 30 Mb)\n` +
+              `Results folder: ${TEST_RUN.runName}_<date-time>\n` +
+              `Duration: ${testDuration} with 10 threads.\n\n` +
+              'The form is replaced by the test settings (e-mail and threads are kept).'
+            }
+            onRun={runTest}
+          />
 
           <FormSection num="01" title="Input data" help="inputEdta">
             <TextField
@@ -147,6 +177,18 @@ export function EdtaPage() {
                   : 'Use simple FASTA headers (e.g. >chr01). Avoid "_", "-", "/" and "|".'
               }
             />
+            {!reusing && (
+              <TextField
+                label={RUN_NAME.label}
+                placeholder={genomeStem ?? 'genome name'}
+                value={form.runName}
+                onChange={(value) => dispatch({ type: 'edta/text', field: 'runName', value })}
+                error={inline('runName')}
+                hint={`Optional. Results folder: ${
+                  form.runName.trim() || genomeStem || '<genome name>'
+                }_<date-time>. Empty = genome name.`}
+              />
+            )}
           </FormSection>
 
           <FormSection num="02" title="Run parameters" help="runParameters">
@@ -260,7 +302,8 @@ export function EdtaPage() {
           <FormSection num="03" title="Advanced options" help="parameters">
             <div className={styles.optionTable}>
               {SWITCHES.filter((s) => isSwitchVisible(form.mode, s.key)).map((s) => {
-                const locked = isSwitchLocked(form, s.key)
+                const lockReason = switchLockReason(form, s.key)
+                const locked = lockReason !== null
                 const lockId = `lock-${s.key}`
                 const annotepOnly = !s.modes.includes('edta')
                 return (
@@ -273,7 +316,7 @@ export function EdtaPage() {
                       {annotepOnly && <span className={styles.badge}>AnnoTEP</span>}
                       {locked && (
                         <span id={lockId} className={styles.locked}>
-                          Always on in AnnoTEP mode
+                          {lockReason}
                         </span>
                       )}
                     </span>
@@ -293,7 +336,7 @@ export function EdtaPage() {
 
           <FormSection num="04" title="Additional files" hint="optional" help="extraFiles">
             {EXTRA_FILES.map((f) => {
-              const enabled = isFileEnabled(form, f.key)
+              const disabledReason = fileDisabledReason(form, f.key)
               return (
                 <FileInput
                   key={f.key}
@@ -306,8 +349,8 @@ export function EdtaPage() {
                   file={form.files[f.key]}
                   accept={f.extensions}
                   placeholder={f.placeholder}
-                  disabled={!enabled}
-                  disabledReason='Enable "Annotation" to use this file.'
+                  disabled={disabledReason !== null}
+                  disabledReason={disabledReason ?? undefined}
                   error={inline(`files.${f.key}`)}
                   onChange={(file) => dispatch({ type: 'edta/file', key: f.key, file })}
                 />

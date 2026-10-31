@@ -14,8 +14,8 @@ import type {
   Step,
   SwitchKey,
 } from '../types'
-import { EXTRA_FILES, FASTA_EXTENSIONS, PARAMS, SWITCHES } from './edtaFields'
-import { PAN_FILE_EXTENSIONS, PAN_PARAMS } from './panFields'
+import { EXTRA_FILES, FASTA_EXTENSIONS, PARAMS, RUN_NAME, SWITCHES, TEST_RUN } from './edtaFields'
+import { PAN_FILE_EXTENSIONS, PAN_PARAMS, PAN_TEST_RUN } from './panFields'
 import { hasAllowedExtension } from '../utils/files'
 
 export type FieldErrors = Record<string, string>
@@ -29,6 +29,7 @@ const ALL_OFF: Record<SwitchKey, boolean> = {
   sensitive: false,
   anno: false,
   evaluate: false,
+  maker: false,
   force: false,
   tirFilter: false,
   annotType: false,
@@ -49,6 +50,7 @@ export function initialEdtaState(): EdtaFormState {
     mode: 'edta',
     email: '',
     genome: null,
+    runName: '',
     species: 'others',
     step: 'all',
     previousRunId: null,
@@ -88,20 +90,48 @@ export function isSwitchVisible(mode: PipelineMode, key: SwitchKey): boolean {
   return SWITCHES.find((s) => s.key === key)?.modes.includes(mode) ?? false
 }
 
+/** Why a switch is locked on, or null when it can be changed. */
+export function switchLockReason(state: EdtaFormState, key: SwitchKey): string | null {
+  if (state.mode === 'annotep' && ANNOTEP_LOCKED_ON.includes(key)) {
+    return 'Always on in AnnoTEP mode'
+  }
+  // EDTA.pl --step anno only runs the annotation section, which needs --anno 1:
+  // without it the run ends right after the dependency check.
+  if (key === 'anno' && state.step === 'anno') return 'Always on with step "anno"'
+  return null
+}
+
 export function isSwitchLocked(state: EdtaFormState, key: SwitchKey): boolean {
-  return state.mode === 'annotep' && ANNOTEP_LOCKED_ON.includes(key)
+  return switchLockReason(state, key) !== null
+}
+
+/** Why a file input is disabled, or null when it is enabled. */
+export function fileDisabledReason(state: EdtaFormState, key: ExtraFileKey): string | null {
+  const def = EXTRA_FILES.find((f) => f.key === key)
+  if (def?.requiresAnno && !state.switches.anno) return 'Enable "Annotation" to use this file.'
+  if (def?.requiresMaker && state.mode === 'edta' && !state.switches.maker) {
+    return 'Enable "MAKER mask" to use this file.'
+  }
+  return null
 }
 
 export function isFileEnabled(state: EdtaFormState, key: ExtraFileKey): boolean {
-  const def = EXTRA_FILES.find((f) => f.key === key)
-  return !def?.requiresAnno || state.switches.anno
+  return fileDisabledReason(state, key) === null
 }
 
-/** Annotation off → Evaluate off, exclude/rmout cleared. */
-function withAnnoOff(state: EdtaFormState): EdtaFormState {
+/** Clears the files that are no longer enabled. */
+function withDisabledFilesCleared(state: EdtaFormState): EdtaFormState {
   const files = { ...state.files }
-  for (const f of EXTRA_FILES) if (f.requiresAnno) files[f.key] = null
-  return { ...state, switches: { ...state.switches, anno: false, evaluate: false }, files }
+  for (const f of EXTRA_FILES) if (!isFileEnabled(state, f.key)) files[f.key] = null
+  return { ...state, files }
+}
+
+/** Annotation off → Evaluate and MAKER mask off, exclude/rmout cleared. */
+function withAnnoOff(state: EdtaFormState): EdtaFormState {
+  return withDisabledFilesCleared({
+    ...state,
+    switches: { ...state.switches, anno: false, evaluate: false, maker: false },
+  })
 }
 
 /**
@@ -109,6 +139,7 @@ function withAnnoOff(state: EdtaFormState): EdtaFormState {
  * - AnnoTEP: Sensitivity and Annotation on and locked; Run LAI on.
  * - EDTA: Sensitivity and Annotation back to 0 (1 only exists in AnnoTEP);
  *   AnnoTEP-only switches off and hidden.
+ * MAKER mask exists only in EDTA mode.
  */
 export function applyMode(state: EdtaFormState, mode: PipelineMode): EdtaFormState {
   if (mode === state.mode) return state
@@ -116,7 +147,7 @@ export function applyMode(state: EdtaFormState, mode: PipelineMode): EdtaFormSta
     return {
       ...state,
       mode,
-      switches: { ...state.switches, sensitive: true, anno: true, runLai: true },
+      switches: { ...state.switches, sensitive: true, anno: true, runLai: true, maker: false },
     }
   }
   const reset: EdtaFormState = {
@@ -130,21 +161,26 @@ export function applyMode(state: EdtaFormState, mode: PipelineMode): EdtaFormSta
       runLai: false,
     },
   }
-  return withAnnoOff(reset)
+  const edta = withAnnoOff(reset)
+  return state.step === 'anno' ? { ...edta, switches: { ...edta.switches, anno: true } } : edta
 }
 
-/** Evaluate on → Annotation on; Annotation off → Evaluate off and annotation files cleared. */
+/**
+ * Evaluate or MAKER mask on → Annotation on; Annotation off → Evaluate and MAKER mask off
+ * and annotation files cleared; MAKER mask off → exclude cleared.
+ */
 export function setSwitch(state: EdtaFormState, key: SwitchKey, value: boolean): EdtaFormState {
   if (isSwitchLocked(state, key) || !isSwitchVisible(state.mode, key)) return state
   if (key === 'anno' && !value) return withAnnoOff(state)
   const switches = { ...state.switches, [key]: value }
-  if (key === 'evaluate' && value) switches.anno = true
-  return { ...state, switches }
+  if ((key === 'evaluate' || key === 'maker') && value) switches.anno = true
+  return withDisabledFilesCleared({ ...state, switches })
 }
 
-/** Back to step "all" forgets the previous run. */
+/** Back to step "all" forgets the previous run; step "anno" turns Annotation on. */
 export function setStep(state: EdtaFormState, step: Step): EdtaFormState {
-  return { ...state, step, previousRunId: step === 'all' ? null : state.previousRunId }
+  const switches = step === 'anno' ? { ...state.switches, anno: true } : state.switches
+  return { ...state, step, switches, previousRunId: step === 'all' ? null : state.previousRunId }
 }
 
 export function setExtraFile(
@@ -154,6 +190,24 @@ export function setExtraFile(
 ): EdtaFormState {
   if (!isFileEnabled(state, key)) return state
   return { ...state, files: { ...state.files, [key]: file } }
+}
+
+/**
+ * Form of the "Run test analysis" button: test genome, run name "Test_genome", step "all",
+ * Sensitivity and Annotation on (Annotation gives the charts). Keeps the mode, e-mail and
+ * threads; everything else back to the defaults.
+ */
+export function testEdtaState(state: EdtaFormState, genome: File): EdtaFormState {
+  const base = initialEdtaState()
+  const edta: EdtaFormState = {
+    ...base,
+    email: state.email,
+    threads: state.threads,
+    genome,
+    runName: TEST_RUN.runName,
+    switches: { ...base.switches, sensitive: true, anno: true },
+  }
+  return applyMode(edta, state.mode)
 }
 
 /* ------------------------------------------------------------------ */
@@ -185,6 +239,17 @@ export function validateMaxDiv(value: string): string | null {
   const { min, max } = PARAMS.maxDiv
   if (!INT_RE.test(v) || Number(v) < min || Number(v) > max) {
     return `Enter a whole number from ${min} to ${max}.`
+  }
+  return null
+}
+
+/** Optional run folder name (the date and time are always added). */
+export function validateRunName(value: string): string | null {
+  const v = value.trim()
+  if (v === '') return null
+  if (v.length > RUN_NAME.maxLength) return `Use at most ${RUN_NAME.maxLength} characters.`
+  if (!RUN_NAME.pattern.test(v)) {
+    return 'Use letters, numbers, ".", "_" or "-" (no spaces), starting with a letter or number.'
   }
   return null
 }
@@ -224,6 +289,8 @@ export function validateEdta(state: EdtaFormState): FieldErrors {
   // When reusing a run, the genome copy already in its folder is used.
   if (!state.genome && !reusing) errors.genome = 'Select a genome FASTA file.'
   set('genome', extensionError(state.genome, FASTA_EXTENSIONS))
+  // When reusing a run, its folder (and name) is kept.
+  if (!reusing) set('runName', validateRunName(state.runName))
 
   set('mutationRate', validateMutationRate(state.mutationRate))
   set('maxDiv', validateMaxDiv(state.maxDiv))
@@ -249,6 +316,7 @@ export function toEdtaRunConfig(state: EdtaFormState): EdtaRunConfig {
     mode: state.mode,
     email: state.email.trim() || null,
     genome: state.genome,
+    runName: state.step === 'all' ? state.runName.trim() || null : null,
     species: state.species,
     step: state.step,
     previousRunId: state.step === 'all' ? null : state.previousRunId,
@@ -283,6 +351,32 @@ export function setPanPairFile(
   return {
     ...state,
     pairs: state.pairs.map((p) => (p.id === id ? { ...p, [field]: file } : p)),
+  }
+}
+
+/** Names of the files used by the panEDTA test (each downloaded once). */
+export function panTestFileNames(): string[] {
+  const names = PAN_TEST_RUN.pairs.flatMap((p) => (p.cds ? [p.genome, p.cds] : [p.genome]))
+  return [...new Set([...names, PAN_TEST_RUN.cds, PAN_TEST_RUN.library])]
+}
+
+/** Form of the panEDTA "Run test analysis" button. Keeps the e-mail and threads. */
+export function testPanState(state: PanFormState, files: ReadonlyMap<string, File>): PanFormState {
+  const file = (name: string) => {
+    const f = files.get(name)
+    if (!f) throw new Error(`Missing test file ${name}`)
+    return f
+  }
+  return {
+    ...state,
+    pairs: PAN_TEST_RUN.pairs.map((p) => ({
+      ...newPanPair(),
+      genome: file(p.genome),
+      cds: p.cds ? file(p.cds) : null,
+    })),
+    cds: file(PAN_TEST_RUN.cds),
+    library: file(PAN_TEST_RUN.library),
+    copies: String(PAN_PARAMS.copies.default),
   }
 }
 

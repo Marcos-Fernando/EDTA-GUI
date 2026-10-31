@@ -1,6 +1,6 @@
 /**
  * Timeline steps detected from the real log messages printed by
- * EDTA.pl (root and AnnoTEP/EDTA), the AnnoTEP report script and panEDTA.sh.
+ * EDTA.pl (root and AnnoTEP/EDTA), the report scripts (AnnoTEP and EDTA) and panEDTA.sh.
  * Messages verified against the pipeline scripts.
  *
  * Lines start with the output of `date` (locale dependent), so patterns only
@@ -94,7 +94,8 @@ export const EDTA_STEPS: readonly StepDef[] = [
     description: 'Repeat landscape, LTR age, LTR phylogeny and TE reports in REPORT/.',
     start: [/Starting report and chart generation/, /Starting adapted ProcessRepeats/],
     end: [/The generation of charts and reports has been completed/],
-    when: (c) => c.kind === 'annotep' || c.kind === 'unknown',
+    when: (c) =>
+      c.kind === 'annotep' || c.kind === 'unknown' || (c.kind === 'edta' && c.anno && !!c.charts),
   },
 ]
 
@@ -158,6 +159,7 @@ export function expectedFinalMessage(ctx: TimelineContext): RegExp | null {
       return /The generation of charts and reports has been completed/
     case 'edta':
       if (!ctx.anno) return /EDTA final stage finished!/
+      if (ctx.charts) return /The generation of charts and reports has been completed/
       return ctx.evaluate
         ? /Evaluation of TE annotation finished!/
         : /TE annotation using the EDTA library has finished!/

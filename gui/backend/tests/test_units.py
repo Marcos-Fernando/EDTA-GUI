@@ -33,9 +33,22 @@ def test_validate_edta_rules():
     assert "genome" in validate_edta(edta(), "genome.txt", {})
     errs = validate_edta(edta(threads=4, maxDiv=101, email="x"), "g.fa", {})
     assert set(errs) == {"threads", "maxDiv", "email"}
-    # exclude/rmout need Annotation; Evaluate implies Annotation
+    # exclude/rmout need Annotation; Evaluate and MAKER mask imply Annotation
     assert "files.exclude" in validate_edta(edta(), "g.fa", {"exclude": "r.bed"})
-    assert validate_edta(edta(switches={"evaluate": True}), "g.fa", {"exclude": "r.bed"}) == {}
+    assert validate_edta(edta(switches={"evaluate": True}), "g.fa", {"rmout": "r.out"}) == {}
+    # run name: optional, folder-safe, only for new runs
+    assert validate_edta(edta(runName="TAIR10_test-1.2"), "g.fa", {}) == {}
+    assert "runName" in validate_edta(edta(runName="my run"), "g.fa", {})
+    assert "runName" in validate_edta(edta(runName="-x"), "g.fa", {})
+    assert "runName" in validate_edta(edta(runName="a" * 81), "g.fa", {})
+    assert "runName" in validate_edta(edta(step="final", previousRunId="x", runName="n"), None, {})
+    # step "anno" implies Annotation (EDTA.pl does nothing without --anno 1)
+    assert validate_edta(edta(step="anno", previousRunId="x"), "g.fa", {"rmout": "r.out"}) == {}
+    # EDTA mode: exclude also needs MAKER mask; AnnoTEP: Annotation is enough
+    errs = validate_edta(edta(switches={"anno": True}), "g.fa", {"exclude": "r.bed"})
+    assert "MAKER mask" in errs["files.exclude"]
+    assert validate_edta(edta(switches={"maker": True}), "g.fa", {"exclude": "r.bed"}) == {}
+    assert validate_edta(edta(mode="annotep"), "g.fa", {"exclude": "r.bed"}) == {}
     assert "files.rmout" in validate_edta(edta(switches={"anno": True}), "g.fa", {"rmout": "x.txt"})
     # same sanitized name as the genome
     assert "files.cds" in validate_edta(edta(), "g.fa", {"cds": "g.fa"})
@@ -55,6 +68,9 @@ def test_normalize_switches():
     s = normalize_switches(edta(switches={"runLai": True, "tirFilter": True}))
     assert not s.run_lai and not s.tir_filter
     assert normalize_switches(edta(switches={"evaluate": True})).anno
+    assert normalize_switches(edta(switches={"maker": True})).anno
+    assert normalize_switches(edta(step="anno")).anno
+    assert not normalize_switches(edta(step="final")).anno
 
 
 def test_validate_pan():
@@ -110,3 +126,7 @@ def test_final_message():
     assert final_message_found(ctx, ["EDTA final stage finished!"]) is False
     assert final_message_found(TimelineContext(kind="edta"), ["EDTA final stage finished!"]) is True
     assert final_message_found(TimelineContext(kind="unknown"), []) is None
+    # EDTA with charts ends with the report script; older runs (no charts) do not.
+    charts = TimelineContext(kind="edta", anno=True, charts=True)
+    assert final_message_found(charts, ["TE annotation using the EDTA library has finished!"]) is False
+    assert final_message_found(charts, ["The generation of charts and reports has been completed"]) is True

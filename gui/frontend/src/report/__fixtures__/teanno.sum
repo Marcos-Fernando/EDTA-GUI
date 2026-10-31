@@ -1,0 +1,32 @@
+Repeat Classes
+==============
+Total Sequences: 1
+Total Length: 1000000 bp
+Class                  Count        bpMasked    %masked
+=====                  =====        ========     =======
+LINE                   --           --           --   
+    L1                 2            914          0.09% 
+LTR                    --           --           --   
+    Copia              5            13719        1.37% 
+    Gypsy              15           36604        3.66% 
+TIR                    --           --           --   
+    CACTA              4            8849         0.88% 
+    Mutator            8            9133         0.91% 
+    PIF_Harbinger      7            4609         0.46% 
+    Tc1_Mariner        36           40671        4.07% 
+    hAT                1            4385         0.44% 
+low_complexity         1            355          0.04% 
+nonTIR                 --           --           --   
+    helitron           13           28280        2.83% 
+                      ---------------------------------
+    total interspersed 92           147519       14.75%
+
+---------------------------------------------------------
+Total                  92           147519       14.75%
+
+Repeat Stats
+============
+Total Sequences: 1
+Total Length: 1000000 bp
+      ID               Count      bpMasked      %masked
+================       =====      ========       =======

@@ -15,6 +15,18 @@ const ctx = (over: Partial<TimelineContext> = {}): TimelineContext => ({
 const D = 'Tue Oct  6 11:02:03 -03 2026\t'
 
 describe('stepsFor', () => {
+  it('EDTA with charts: Charts and reports at the end; runs from older versions have none', () => {
+    expect(stepsFor(ctx({ anno: true, charts: true })).map((s) => s.id)).toEqual([
+      'deps',
+      'raw',
+      'filter',
+      'final',
+      'anno',
+      'reports',
+    ])
+    expect(stepsFor(ctx({ anno: true })).map((s) => s.id)).not.toContain('reports')
+  })
+
   it('EDTA without annotation: dependency, raw, filter, final', () => {
     expect(stepsFor(ctx()).map((s) => s.id)).toEqual(['deps', 'raw', 'filter', 'final'])
   })
@@ -134,6 +146,9 @@ describe('expectedFinalMessage', () => {
     expect(expectedFinalMessage(ctx({ anno: true }))?.source).toMatch(/TE annotation using/)
     expect(expectedFinalMessage(ctx({ anno: true, evaluate: true }))?.source).toMatch(/Evaluation/)
     expect(expectedFinalMessage(ctx({ kind: 'annotep' }))?.source).toMatch(/charts and reports/)
+    expect(expectedFinalMessage(ctx({ anno: true, charts: true }))?.source).toMatch(
+      /charts and reports/,
+    )
     expect(
       expectedFinalMessage(ctx({ kind: 'pan' }))?.test(
         'panEDTA annotation of genome_1.cds.list is finished!',

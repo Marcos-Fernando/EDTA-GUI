@@ -4,6 +4,8 @@ import divsumRaw from './__fixtures__/sample.divsum?raw'
 import ageRaw from './__fixtures__/age-copia.txt?raw'
 import nwk from './__fixtures__/all.nwk?raw'
 import clsRaw from './__fixtures__/te.cls.tsv?raw'
+import teannoSum from './__fixtures__/teanno.sum?raw'
+import { parseEdtaSum } from './parse/edtaSum'
 import {
   getChartLabel,
   getGeneralCategories,
@@ -172,5 +174,37 @@ describe('radialTreeSize', () => {
   it('grows the circle with the number of leaves', () => {
     const names = (n: number) => Array.from({ length: n }, (_, i) => `TE_${i}`)
     expect(radialTreeSize(names(700)).size).toBeGreaterThan(radialTreeSize(names(125)).size)
+  })
+})
+
+describe('parseEdtaSum (EDTA TEanno.sum)', () => {
+  it('reads the Repeat Classes block as the TE table tree', () => {
+    const r = parseEdtaSum(teannoSum, 'Col.test.fa')!
+    expect(r.meta).toMatchObject({
+      fileName: 'Col.test.fa',
+      sequences: '1',
+      totalLength: '1000000 bp',
+      totalLengthBp: 1000000,
+      basesMaskedBp: 147519,
+      basesMasked: '147519 bp ( 14.75 %)',
+    })
+    expect(r.tree.map((n) => n.name)).toEqual(['LINE', 'LTR', 'TIR', 'low_complexity', 'nonTIR'])
+    const ltr = r.tree[1]
+    expect(ltr.children.map((c) => [c.name, c.elements, c.lengthBp, c.percentage])).toEqual([
+      ['Copia', 5, 13719, 1.37],
+      ['Gypsy', 15, 36604, 3.66],
+    ])
+    // "--" classes: sums of the subclasses
+    expect(ltr.elements).toBe(20)
+    expect(ltr.lengthBp).toBe(50323)
+    expect(ltr.percentage).toBeCloseTo(5.03, 2)
+    expect(r.tree[3]).toMatchObject({ elements: 1, lengthBp: 355, children: [] })
+    // nothing from "total interspersed" or the Repeat Stats block
+    const all = JSON.stringify(r.tree)
+    expect(all).not.toMatch(/total interspersed|ACCCTAAn/)
+  })
+
+  it('returns null without a Repeat Classes block', () => {
+    expect(parseEdtaSum('not a summary')).toBeNull()
   })
 })

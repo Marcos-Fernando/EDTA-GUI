@@ -32,6 +32,9 @@ export const MODES: readonly ModeDef[] = [
 /** AnnoTEP report script, run after EDTA.pl succeeds (bash, per its shebang). */
 export const ANNOTEP_REPORT_SCRIPT = 'AnnoTEP/Scripts/generate_PLOTs-for-TE-pipe.sh'
 
+/** EDTA charts script, run after EDTA.pl when Annotation is on (same REPORT/ folder). */
+export const EDTA_REPORT_SCRIPT = 'AnnoTEP/Scripts/generate_PLOTs-for-EDTA.sh'
+
 export const SPECIES_OPTIONS: readonly { value: Species; label: string }[] = [
   { value: 'others', label: 'others' },
   { value: 'rice', label: 'rice' },
@@ -59,6 +62,8 @@ export const SWITCHES: readonly SwitchDef[] = [
   { key: 'sensitive', label: 'Sensitivity', flag: '--sensitive', modes: ['edta', 'annotep'] },
   { key: 'anno', label: 'Annotation', flag: '--anno', modes: ['edta', 'annotep'] },
   { key: 'evaluate', label: 'Evaluate', flag: '--evaluate', modes: ['edta', 'annotep'] },
+  // --maker exists only in the root EDTA.pl (v2.3); AnnoTEP always writes MAKER.masked.
+  { key: 'maker', label: 'MAKER mask', flag: '--maker', modes: ['edta'] },
   { key: 'force', label: 'Force', flag: '--force', modes: ['edta', 'annotep'] },
   { key: 'tirFilter', label: 'TIR filter', flag: '--TIR_filter', modes: ['annotep'] },
   { key: 'annotType', label: 'Annot. type', flag: '--ANNOT_TYPE', modes: ['annotep'] },
@@ -74,6 +79,8 @@ export interface ExtraFileDef {
   placeholder: string
   /** Requires the Annotation switch. */
   requiresAnno: boolean
+  /** EDTA mode: also requires MAKER mask (the file only affects MAKER.masked). */
+  requiresMaker: boolean
 }
 
 export const EXTRA_FILES: readonly ExtraFileDef[] = [
@@ -84,6 +91,7 @@ export const EXTRA_FILES: readonly ExtraFileDef[] = [
     extensions: FASTA_EXTENSIONS,
     placeholder: '.fasta .fa',
     requiresAnno: false,
+    requiresMaker: false,
   },
   {
     key: 'curatedlib',
@@ -92,6 +100,7 @@ export const EXTRA_FILES: readonly ExtraFileDef[] = [
     extensions: [],
     placeholder: 'none selected',
     requiresAnno: false,
+    requiresMaker: false,
   },
   {
     key: 'exclude',
@@ -100,6 +109,7 @@ export const EXTRA_FILES: readonly ExtraFileDef[] = [
     extensions: ['.bed'],
     placeholder: '.bed',
     requiresAnno: true,
+    requiresMaker: true,
   },
   {
     key: 'rmlib',
@@ -108,6 +118,7 @@ export const EXTRA_FILES: readonly ExtraFileDef[] = [
     extensions: [],
     placeholder: 'none selected',
     requiresAnno: false,
+    requiresMaker: false,
   },
   {
     key: 'rmout',
@@ -116,8 +127,28 @@ export const EXTRA_FILES: readonly ExtraFileDef[] = [
     extensions: ['.out'],
     placeholder: '.out',
     requiresAnno: true,
+    requiresMaker: false,
   },
 ]
+
+/** Run name: the new run folder is <name>_<YYYYmmdd-HHMMSS>; empty = genome name. */
+export const RUN_NAME = {
+  label: 'Run name',
+  maxLength: 80,
+  /** Same characters as the run folders (no spaces, no leading '.', '_' or '-'). */
+  pattern: /^[A-Za-z0-9][A-Za-z0-9._-]*$/,
+} as const
+
+/**
+ * "Run test analysis" button: chromosome 1 of Arabidopsis thaliana (repository test/ folder,
+ * downloaded from the server). Same genome in both modes, which both end with charts.
+ */
+export const TEST_RUN = {
+  genome: 'TAIR10_chr1.fa',
+  runName: 'Test_genome',
+  /** Measured with 10 threads (fewer threads take longer). */
+  duration: { edta: 'about 1 hour', annotep: 'about 1 h 20 min' },
+} as const
 
 /** Numeric parameters: defaults are omitted from the command, as in the legacy GUI. */
 export const PARAMS = {

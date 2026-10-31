@@ -109,6 +109,7 @@ export class HttpPipelineService implements PipelineService {
       JSON.stringify({
         mode: cfg.mode,
         email: cfg.email,
+        runName: cfg.runName,
         species: cfg.species,
         step: cfg.step,
         previousRunId: cfg.previousRunId,
@@ -209,6 +210,25 @@ export class HttpPipelineService implements PipelineService {
     }
     if (!res.ok) throw new ServiceError(`Cannot read ${path} (HTTP ${res.status}).`)
     return res.text()
+  }
+
+  async loadTestFile(name: string): Promise<File> {
+    let res: Response
+    try {
+      res = await this.fetchFn(`${this.api}/test-data/${encodeURIComponent(name)}`)
+    } catch {
+      throw new ServiceError('Cannot reach the backend. Check that the server is running.')
+    }
+    if (!res.ok) {
+      let message = `Cannot load the test file ${name} (HTTP ${res.status}).`
+      try {
+        message = ((await res.json()) as ErrorBody).message ?? message
+      } catch {
+        /* not JSON */
+      }
+      throw new ServiceError(message)
+    }
+    return new File([await res.arrayBuffer()], name)
   }
 
   fileUrl(runId: string, path: string, inline = false): string {

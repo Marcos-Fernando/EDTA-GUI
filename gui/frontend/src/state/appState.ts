@@ -35,18 +35,24 @@ export interface AppState {
 export type Action =
   | { type: 'theme/set'; theme: Theme }
   | { type: 'edta/mode'; mode: PipelineMode }
-  | { type: 'edta/text'; field: 'email' | 'mutationRate' | 'maxDiv' | 'threads'; value: string }
+  | {
+      type: 'edta/text'
+      field: 'email' | 'runName' | 'mutationRate' | 'maxDiv' | 'threads'
+      value: string
+    }
   | { type: 'edta/genome'; file: File | null }
   | { type: 'edta/species'; value: Species }
   | { type: 'edta/step'; value: Step }
   | { type: 'edta/previousRun'; runId: string | null }
   | { type: 'edta/switch'; key: SwitchKey; value: boolean }
   | { type: 'edta/file'; key: ExtraFileKey; file: File | null }
+  | { type: 'edta/replace'; state: EdtaFormState }
   | { type: 'pan/text'; field: 'email' | 'threads' | 'copies'; value: string }
   | { type: 'pan/addPair' }
   | { type: 'pan/removePair'; id: string }
   | { type: 'pan/pairFile'; id: string; field: 'genome' | 'cds'; file: File | null }
   | { type: 'pan/file'; field: 'cds' | 'library'; file: File | null }
+  | { type: 'pan/replace'; state: PanFormState }
   | { type: 'run/active'; page: RunPage; runId: string | null }
 
 export function initialAppState(theme: Theme): AppState {
@@ -82,6 +88,8 @@ export function appReducer(state: AppState, action: Action): AppState {
       return edta(setSwitch(state.edta, action.key, action.value))
     case 'edta/file':
       return edta(setExtraFile(state.edta, action.key, action.file))
+    case 'edta/replace':
+      return edta(action.state)
     case 'pan/text':
       return pan({ ...state.pan, [action.field]: action.value })
     case 'pan/addPair':
@@ -92,6 +100,8 @@ export function appReducer(state: AppState, action: Action): AppState {
       return pan(setPanPairFile(state.pan, action.id, action.field, action.file))
     case 'pan/file':
       return pan({ ...state.pan, [action.field]: action.file })
+    case 'pan/replace':
+      return pan(action.state)
     case 'run/active':
       return {
         ...state,

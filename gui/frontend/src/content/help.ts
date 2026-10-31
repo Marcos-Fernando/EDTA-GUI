@@ -77,6 +77,22 @@ export const HELP = {
           'Use the "Browse" button to select the file from the local system.',
       ),
       p(FASTA_HEADER_NOTE),
+      h('Run name'),
+      p(
+        'Optional name of the results folder. The date and time are always added, as in ' +
+          '"TAIR10_test_20261031-102519". If left empty, the genome name is used. Use letters, ' +
+          'numbers, ".", "_" or "-", without spaces. When continuing a previous run (Steps to ' +
+          'run other than "all"), its folder is kept and the field is hidden.',
+      ),
+      h('Run test analysis'),
+      p(
+        'Checks the installation with chromosome 1 of Arabidopsis thaliana (TAIR10_chr1.fa, ' +
+          '30 Mb, from the test/ folder of the repository), in the selected mode. After a ' +
+          'confirmation, the form is filled in (run name "Test_genome", Sensitivity and ' +
+          'Annotation on, so the charts are made) and the run starts. The e-mail and the number ' +
+          'of threads are kept. With 10 threads it takes about 1 hour in EDTA mode and about ' +
+          '1 h 20 min in AnnoTEP mode.',
+      ),
     ],
   },
 
@@ -184,13 +200,20 @@ export const HELP = {
           term: 'Annotation',
           text:
             'Specify whether the genome-wide annotation of TEs should proceed after building ' +
-            'the TE library.',
+            'the TE library. In EDTA mode it also enables the charts and reports (REPORT/).',
         },
         {
           term: 'Evaluate',
           text:
             'Check if the classification of annotated TEs is consistent. Enabling it also ' +
             'enables "Annotation".',
+        },
+        {
+          term: 'MAKER mask',
+          text:
+            'Also write a lightly masked genome (MAKER.masked) for gene annotation with MAKER. ' +
+            'Only long, low-divergence TEs are masked. Enabling it also enables "Annotation". ' +
+            'In AnnoTEP mode this file is always written.',
         },
         {
           term: 'Force',
@@ -245,8 +268,8 @@ export const HELP = {
         {
           term: 'Exclusion of masked regions',
           text:
-            'Regions (BED) to be ignored during TE masking. "Annotation" must be enabled to use ' +
-            'this option.',
+            'Regions (BED), such as known genes, left unmasked in the MAKER.masked genome. ' +
+            '"Annotation" must be enabled to use this option, and in EDTA mode also "MAKER mask".',
         },
         {
           term: 'RepeatModeler library',
@@ -279,6 +302,14 @@ export const HELP = {
           'an added row.',
       ),
       p(FASTA_HEADER_NOTE),
+      h('Run test analysis'),
+      p(
+        'Checks the installation with the panEDTA toy example of EDTA: Col.test.fa (with ' +
+          'genome.cds.fa) and Ler.test.fa, CDS genome.cds.fa and the library ' +
+          'athrep.updated.nonredun.fasta, from the test/ and database/ folders of the ' +
+          'repository. After a confirmation, the form is filled in and the run starts. The ' +
+          'e-mail and the number of threads are kept. With 10 threads it takes about 5 min.',
+      ),
     ],
   },
 
@@ -342,7 +373,8 @@ export const HELP = {
         {
           term: 'EDTA',
           text:
-            '"Evaluation of TE annotation finished!" (or the last step you enabled), or ' +
+            '"The generation of charts and reports has been completed" with "Annotation" on, ' +
+            'or "EDTA final stage finished!" without it; ' +
             '"panEDTA annotation of genome_<date>.cds.list is finished!" for panEDTA.',
         },
         { term: 'AnnoTEP', text: '"The generation of charts and reports has been completed".' },

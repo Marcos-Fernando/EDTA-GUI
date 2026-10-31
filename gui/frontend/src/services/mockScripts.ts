@@ -113,9 +113,11 @@ export function edtaScript(cfg: EdtaRunConfig, genome: string): MockScript {
       )
     }
   }
-  if (annotep) {
+  if (anno) {
     lines.push(
-      '################## AnnoTEP annotation completed successfully ##################',
+      annotep
+        ? '################## AnnoTEP annotation completed successfully ##################'
+        : '################## EDTA annotation completed successfully #####################',
       ' ',
       '################## Starting report and chart generation #######################',
       `processing the genome: ${genome}`,

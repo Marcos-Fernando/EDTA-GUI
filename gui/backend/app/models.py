@@ -25,6 +25,7 @@ class Switches(StrictCamelModel):
     sensitive: bool = False
     anno: bool = False
     evaluate: bool = False
+    maker: bool = False
     force: bool = False
     tir_filter: bool = False
     annot_type: bool = False
@@ -36,6 +37,8 @@ class EdtaConfigIn(StrictCamelModel):
 
     mode: PipelineMode
     email: str | None = None
+    # Name of the new run folder (<name>_<YYYYmmdd-HHMMSS>); None = genome name.
+    run_name: str | None = None
     species: Species = "others"
     step: Step = "all"
     previous_run_id: str | None = None
@@ -60,6 +63,8 @@ class TimelineContext(CamelModel):
     anno: bool = False
     evaluate: bool = False
     run_lai: bool = False
+    # EDTA runs with the charts step (REPORT/). Absent in runs from older versions.
+    charts: bool = False
 
 
 class RunSummary(CamelModel):

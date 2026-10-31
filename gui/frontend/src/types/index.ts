@@ -8,7 +8,15 @@ export type Species = 'others' | 'rice' | 'maize'
 export type Step = 'all' | 'filter' | 'final' | 'anno'
 
 export type SwitchKey =
-  'overwrite' | 'sensitive' | 'anno' | 'evaluate' | 'force' | 'tirFilter' | 'annotType' | 'runLai'
+  | 'overwrite'
+  | 'sensitive'
+  | 'anno'
+  | 'evaluate'
+  | 'maker'
+  | 'force'
+  | 'tirFilter'
+  | 'annotType'
+  | 'runLai'
 
 export type ExtraFileKey = 'cds' | 'curatedlib' | 'exclude' | 'rmlib' | 'rmout'
 
@@ -17,6 +25,8 @@ export interface EdtaFormState {
   mode: PipelineMode
   email: string
   genome: File | null
+  /** Name of the new run folder (<name>_<date-time>); empty = genome name. */
+  runName: string
   species: Species
   step: Step
   /** Run folder reused when step ≠ all. */
@@ -34,6 +44,8 @@ export interface EdtaRunConfig {
   email: string | null
   /** May be null only when reusing a previous run (its genome copy is used). */
   genome: File | null
+  /** null = genome name; always null when reusing a previous run. */
+  runName: string | null
   species: Species
   step: Step
   previousRunId: string | null
@@ -118,4 +130,6 @@ export interface TimelineContext {
   anno: boolean
   evaluate: boolean
   runLai: boolean
+  /** EDTA runs with the charts step (REPORT/). Absent in runs from older versions. */
+  charts?: boolean
 }

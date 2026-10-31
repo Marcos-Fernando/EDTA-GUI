@@ -1,0 +1,8 @@
+.block {
+  display: grid;
+  justify-items: start;
+  gap: var(--s-2);
+  padding-bottom: var(--s-5);
+  margin-bottom: var(--s-5);
+  border-bottom: 1px solid var(--line);
+}
