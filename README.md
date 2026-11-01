@@ -153,6 +153,14 @@ The image already contains everything: the pipelines, the conda environments and
 | `EDTA_GUI_PORT` | `8000` | Port of the interface (`EDTA_GUI_PORT=8080 bash start.sh` → http://localhost:8080) |
 | `EDTA_GUI_PIDS_LIMIT` | `300000` | Process limit of the container. Use threads × 10 000 when running with more than 30 threads |
 
+Example: results on a larger disk, port 8080 and up to 40 threads:
+```sh
+EDTA_GUI_RESULTS=/mnt/storage/results EDTA_GUI_PORT=8080 EDTA_GUI_PIDS_LIMIT=400000 bash start.sh
+bash start.sh logs     # follow the server messages (Ctrl+C to leave)
+bash start.sh stop     # stop the interface
+```
+The variables are not saved: give them again with `bash start.sh` or `bash start.sh update`, or the defaults are used.
+
 The interface only accepts connections from your own computer: other machines on the network cannot open it.
 
 #### Docker commands and file paths
@@ -376,6 +384,7 @@ panEDTA -g genomes.list -c cds.fa -t 10
 * No `conda activate` is needed: each command uses its environment (`EDTAgui` for EDTA and panEDTA, `annotepgui_3_11` for AnnoTEP).
 * The options are passed unchanged. Without options, each command shows the original help (`EDTA --help`, `AnnoTEP --help`, `panEDTA`).
 * Long runs keep going after the terminal is closed when started with `nohup`, for example `nohup AnnoTEP --genome genome.fa ... > AnnoTEP.log 2>&1 &` (follow it with `tail -f AnnoTEP.log`).
+* Step-by-step guide for AnnoTEP, with the traditional way (`conda activate` and `EDTA.pl`) and the automated one: [AnnoTEP/README.md](AnnoTEP/README.md).
 * `EDTA` and `AnnoTEP` also generate the charts and reports in `REPORT/` at the end, when the run includes the genome-wide annotation (`--anno 1`). For EDTA, LTRs are classified down to superfamily (Copia, Gypsy), so the charts show no lineages.
 
 **Interface fields → command-line options** (help of each option: `EDTA --help` or `AnnoTEP --help`):
