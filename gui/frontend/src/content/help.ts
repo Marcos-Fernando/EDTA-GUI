@@ -242,7 +242,8 @@ export const HELP = {
           term: 'Run LAI',
           text:
             'LAI calculations must be performed on haploid assemblies. If you have a diploid ' +
-            'or polyploid genome, we recommend disabling this option.',
+            'or polyploid genome, disable this option: on haplotype-phased assemblies, this ' +
+            'step can run for days and use up all the memory of the server.',
         },
       ),
     ],

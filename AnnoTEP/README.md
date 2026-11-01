@@ -132,6 +132,8 @@ tail -f AnnoTEP.log
 > <br>
 > 📌 <b>Enhancing genome analysis with mutation rate - </b> For a more refined analysis of TE insertion age, we recommend setting the mutation rate using the ``-u <float>``parameter. Suggested values and detailed explanations can be found in the Genome section of the [AnnoTEP](https://plantgenomics.ncc.unesp.br/AnnoTEP-DB/). <br>
 > <br>
+> 📌 <b>Diploid or polyploid genomes - </b> Add ``--run_LAI 0``. The LAI (LTR Assembly Index) is only valid for haploid assemblies, and it is calculated by default. On haplotype-phased assemblies (all copies of each chromosome in the FASTA), this step can run for days and use up all the memory of the server.
+> <br>
 > 📌 <b>Redoing part of the analysis - </b> Run again in the same folder with ``--step`` (`filter`, `final` or `anno`) to restart from a specific step.
 >
 

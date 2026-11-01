@@ -507,6 +507,7 @@ Open http://127.0.0.1:8000 and stop it with Ctrl+C. On a remote server, open a t
 | RepeatMasker error about a long sequence identifier (`max id length = 50`) | The Docker image and `install.sh` already accept names up to 80 characters. For longer names, shorten the FASTA headers (e.g. `>chr01`). |
 | The browser does not show notifications | Open the interface through `http://localhost:8000`, not through the machine IP. |
 | The run stays many hours in the LINE step | Usually not an error: see below. |
+| AnnoTEP stays for days at "Performing LAI:", with memory use growing (diploid or polyploid genome) | The LAI is only valid for haploid assemblies. Stop the run and start it again with **Run LAI** off (`--run_LAI 0` on the command line). |
 
 **Long LINE step.** The LINE step runs RepeatModeler2, the slowest part of EDTA, and the log does not change while it runs. The complete *A. thaliana* genome took 5h35 in this step on a 6-core desktop; on a laptop, 12–20 hours is normal. RepeatModeler works in rounds over larger and larger samples of the genome, and each round takes about 3 times the previous one. To check the progress (Docker paths):
 ```sh
