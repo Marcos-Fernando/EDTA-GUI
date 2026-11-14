@@ -18,14 +18,10 @@
 > * **New libraries in `database/`:** `rice7.0.1.liban` (replaces `rice7.0.0.liban`) and `maizeTE11082026` (replaces `maizeTE02052020`). If you give one of the old names with `--curatedlib`, change it to the new one;
 > * **Files in `REPORT/`:** the TE tables are now `TEs-report-lite.tbl` and `TEs-report-complete.tbl`. In the AnnoTEP mode, the divergence plots are also saved as PNG (`divergence_plot.png`, `divergence_plot2.png` and `divergence_plot3.png`). Runs made before this update still open in the interface;
 > * **Docker image `annotep/edta-gui:v2.0.1`:** download the new `start.sh` and run `bash start.sh update`.
-
-> [!NOTE]
-> **Update (October 2026), EDTA-GUI 2.0:**
 > * **New interface:** live timeline and log, a queue for several runs, interactive report and results page. Details in [What is new in version 2.0](#what-is-new-in-version-20);
 > * **EDTA also makes charts and reports** (`REPORT/`), as AnnoTEP does, when Annotation is on;
 > * **Run test analysis** button in the interface: fills in the form with the test data and starts the run;
 > * **Automation by scripts:** `install.sh` sets up everything at once, and the `EDTA`, `AnnoTEP` and `panEDTA` commands run from any folder, without `conda activate`;
-> * **One Docker image for everything:** instead of two images, `annotep/edta-gui:v2.0.1` runs both the interface (started with a single script, `start.sh`) and the command line (`docker run ... AnnoTEP`, `EDTA` or `panEDTA`). If you already use it, download the new `start.sh` and run `bash start.sh update`.
 
 ## Table of Contents
   - [Introduction](#introduction)
