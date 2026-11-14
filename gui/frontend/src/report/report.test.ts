@@ -151,6 +151,16 @@ describe('buildReport', () => {
     expect(m.sizes['TAIR10_chr1.fa.mod.EDTA.TEanno.gff3']).toBe(5000)
   })
 
+  it('finds the tables under the current names (TEs-report-*.tbl)', () => {
+    const m = buildReport([f('REPORT/TEs-report-lite.tbl'), f('REPORT/TEs-report-complete.tbl')])
+    expect(m.liteTable).toBe('REPORT/TEs-report-lite.tbl')
+    expect(m.completeTable).toBe('REPORT/TEs-report-complete.tbl')
+    expect(m.reportTables.map((d) => d.label)).toEqual([
+      'TE classification, complete table',
+      'TE classification, simplified table',
+    ])
+  })
+
   it('panEDTA: one group per genome, pan library last, backups skipped', () => {
     const m = buildReport([
       f('genome_1.cds.list.panEDTA.TElib.fa'),

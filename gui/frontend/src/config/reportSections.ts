@@ -166,8 +166,8 @@ export function buildReport(files: RunFile[]): ReportManifest {
   )
 
   const reportTables = [
-    [/^REPORT\/[^/]+-COMPLETE\.tbl$/, 'TE classification, complete table'],
-    [/^REPORT\/[^/]+-LITE\.tbl$/, 'TE classification, simplified table'],
+    [/^REPORT\/[^/]+-complete\.tbl$/i, 'TE classification, complete table'],
+    [/^REPORT\/[^/]+-lite\.tbl$/i, 'TE classification, simplified table'],
     [/^REPORT\/[^/]+\.divsum$/, 'Divergence summary (RepeatMasker .divsum)'],
     [/^REPORT\/TREE\/all\.nwk$/, 'LTR tree (Newick)'],
     [/^REPORT\/TREE\/TE\.cls\.tsv$/, 'LTR classification (TEsorter)'],
@@ -179,8 +179,8 @@ export function buildReport(files: RunFile[]): ReportManifest {
     .filter((d): d is ReportDownload => d !== null)
 
   return {
-    liteTable: first(paths, /^REPORT\/[^/]+-LITE\.tbl$/),
-    completeTable: first(paths, /^REPORT\/[^/]+-COMPLETE\.tbl$/),
+    liteTable: first(paths, /^REPORT\/[^/]+-lite\.tbl$/i),
+    completeTable: first(paths, /^REPORT\/[^/]+-complete\.tbl$/i),
     divsum: first(paths, /^REPORT\/[^/]+\.divsum$/),
     landscapeHtml: first(paths, /^REPORT\/RepeatLandscape\.html$/),
     chromosomePdf: first(paths, /^REPORT\/chromosome_density_plots\.pdf$/),

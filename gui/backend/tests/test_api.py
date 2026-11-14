@@ -33,7 +33,7 @@ def tree_hash(root: Path) -> str:
 
 def test_health(ctx: Ctx):
     body = ctx.client.get("/api/health").json()
-    assert body["version"] == "0.1.0"
+    assert body["version"] == "2.0.1"
     assert body["condaEnvs"] == {"edta": "EDTAgui", "annotep": "annotepgui_3_11"}
     assert body["resultsDirWritable"] is True
     assert body["condaFound"] is False and body["status"] == "degraded"

@@ -1,7 +1,7 @@
 # EDTA-GUI / AnnoTEP: web interface (React) + API (FastAPI) + pipelines, in one image.
 #
 # Users:        gui/start.sh (downloads the published image, or builds it locally).
-# Maintainers:  gui/publish.sh v2.0 (builds and pushes annotep/edta-gui:v2.0).
+# Maintainers:  gui/publish.sh v2.0.1 (builds and pushes annotep/edta-gui:v2.0.1).
 # Manual build, from the REPOSITORY ROOT (the pipelines live there):
 #   docker build -f gui/Dockerfile -t annotep/edta-gui:dev .
 # See README.md (Docker sections).

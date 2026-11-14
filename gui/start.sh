@@ -19,7 +19,7 @@ set -euo pipefail
 cd "$(dirname "$0")"
 PORT="${EDTA_GUI_PORT:-8000}"
 # Same default as compose.yaml
-IMAGE="${EDTA_GUI_IMAGE:-annotep/edta-gui:v2.0}"
+IMAGE="${EDTA_GUI_IMAGE:-annotep/edta-gui:v2.0.1}"
 URL="http://localhost:${PORT}"
 
 say() { printf '\n\033[1m%s\033[0m\n' "$*"; }
@@ -195,7 +195,7 @@ name: edta-gui
 
 services:
   edta-gui:
-    image: ${EDTA_GUI_IMAGE:-annotep/edta-gui:v2.0}
+    image: ${EDTA_GUI_IMAGE:-annotep/edta-gui:v2.0.1}
     pull_policy: missing
     container_name: edta-gui
     # Results belong to the user of this machine, not to root.

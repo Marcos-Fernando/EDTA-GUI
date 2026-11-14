@@ -136,7 +136,7 @@ function Report({
   const [ageMode, setAgeMode] = useMode(!!(copiaPath || gypsyPath))
   const [treeMode, setTreeMode] = useMode(!!treePath && !treeTooBig)
 
-  // EDTA summary per genome (panEDTA, or EDTA without REPORT/): same table as LITE.tbl
+  // EDTA summary per genome (panEDTA, or EDTA without REPORT/): same table as TEs-report-lite.tbl
   const sumGenomes = m.genomes.filter((g) => g.teSum)
   const genome = sumGenomes[Math.min(genomeIdx, sumGenomes.length - 1)] ?? null
   const teSum = useRunText(

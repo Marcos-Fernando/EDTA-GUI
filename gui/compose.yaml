@@ -10,7 +10,7 @@ services:
   edta-gui:
     # Published image (Docker Hub). Without internet, or before it is published, ./start.sh
     # builds the same image locally from the build section below.
-    image: ${EDTA_GUI_IMAGE:-annotep/edta-gui:v2.0}
+    image: ${EDTA_GUI_IMAGE:-annotep/edta-gui:v2.0.1}
     pull_policy: missing
     build:
       context: ..

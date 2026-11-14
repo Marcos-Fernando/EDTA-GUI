@@ -9,7 +9,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 GUI_DIR = BACKEND_DIR.parent
 
-VERSION = "0.1.0"
+VERSION = "2.0.1"
 
 
 class Settings(BaseSettings):

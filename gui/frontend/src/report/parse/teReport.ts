@@ -1,5 +1,6 @@
 /**
- * RepeatMasker TE table (REPORT/*-LITE.tbl, *-COMPLETE.tbl) as a tree.
+ * RepeatMasker TE table (REPORT/TEs-report-lite.tbl, TEs-report-complete.tbl; older runs:
+ * *-LITE.tbl, *-COMPLETE.tbl) as a tree.
  * Adapted from AnnoTEPDB_v2 (src/pages/genomes/components/tereports/parseTEReport.ts).
  */
 

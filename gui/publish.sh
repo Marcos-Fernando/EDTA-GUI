@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # For maintainers only: build the image and send it to Docker Hub.
 #
-#   ./publish.sh v2.0            build annotep/edta-gui:v2.0 and ask before pushing
-#   ./publish.sh v2.0 --latest   also tag and push it as annotep/edta-gui:latest
+#   ./publish.sh v2.0.1          build annotep/edta-gui:v2.0.1 and ask before pushing
+#   ./publish.sh v2.0.1 --latest also tag and push it as annotep/edta-gui:latest
 #
 # Before pushing: docker login (account with access to the "annotep" organization).
 # After publishing a NEW version, update the default tag in compose.yaml and start.sh.
@@ -15,7 +15,7 @@ say() { printf '\n\033[1m%s\033[0m\n' "$*"; }
 fail() { printf '\n\033[1;31m%s\033[0m\n' "$*" >&2; exit 1; }
 
 VERSION="${1:-}"
-[[ "$VERSION" =~ ^v[0-9]+(\.[0-9]+)*$ ]] || fail "Usage: ./publish.sh v2.0 [--latest]"
+[[ "$VERSION" =~ ^v[0-9]+(\.[0-9]+)*$ ]] || fail "Usage: ./publish.sh v2.0.1 [--latest]"
 LATEST=false
 [ "${2:-}" = "--latest" ] && LATEST=true
 
