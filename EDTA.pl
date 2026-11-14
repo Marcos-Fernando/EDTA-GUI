@@ -8,7 +8,7 @@ use Pod::Usage;
 use POSIX qw(strftime);
 use Cwd qw(abs_path);
 
-my $version = "v2.3.3";
+my $version = "v2.3.5";
 #v1.0 05/31/2019
 #v1.1 06/05/2019
 #v1.2 06/16/2019
@@ -27,6 +27,8 @@ my $version = "v2.3.3";
 #v2.3.1 05/10/2026
 #v2.3.2 07/10/2026
 #v2.3.3 08/31/2026
+#v2.3.4 11/01/2026
+#v2.3.5 11/09/2026
 
 print "
 #########################################################
@@ -55,7 +57,9 @@ perl EDTA.pl [options]
 	--overwrite [0|1]	If previous raw TE results are found, decide to overwrite
 				(1, rerun) or not (0, default).
 	--cds [File]	Provide a FASTA file containing the coding sequence (no introns,
-			UTRs, nor TEs) of this genome or its close relative.
+			UTRs, nor TEs) of this genome or its close relative. CDS-matching
+			parts of DNA TEs and unclassified repeats are removed from the
+			library; LTR, LINE and SINE entries are kept whole.
 	--curatedlib [File]	Provided a curated library to keep consistant naming and
 				classification for known TEs. TEs in this file will be
 				trusted 100%, so please ONLY provide MANUALLY CURATED ones.
@@ -130,11 +134,11 @@ my $count_base = "$script_path/bin/count_base.pl";
 my $make_masked = "$script_path/bin/make_masked.pl";
 my $make_gff3 = "$script_path/bin/make_gff3_with_RMout.pl";
 my $protlib = "$script_path/database/alluniRefprexp082813";
-my $rice_LTR = "$script_path/database/rice7.0.0.liban.LTR";
-my $rice_SINE = "$script_path/database/rice7.0.0.liban.SINE";
-my $rice_LINE = "$script_path/database/rice7.0.0.liban.LINE";
-my $rice_TIR = "$script_path/database/rice7.0.0.liban.TIR";
-my $rice_helitron = "$script_path/database/rice7.0.0.liban.Helitron";
+my $rice_LTR = "$script_path/database/rice7.0.1.liban.LTR";
+my $rice_SINE = "$script_path/database/rice7.0.1.liban.SINE";
+my $rice_LINE = "$script_path/database/rice7.0.1.liban.LINE";
+my $rice_TIR = "$script_path/database/rice7.0.1.liban.TIR";
+my $rice_helitron = "$script_path/database/rice7.0.1.liban.Helitron";
 my $rename_TE = "$script_path/bin/rename_TE.pl";
 my $update_LTRbound = "$script_path/bin/update_LTRbound.pl";
 my $ltrbound_denovo = "$script_path/bin/ltrbound_denovo.py";
@@ -171,7 +175,6 @@ my $TEsorter = "";
 my $blastplus = "";
 my $mdust = "";
 my $trf = "";
-my $GRF = "";
 my $annosine = "";
 my $TIR_Learner = "";
 
@@ -353,16 +356,10 @@ $mdust =~ s/\s+$//;
 $mdust = dirname($mdust) unless -d $mdust;
 $mdust = "$mdust/" if $mdust ne '' and $mdust !~ /\/$/;
 die "Error: mdust is not found in the mdust path $mdust!\n" unless -X "${mdust}mdust";
-# trf
+# trf (LTR_retriever and cleanup_tandem.pl run it; an exit-status test here never caught a missing trf)
 chomp ($trf=`command -v trf 2>/dev/null`) if $trf eq '';
 $trf=~s/\n$//;
-`$trf 2>/dev/null`;
-die "Error: Tandem Repeat Finder is not found in the TRF path $trf!\n" if $?==32256;
-# GRF
-chomp ($GRF = `command -v grf-main 2>/dev/null`) if $GRF eq '';
-$GRF =~ s/\n$//;
-`$GRF 2>/dev/null`;
-die "Error: The Generic Repeat Finder (GRF) is not found in the GRF path: $GRF\n" if $?==32256;
+die "Error: Tandem Repeat Finder is not found in the TRF path $trf!\n" unless -f $trf and -X $trf;
 
 print "\tAll passed!\n\n";
 exit if $check_dependencies;
@@ -506,18 +503,20 @@ chomp ($date = `date`);
 print "$date\tObtain raw TE libraries using various structure-based programs: \n";
 
 # Get raw TE candidates
-`perl $EDTA_raw --genome $genome --overwrite $overwrite --species $species --u $miu --threads $threads --genometools $genometools --ltrretriever $LTR_retriever --blastplus $blastplus --tesorter $TEsorter --GRF $GRF --trf_path $trf --repeatmasker $repeatmasker --repeatmodeler $repeatmodeler --annosine $annosine --tirlearner $TIR_Learner --convert_seq_name 0 --rmlib $RMlib --wholeelement $wholeelement`;
+`perl $EDTA_raw --genome $genome --overwrite $overwrite --species $species --u $miu --threads $threads --genometools $genometools --ltrretriever $LTR_retriever --blastplus $blastplus --tesorter $TEsorter --trf_path $trf --repeatmasker $repeatmasker --repeatmodeler $repeatmodeler --annosine $annosine --tirlearner $TIR_Learner --convert_seq_name 0 --rmlib $RMlib --wholeelement $wholeelement`;
+die "ERROR: EDTA_raw.pl exited with error. See the messages above; fix the problem and rerun with --overwrite 0 to reuse finished modules.\n" if $?;
 
-chdir "$genome.EDTA.raw";
+chdir "$genome.EDTA.raw" or die "ERROR: cannot enter $genome.EDTA.raw: $!\n";
 
-# Force to use rice TEs when raw.fa is empty
+# Force to use rice TEs when raw.fa is empty. The rice headers carry notes and a strand tag after the name;
+# the raw stage gets bare names.
 if ($force eq 1){
-	`cp $rice_LTR $genome.LTR.raw.fa` unless -s "$genome.LTR.raw.fa";
-	`cp $rice_LTR $genome.LTR.intact.raw.fa` unless -s "$genome.LTR.intact.raw.fa";
-	`cp $rice_LINE $genome.LINE.raw.fa` unless -s "$genome.LINE.raw.fa";
-	`cp $rice_SINE $genome.SINE.raw.fa` unless -s "$genome.SINE.raw.fa";
-	`cp $rice_TIR $genome.TIR.intact.raw.fa` unless -s "$genome.TIR.intact.raw.fa";
-	`cp $rice_helitron $genome.Helitron.intact.raw.fa` unless -s "$genome.Helitron.intact.raw.fa";
+	copy_names($rice_LTR, "$genome.LTR.raw.fa") unless -s "$genome.LTR.raw.fa";
+	copy_names($rice_LTR, "$genome.LTR.intact.raw.fa") unless -s "$genome.LTR.intact.raw.fa";
+	copy_names($rice_LINE, "$genome.LINE.raw.fa") unless -s "$genome.LINE.raw.fa";
+	copy_names($rice_SINE, "$genome.SINE.raw.fa") unless -s "$genome.SINE.raw.fa";
+	copy_names($rice_TIR, "$genome.TIR.intact.raw.fa") unless -s "$genome.TIR.intact.raw.fa";
+	copy_names($rice_helitron, "$genome.Helitron.intact.raw.fa") unless -s "$genome.Helitron.intact.raw.fa";
 	}
 
 # check results and report status
@@ -561,12 +560,13 @@ print "$date\tPerform EDTA advance filtering for raw TE candidates and generate 
 if (-s "$genome.EDTA.combine/$genome.EDTA.fa.stg1" and $overwrite == 0){
 	print "$date\tExisting stage 1 library $genome.EDTA.combine/$genome.EDTA.fa.stg1 found!\n\t\tWill keep this file without rerunning this module.\n\t\tPlease specify --overwrite 1 if you want to rerun this module.\n\n";
 	} else {
+	encode_ids(map "$genome.EDTA.raw/$genome.$_.fa", qw(LTR.raw LTR.intact.raw LINE.raw SINE.raw TIR.intact.raw Helitron.intact.raw));
 `perl $EDTA_process -genome $genome -ltr $genome.EDTA.raw/$genome.LTR.raw.fa -ltrint $genome.EDTA.raw/$genome.LTR.intact.raw.fa -line $genome.EDTA.raw/$genome.LINE.raw.fa -sine $genome.EDTA.raw/$genome.SINE.raw.fa -tir $genome.EDTA.raw/$genome.TIR.intact.raw.fa -helitron $genome.EDTA.raw/$genome.Helitron.intact.raw.fa -repeatmasker $repeatmasker -blast $blastplus -threads $threads`;
 	}
 
 # check results, remove intermediate files, and report status
 die "ERROR: Stage 1 library not found in $genome.EDTA.combine/$genome.EDTA.fa.stg1" unless -s "$genome.EDTA.combine/$genome.EDTA.fa.stg1";
-chdir "$genome.EDTA.combine";
+chdir "$genome.EDTA.combine" or die "ERROR: cannot enter $genome.EDTA.combine: $!\n";
 `rm ./$genome.LTR.raw.fa*Q* ./$genome.LTR.intact.raw.fa*Q* ./$genome.TIR.intact.raw.fa*Q* ./$genome.Helitron.intact.raw.fa*Q* ./$genome.TIR.Helitron.fa*Q* $genome*tbl $genome*out $genome*cleanup $genome*RMoutput $genome*stg1.raw* $genome.LTR.raw.fa-* $genome.LTR.intact.raw.fa-* $genome.TIR.intact.raw.fa-* $genome.Helitron.intact.raw.fa-* $genome.LINE_LTR.raw.fa $genome.LTR.SINE.LINE.fa *.ndb *.not *.ntf *.nto *.cat.gz *.cat *.masked *.ori.out *.nhr *.nin *.nsq 2>/dev/null` unless $debug eq 1;
 
 chdir "..";
@@ -586,7 +586,7 @@ print "$date\tPerform EDTA final steps to generate a non-redundant comprehensive
 
 # Make the final working directory
 `mkdir $genome.EDTA.final` unless -e "$genome.EDTA.final" && -d "$genome.EDTA.final";
-chdir "$genome.EDTA.final";
+chdir "$genome.EDTA.final" or die "ERROR: cannot enter $genome.EDTA.final: $!\n";
 `rm ./* 2>/dev/null` if $overwrite == 1;
 `cp ../$genome.EDTA.raw/$genome.RM2.fa ./`;
 `cp ../$genome.EDTA.combine/$genome.EDTA.fa.stg1 ./`;
@@ -596,15 +596,17 @@ chdir "$genome.EDTA.final";
 #`cp ../$genome.EDTA.raw/$genome.EDTA.intact.raw.fa ./`;
 `cp ../$genome.EDTA.raw/$genome.EDTA.intact.raw.gff3 ./`;
 `cp ../$exclude ./` if $exclude ne '';
+encode_ids("$genome.EDTA.fa.stg1", "$genome.EDTA.intact.fa.cln", "$genome.EDTA.intact.raw.gff3", "$genome.EDTA.intact.fa.cln2.out");
 
 # identify remaining TEs in the filtered RM2 library
 if ($sensitive == 1 and -s "$genome.RM2.fa"){
 	print "\tFilter RepeatModeler results that are ignored in the raw step.\n\n";
 	chomp ($date = `date`);
-	my $rm_status = `${repeatmasker}RepeatMasker -e ncbi -pa $rm_threads -q -no_is -nolow -div 40 -lib $genome.EDTA.fa.stg1 $genome.RM2.fa 2>/dev/null`;
-	`cp $genome.RM2.fa $genome.RM2.fa.masked` if $rm_status =~ /No repetitive sequences were detected/i;
-	# clean up tandem and coding sequences in the RM2 library
-	`perl $cleanup_tandem -misschar N -nc 50000 -nr 0.8 -minlen 80 -minscore 3000 -trf 1 -trf_path $trf -cleanN 1 -cleanT 1 -f $genome.RM2.fa.masked > $genome.RM2.fa.stg1`;
+	RM_mask("$genome.EDTA.fa.stg1", "$genome.RM2.fa");
+	# clean up tandem and coding sequences in the RM2 library. The parts stage 1 masks are cut out, and an entry
+	# >= 80% masked is dropped. A masked end is cut like any other part (no -cleanT): autonomous TIRs share their
+	# ends with the non-autonomous TIRs and MITEs of stage 1, and dropping them for it cost rice 0.018 TIR F1.
+	`perl $cleanup_tandem -misschar N -nc 50000 -nr 0.8 -minlen 80 -minscore 3000 -trf 1 -trf_path $trf -cleanN 1 -f $genome.RM2.fa.masked > $genome.RM2.fa.stg1`;
 	`perl $cleanup_proteins -seq $genome.RM2.fa.stg1 -rmdnate 0 -rmline 0 -rmprot 1 -protlib $protlib -blast $blastplus -threads $threads`;
 	if (-s "$genome.RM2.fa.stg1.clean"){
 		`cat $genome.EDTA.fa.stg1 $genome.RM2.fa.stg1.clean > $genome.EDTA.raw.fa`;
@@ -629,16 +631,18 @@ if (-s "$cds"){
 	die "\tERROR: The $cds file is empty after TE clean up. Please check the file and $cds.code.noTE.\n\n" unless -s "$cds.code.noTE";
 	$cds = "$cds.code.noTE";
 
-	# remove cds-related sequences in the EDTA library
+	# remove cds-related sequences in the EDTA library: cut the CDS-matching parts out of DNA TEs and
+	# unclassified repeats, and drop those that are >= 30% CDS. A match at an end is cut like any other
+	# (no -cleanT): dropping the whole entry for it cost rice 7.8 Mb of true LTR annotation.
 	print "\tRemove CDS-related sequences in the EDTA library.\n\n";
-	my $rm_status = `${repeatmasker}RepeatMasker -e ncbi -pa $rm_threads -q -no_is -nolow -div 40 -cutoff 225 -lib $cds $genome.EDTA.raw.fa 2>/dev/null`;
-	`cp $genome.EDTA.raw.fa $genome.EDTA.raw.fa.masked` if $rm_status =~ /No repetitive sequences were detected/i;
-	`perl $cleanup_tandem -misschar N -Nscreen 1 -nc 1000 -nr 0.3 -minlen 80 -maxlen 5000000 -trf 0 -cleanN 1 -cleanT 1 -f $genome.EDTA.raw.fa.masked > $genome.EDTA.raw.fa.cln`;
+	RM_mask($cds, "$genome.EDTA.raw.fa", "-cutoff 225");
+	unmask_retro("$genome.EDTA.raw.fa", "$genome.EDTA.raw.fa.masked");
+	`perl $cleanup_tandem -misschar N -Nscreen 1 -nc 1000 -nr 0.3 -minlen 80 -maxlen 5000000 -trf 0 -cleanN 1 -f $genome.EDTA.raw.fa.masked > $genome.EDTA.raw.fa.cln`;
 
 	# remove cds-related sequences in intact TEs
 	print "\tRemove CDS-related sequences in intact TEs.\n\n";
-	$rm_status = `${repeatmasker}RepeatMasker -e ncbi -pa $rm_threads -q -no_is -nolow -div 40 -cutoff 225 -lib $cds $genome.EDTA.intact.fa.cln 2>/dev/null`;
-	`cp $genome.EDTA.intact.fa.cln $genome.EDTA.intact.fa.cln.masked` if $rm_status =~ /No repetitive sequences were detected/i;
+	RM_mask($cds, "$genome.EDTA.intact.fa.cln", "-cutoff 225");
+	unmask_retro("$genome.EDTA.intact.fa.cln", "$genome.EDTA.intact.fa.cln.masked");
 	`perl $cleanup_tandem -misschar N -Nscreen 1 -nc 1000 -nr 0.8 -minlen 80 -maxlen 5000000 -trf 0 -cleanN 0 -f $genome.EDTA.intact.fa.cln.masked > $genome.EDTA.intact.fa.cln.rmCDS`;
 	`perl $output_by_list 1 $genome.EDTA.intact.fa.cln 1 $genome.EDTA.intact.fa.cln.masked.cleanup -ex -FA > $genome.EDTA.intact.fa.cln2`;
 	} else {
@@ -657,12 +661,9 @@ if (-s "$genome.EDTA.raw.fa.cln.cln" and $overwrite == 0){
 }
 
 # rename all TEs in the EDTA library
-# resume guard added 2026-08-28: keeps the TE library byte-identical across a resumed
-# FINAL, so a library already handed to an external RepeatMasker run stays valid.
-if (-s "$genome.EDTA.TElib.fa" and $overwrite == 0
-    and (!$wholeelement or -s "$genome.EDTA.TElib.fa.rename_map")){
-	print "\tExisting $genome.EDTA.TElib.fa found, skipping rename_TE (--overwrite 0).\n\n";
-} elsif ($wholeelement){
+# always rerun: rename_TE gives the same library from the same input, and a TElib.fa left by
+# an earlier run may be out of date or already merged with --curatedlib
+if ($wholeelement){
 	`perl $rename_TE $genome.EDTA.raw.fa.cln.cln --map $genome.EDTA.TElib.fa.rename_map > $genome.EDTA.TElib.fa`;
 } else {
 	`perl $rename_TE $genome.EDTA.raw.fa.cln.cln > $genome.EDTA.TElib.fa`;
@@ -693,8 +694,7 @@ if ($HQlib ne ''){
 	print "$date\tCombine the high-quality TE library $HQlib with the EDTA library:\n\n";
 
 	# remove known TEs in the EDTA library
-	my $rm_status = `${repeatmasker}RepeatMasker -e ncbi -pa $rm_threads -q -no_is -nolow -div 40 -lib $HQlib $genome.EDTA.TElib.fa 2>/dev/null`;
-	`cp $genome.EDTA.TElib.fa $genome.EDTA.TElib.fa.masked` if $rm_status =~ /No repetitive sequences were detected/i;
+	RM_mask($HQlib, "$genome.EDTA.TElib.fa");
 	`perl $cleanup_tandem -misschar N -nc 50000 -nr 0.8 -minlen 80 -minscore 3000 -trf 0 -cleanN 1 -cleanT 0 -f $genome.EDTA.TElib.fa.masked > $genome.EDTA.TElib.novel.fa`;
 	rename "$genome.EDTA.TElib.fa", "$genome.EDTA.TElib.ori.fa";
 	`cat $HQlib $genome.EDTA.TElib.novel.fa > $genome.EDTA.TElib.fa`;
@@ -802,7 +802,7 @@ if ($anno == 1){
 
 	# Make the post-library annotation working directory
 	`mkdir $genome.EDTA.anno` unless -e "$genome.EDTA.anno" && -d "$genome.EDTA.anno";
-	chdir "$genome.EDTA.anno";
+	chdir "$genome.EDTA.anno" or die "ERROR: cannot enter $genome.EDTA.anno: $!\n";
 	`rm ./* 2>/dev/null` if $overwrite == 1;
 	`rm $genome.EDTA.TElib.fa* 2>/dev/null`; # clean up libraries
 	`cp ../$genome.EDTA.TElib.fa ./`;
@@ -951,8 +951,8 @@ if ($anno == 1){
 		# check results and report status
 		die "ERROR: TE annotation stats results not found in $genome.EDTA.TE.fa.stat!\n\n" unless -s "$genome.EDTA.TE.fa.stat";
 		chomp ($date = `date`);
-		print "$date\tEvaluation of TE annotation finished! Check out these files:
-		(each contains unfiltered + divergence-titrated reports at <=40%, <=30%, <=20%, <=10%, <=5%)\n
+		print "$date\tEvaluation of TE annotation finished! Check out these files
+		(superfamily and subclass levels; bin/count_nested.pl -maxdiv filters the .stat file by divergence):\n
 		Overall: $genome.EDTA.TE.fa.stat.all.sum
 		Nested: $genome.EDTA.TE.fa.stat.nested.sum
 		Non-nested: $genome.EDTA.TE.fa.stat.redun.sum\n\n";
@@ -985,4 +985,69 @@ sub copy_file {
 
         # copy file to the path if it's not the current path
 	`cp $file $path` if abs_path($path) ne abs_path('.');
+	}
+
+# Copy a FASTA file with each header cut to its first word (the name).
+sub copy_names {
+	my ($src, $dst) = @_;
+	open my $in, '<', $src or die "ERROR: cannot read $src: $!\n";
+	open my $out, '>', $dst or die "ERROR: cannot write $dst: $!\n";
+	while (<$in>){
+		s/^(>\S+).*/$1/;
+		print $out $_;
+		}
+	close $in;
+	close $out or die "ERROR: cannot write $dst: $!\n";
+	}
+
+# A finished run decoded its working files. A rerun reads them again, and RepeatMasker needs the short IDs.
+sub encode_ids {
+	return if $seqid_mapfile eq '' or !-s $seqid_mapfile;
+	for my $f (@_){
+		`perl $seqid_codec encode_names $f $seqid_mapfile $f.encoded && mv $f.encoded $f` if -s $f;
+		}
+	}
+
+# Mask $query with the $lib library. A query without hits is copied as its own .masked.
+sub RM_mask {
+	my ($lib, $query, $opts) = ($_[0], $_[1], $_[2] // '');
+	unlink "$query.masked"; # a leftover would hide a failed run
+	my $rm_status = `${repeatmasker}RepeatMasker -e ncbi -pa $rm_threads -q -no_is -nolow -div 40 $opts -lib $lib $query 2>&1`;
+	`cp $query $query.masked` if $rm_status =~ /No repetitive sequences were detected/i;
+	# cleanup_tandem reads .masked, so continuing here would silently drop all of $query
+	die "ERROR: RepeatMasker failed to mask $query with $lib:\n$rm_status\n" if -s $query and !-e "$query.masked";
+	}
+
+# Put the unmasked sequence of LTR, LINE and SINE entries back into the CDS-masked $masked, in place and
+# in order, so the --cds purge keeps them whole. Retrotransposons rarely capture host genes, so a CDS that
+# matches one is itself TE-derived. On rice, purging them cost 13.7 Mb of true LTR and LINE annotation
+# to unmask 0.47 Mb of genes, and the unpurged annotation covered genes no more than the curated one.
+sub unmask_retro {
+	my ($orig, $masked) = @_;
+	my (%seq, $id);
+	open my $in, '<', $orig or die "ERROR: Cannot read $orig: $!\n";
+	while (<$in>){
+		if (/^>(\S+)/){
+			$id = $1;
+			next;
+			}
+		$seq{$id} .= $_ if $id =~ /#(LTR|LINE|SINE)\//;
+		}
+	close $in;
+	return unless %seq;
+	open $in, '<', $masked or die "ERROR: Cannot read $masked: $!\n";
+	open my $out, '>', "$masked.retro" or die "ERROR: Cannot write $masked.retro: $!\n";
+	my $restored = 0;
+	while (<$in>){
+		if (/^>(\S+)/){
+			$restored = exists $seq{$1};
+			print $out $_;
+			print $out $seq{$1} if $restored;
+			next;
+			}
+		print $out $_ unless $restored;
+		}
+	close $in;
+	close $out;
+	rename "$masked.retro", $masked or die "ERROR: Cannot replace $masked: $!\n";
 	}

@@ -43,7 +43,6 @@ perl EDTA_raw.pl [options]
 	--ltrretriever	[path]	Path to the LTR_retriever program. (default: find from ENV)
 	--blastplus	[path]	Path to the BLAST+ program. (default: find from ENV)
 	--tesorter	[path]	Path to the TEsorter program. (default: find from ENV)
-	--GRF		[path]	Path to the GRF program. (default: find from ENV)
 	--trf_path	[path]	Path to the TRF program. (default: find from ENV)
 	--mdust		[path]	Path to the mdust program. (default: find from ENV)
 	--repeatmasker	[path]	Path to the RepeatMasker program. (default: find from ENV)
@@ -89,7 +88,6 @@ my $TEsorter = ''; #path to the TEsorter program
 my $blastplus = ''; #path to the blastn program
 my $mdust = ''; #path to mdust
 my $trf = ''; #path to trf
-my $GRF = ''; #path to GRF
 my $annosine = ""; #path to the AnnoSINE program
 my $TIR_Learner = ""; #path to TIR-Learner program
 my $LTR_FINDER = ""; #path to LTR_FINDER_parallel program  #tianyulu
@@ -119,7 +117,6 @@ foreach (@ARGV){
 	$blastplus = $ARGV[$k+1] if /^--blastplus$/i and $ARGV[$k+1] !~ /^-/;
 	$mdust = $ARGV[$k+1] if /^--mdust$/i and $ARGV[$k+1] !~ /^-/;
 	$trf = $ARGV[$k+1] if /^--trf_path$/i and $ARGV[$k+1] !~ /^-/;
-	$GRF = $ARGV[$k+1] if /^--GRF$/i and $ARGV[$k+1] !~ /^-/;
 	$threads = $ARGV[$k+1] if /^--threads$|^-t$/i and $ARGV[$k+1] !~ /^-/;
 	$wholeelement = $ARGV[$k+1] if /^--wholeelement$/i and $ARGV[$k+1] !~ /^-/;
 	$help = 1 if /^--help$|^-h$/i;
@@ -228,18 +225,10 @@ $mdust =~ s/\s+$//;
 $mdust = dirname($mdust) unless -d $mdust;
 $mdust = "$mdust/" if $mdust ne '' and $mdust !~ /\/$/;
 die "Error: mdust is not found in the mdust path $mdust!\n" unless -X "${mdust}mdust";
-# trf
+# trf (LTR_retriever and cleanup_tandem.pl run it; an exit-status test here never caught a missing trf)
 chomp ($trf=`command -v trf 2>/dev/null`) if $trf eq '';
 $trf=~s/\n$//;
-`$trf 2>/dev/null`;
-die "Error: Tandem Repeat Finder is not found in the TRF path $trf!\n" if $?==32256;
-# GRF
-chomp ($GRF = `command -v grf-main 2>/dev/null`) if $GRF eq '';
-$GRF =~ s/\n$//;
-my $grfp= dirname ($GRF);
-$grfp =~ s/\n$//;
-`${grfp}grf-main 2>/dev/null`;
-die "Error: The Generic Repeat Finder (GRF) is not found in the GRF path: $grfp\n" if $?==32256;
+die "Error: Tandem Repeat Finder is not found in the TRF path $trf!\n" unless -f $trf and -X $trf;
 
 # TIR-Learner  #tianyuLu
 # Remove any trailing whitespace
@@ -356,6 +345,21 @@ if (-s "$genome.mod"){
 }
 # pre-set parameters
 my $genome_file_real_path=File::Spec->rel2abs($genome); # the genome file with real path
+my $tesorter_fw = $overwrite ? "-fw" : ""; # TEsorter reuses an existing hmmscan output unless forced
+
+# Classify $fa with TEsorter, then drop misclassified entries, in the current module directory; stop if either fails.
+# TEsorter exits 0 also when nothing has a domain hit (a header-only .cls.tsv), so a failure is real (hmmscan or its
+# database missing, a bad input); unchecked, the module went on with an unfiltered or empty set.
+sub run_tesorter {
+	my ($fa, $module) = @_;
+	my $status = system("${TEsorter}TEsorter $fa --disable-pass2 -p $threads $tesorter_fw > $fa.tesorter.log 2>&1");
+	die "ERROR: TEsorter exited with error, please check $genome.EDTA.raw/$module/$fa.tesorter.log\n\n" if $status != 0;
+	}
+sub run_cleanup_misclas {
+	my ($fa, $module) = @_;
+	`perl $cleanup_misclas $fa.rexdb.cls.tsv`;
+	die "ERROR: cleanup_misclas.pl failed on $genome.EDTA.raw/$module/$fa.rexdb.cls.tsv, see the message above.\n\n" if $? != 0;
+	}
 
 # Make working directories
 `mkdir $genome.EDTA.raw` unless -e "$genome.EDTA.raw" && -d "$genome.EDTA.raw";
@@ -376,7 +380,7 @@ chomp ($date = `date`);
 print STDERR "$date\tStart to find LTR candidates.\n\n";
 
 # enter the working directory and create genome softlink
-chdir "$genome.EDTA.raw/LTR";
+chdir "$genome.EDTA.raw/LTR" or die "ERROR: cannot enter $genome.EDTA.raw/LTR: $!\n";
 `ln -s ../../$genome $genome` unless -s $genome;
 
 # Try to recover existing results
@@ -385,6 +389,9 @@ if ($overwrite eq 0 and -s "$genome.LTR.raw.fa"){
 	print STDERR "$date\tExisting result file $genome.LTR.raw.fa found!\n\t\tWill keep this file without rerunning this module.\n\t\tPlease specify --overwrite 1 if you want to rerun this module.\n\n";
 	} else {
 	print STDERR "$date\tIdentify LTR retrotransposon candidates from scratch.\n\n";
+
+# LTR_HARVEST and LTR_FINDER reuse this genome copy, but EDTA.pl decodes its IDs at the end of a run
+`rm -f $genome.shortID` if $overwrite eq 1;
 
 # run LTRharvest
 if ($overwrite eq 0 and -s "$genome.harvest.combine.scn"){
@@ -403,13 +410,15 @@ if ($overwrite eq 0 and -s "$genome.finder.combine.scn"){
 	}
 
 # run LTR_retriever
-my $status = 0;
 if ($overwrite eq 0 and (-s "$genome.mod.LTRlib.fa" or -s "$genome.LTRlib.fa")){
 	print STDERR "$date\tExisting LTR_retriever result found!\n\t\tWill use this for further analyses.\n\n";
 	} else {
 	`cat $genome.harvest.combine.scn $genome.finder.combine.scn > $genome.rawLTR.scn`;
 	my $we_flag = $wholeelement ? "-wholeelement" : "";
-	$status = system("${LTR_retriever}LTR_retriever -genome $genome -inharvest $genome.rawLTR.scn -u $miu -threads $threads -noanno $we_flag -trf_path $trf -blastplus $blastplus -repeatmasker $repeatmasker -salvage 1 -convert_seq_name 0");
+	my $salvage = $overwrite ? 0 : 1; # reuse an earlier LTR_retriever run only when resuming
+	my $status = system("${LTR_retriever}LTR_retriever -genome $genome -inharvest $genome.rawLTR.scn -u $miu -threads $threads -noanno $we_flag -trf_path $trf -blastplus $blastplus -repeatmasker $repeatmasker -salvage $salvage -convert_seq_name 0");
+	# LTR_retriever also exits with error on a genome without LTR candidates, which is a valid empty result
+	die "ERROR: LTR_retriever exited with error, please test run EDTA with EDTA/test/ to make sure the installation is correct.\n\n" if $status != 0 and `grep -cE '^\\s*[0-9]' $genome.rawLTR.scn` > 0;
 	}
 
 # get full-length LTR from pass.list (or use LTR_retriever's whole-element output)
@@ -429,13 +438,11 @@ if ($wholeelement and -s "$genome.LTR.intact.fa"){
 
 # annotate and remove not LTR candidates
 if (-s "$genome.LTR.intact.fa.ori.dusted.cln"){
-	`${TEsorter}TEsorter $genome.LTR.intact.fa.ori.dusted.cln --disable-pass2 -p $threads 2>/dev/null`;
-	`perl $cleanup_misclas $genome.LTR.intact.fa.ori.dusted.cln.rexdb.cls.tsv`;
-} elsif ($status == 0){
-	print "\t\tLTR_retriever is finished without error, but no LTR is identified.\n\n";
-	`touch $genome.LTR.intact.fa.ori.dusted.cln.cln`;
+	&run_tesorter("$genome.LTR.intact.fa.ori.dusted.cln", "LTR");
+	&run_cleanup_misclas("$genome.LTR.intact.fa.ori.dusted.cln", "LTR");
 } else {
-	print "\t\tLTR_retriever exited with error, please test run EDTA with EDTA/test/ to make sure the installation is correct.\n\n";
+	print STDERR "\t\tLTR_retriever is finished, but no LTR is identified.\n\n";
+	`touch $genome.LTR.intact.fa.ori.dusted.cln.cln`;
 }
 `mv $genome.LTR.intact.fa.ori.dusted.cln.cln $genome.LTR.intact.raw.fa`;
 `mv $genome.LTR.intact.fa.ori.dusted.cln.cln.list $genome.LTR.intact.raw.fa.anno.list`;
@@ -463,7 +470,7 @@ chdir '../..';
 
 # check results
 chomp ($date = `date`);
-die "Error: LTR results not found!\n\n" unless -e "$genome.EDTA.raw/$genome.LTR.raw.fa";
+die "Error: LTR results not found!\n\n" unless -e "$genome.EDTA.raw/$genome.LTR.raw.fa" and -e "$genome.EDTA.raw/$genome.LTR.intact.raw.fa";
 if (-s "$genome.EDTA.raw/$genome.LTR.raw.fa"){
 	print STDERR "$date\tFinish finding LTR candidates.\n\n";
 	} else {
@@ -482,38 +489,53 @@ chomp ($date = `date`);
 print STDERR "$date\tStart to find SINE candidates.\n\n";
 
 # enter the working directory and create genome softlink
-chdir "$genome.EDTA.raw/SINE";
+chdir "$genome.EDTA.raw/SINE" or die "ERROR: cannot enter $genome.EDTA.raw/SINE: $!\n";
 `ln -s ../../$genome $genome` unless -s $genome;
 
 # Remove existing results
 `rm -rf Seed_SINE.fa Step* HMM_out 2>/dev/null` if $overwrite eq 1;
 
 # run AnnoSINE_v2
-my $status; # record status of AnnoSINE execution
 if (-s "Seed_SINE.fa"){
 	print STDERR "$date\tExisting result file Seed_SINE.fa found!\n\t\tWill keep this file without rerunning this module.\n\t\tPlease specify --overwrite 1 if you want to rerun AnnoSINE_v2.\n\n";
 	} else { 
-	$status = system("python3 ${annosine}AnnoSINE_v2 --temp_dir $genome_file_real_path.EDTA.raw/SINE/ -t $threads -a 2 --num_alignments 50000 -rpm 0 --copy_number 3 --shift 100 -auto 1 3 $genome ./ 2>/dev/null");
-	#$status = system("python3 ${annosine}AnnoSINE_v2 --temp_dir $genome_file_real_path.EDTA.raw/SINE/ -t $threads -a 2 --num_alignments 50000 -rpm 0 --copy_number 3 --shift 100 -auto 1 3 $genome ./ > /dev/null 2>&1");
+	# use its own #! line (conda points it to the env's python); the upstream script has none
+	my $run_annosine = `head -c 2 ${annosine}AnnoSINE_v2` eq '#!' ? "${annosine}AnnoSINE_v2" : "python3 ${annosine}AnnoSINE_v2";
+	my $status = system("$run_annosine --temp_dir $genome_file_real_path.EDTA.raw/SINE/ -t $threads -a 2 --num_alignments 50000 -rpm 0 --copy_number 3 --shift 100 -auto 1 3 $genome ./ > annosine.log 2>&1");
+	die "ERROR: AnnoSINE exited with error, please check $genome.EDTA.raw/SINE/annosine.log\n\n" if $status != 0;
 	}
 
 # filter and reclassify AnnoSINE candidates with TEsorter and make SINE library
 if (-s "Seed_SINE.fa"){
+	# Name each candidate ID#SINE/type, the type from the header's last field. AnnoSINE_v2 now writes
+	# ">SINE_0 Chr1 C 317167:317386|...|tRNA" (older releases ">SINE_0#SINE/Unknown Chr1 ...|tRNA"), and
+	# without the class in the ID the SINEs reach the library unclassified and are annotated as unknown.
+	open my $seed, '<', "Seed_SINE.fa" or die "ERROR: Cannot read $genome.EDTA.raw/SINE/Seed_SINE.fa: $!\n";
+	open my $sine, '>', "$genome.AnnoSINE.raw.fa" or die "ERROR: Cannot write $genome.EDTA.raw/SINE/$genome.AnnoSINE.raw.fa: $!\n";
+	while (<$seed>){
+		if (/^>(\S+)/){
+			my $id = $1;
+			$id =~ s/#.*//;
+			my ($type) = /\|([^|\s]+)\s*$/;
+			$type = 'unknown' unless defined $type and $type =~ /^(tRNA|5S|7SL)$/;
+			$_ = ">$id#SINE/$type\n";
+			}
+		print $sine $_;
+		}
+	close $seed;
+	close $sine;
+
 	# annotate and remove non-SINE candidates
-	`awk '{gsub(/Unknown/, "unknown"); print \$1}' Seed_SINE.fa > $genome.AnnoSINE.raw.fa`;
-	`${TEsorter}TEsorter $genome.AnnoSINE.raw.fa --disable-pass2 -p $threads 2>/dev/null`;
+	&run_tesorter("$genome.AnnoSINE.raw.fa", "SINE");
 	`touch $genome.AnnoSINE.raw.fa.rexdb.cls.tsv` unless -e "$genome.AnnoSINE.raw.fa.rexdb.cls.tsv";
-	`perl $cleanup_misclas $genome.AnnoSINE.raw.fa.rexdb.cls.tsv`;
+	&run_cleanup_misclas("$genome.AnnoSINE.raw.fa", "SINE");
         
 	# clean up tandem repeat
 	`perl $cleanup_tandem -misschar N -nc 50000 -nr 0.8 -minlen 80 -minscore 3000 -trf 1 -trf_path $trf -cleanN 1 -cleanT 1 -f $genome.AnnoSINE.raw.fa.cln > $genome.SINE.raw.fa`;
 	}
-elsif ($status == 0) {
-	print "\t\tAnnoSINE is finished without error, but the Seed_SINE.fa file is not produced.\n\n";
-       	`touch $genome.SINE.raw.fa`;
-	}
 else {
-	print "\t\tAnnoSINE exited with error, please test run AnnoSINE to make sure it's working.\n\n";
+	print STDERR "\t\tAnnoSINE is finished without error, but the Seed_SINE.fa file is not produced.\n\n";
+       	`touch $genome.SINE.raw.fa`;
 	}
 
 # copy result files out
@@ -542,7 +564,7 @@ chomp ($date = `date`);
 print STDERR "$date\tStart to find LINE candidates.\n\n";
 
 # enter the working directory and create genome softlink
-chdir "$genome.EDTA.raw/LINE";
+chdir "$genome.EDTA.raw/LINE" or die "ERROR: cannot enter $genome.EDTA.raw/LINE: $!\n";
 `ln -s ../../$genome $genome` unless -s $genome;
 `cp ../../$RMlib $RMlib` if $RMlib ne 'null';
 
@@ -567,13 +589,9 @@ if ($overwrite eq 0 and -s "$genome-families.fa"){
 	if ($status != 0) {
 		# Execute the old version of RepeatModeler
 		warn "RepeatModeler failed with -threads, retrying with -pa...\n";
-		$status = system("${repeatmodeler}RepeatModeler -engine ncbi -pa $threads -database $genome > repeatmodeler.log 2>&1");
-		if ($status != 0) {
-			print "ERROR: RepeatModeler did not run correctly. Please test run this command:
-				${repeatmodeler}RepeatModeler -engine ncbi -pa $threads -database $genome
-				ERROR\n";
-			exit;
-			}
+		$status = system("${repeatmodeler}RepeatModeler -engine ncbi -pa $threads -database $genome >> repeatmodeler.log 2>&1");
+		# a genome below RepeatModeler's minimum size is a valid empty result
+		die "ERROR: RepeatModeler did not run correctly, please check $genome.EDTA.raw/LINE/repeatmodeler.log\n\n" if $status != 0 and `grep -c 'is not large enough' repeatmodeler.log` == 0;
 		}
 	`rm $genome*nal $genome*nhr $genome*nin $genome*nnd $genome*nni $genome*nog $genome*nsq $genome*njs $genome*translation 2>/dev/null`;
 	}
@@ -582,19 +600,21 @@ if ($overwrite eq 0 and -s "$genome-families.fa"){
 if (-s "$genome-families.fa"){
 	# annotate and remove misclassified candidates
 	`awk '{gsub(/Unknown/, "unknown"); print \$1}' $genome-families.fa > $genome.RM2.raw.fa` if -e "$genome-families.fa";
-	`${TEsorter}TEsorter $genome.RM2.raw.fa --disable-pass2 -p $threads 2>/dev/null`;
-	`perl $cleanup_misclas $genome.RM2.raw.fa.rexdb.cls.tsv`;
+	&run_tesorter("$genome.RM2.raw.fa", "LINE");
+	&run_cleanup_misclas("$genome.RM2.raw.fa", "LINE");
 	
-	# reclassify clean candidates
-	`${TEsorter}TEsorter $genome.RM2.raw.fa.cln --disable-pass2 -p $threads 2>/dev/null`;
-	`perl -nle 's/>\\S+\\s+/>/; print \$_' $genome.RM2.raw.fa.cln.rexdb.cls.lib > $genome.RM2.raw.fa.cln`;
+	# reclassify clean candidates (TEsorter fails on an empty file)
+	if (-s "$genome.RM2.raw.fa.cln"){
+		&run_tesorter("$genome.RM2.raw.fa.cln", "LINE");
+		`perl -nle 's/>\\S+\\s+/>/; print \$_' $genome.RM2.raw.fa.cln.rexdb.cls.lib > $genome.RM2.raw.fa.cln`;
+		}
 
         # clean up tandem repeat
 	`perl $cleanup_tandem -misschar N -nc 50000 -nr 0.8 -minlen 80 -minscore 3000 -trf 1 -trf_path $trf -cleanN 1 -cleanT 1 -f $genome.RM2.raw.fa.cln > $genome.RM2.raw.fa.cln2`;
 	`grep -P 'LINE|SINE' $genome.RM2.raw.fa.cln2 | perl $output_by_list 1 $genome.RM2.raw.fa.cln2 1 - -FA > $genome.LINE.raw.fa`;
 	`grep -P 'LINE|SINE' $genome.RM2.raw.fa.cln2 | perl $output_by_list 1 $genome.RM2.raw.fa.cln2 1 - -FA -ex > $genome.RM2.fa`;
 	} else {
-	print "\t\tRepeatModeler is finished, but the $genome-families.fa file is not produced.\n\n";
+	print STDERR "\t\tRepeatModeler is finished, but the $genome-families.fa file is not produced.\n\n";
 	`touch $genome.RM2.raw.fa $genome.LINE.raw.fa $genome.RM2.fa`;
 	}
 
@@ -624,7 +644,7 @@ chomp ($date = `date`);
 print STDERR "$date\tStart to find TIR candidates.\n\n";
 
 # enter the working directory and create genome softlink
-chdir "$genome.EDTA.raw/TIR";
+chdir "$genome.EDTA.raw/TIR" or die "ERROR: cannot enter $genome.EDTA.raw/TIR: $!\n";
 `ln -s ../../$genome $genome` unless -s $genome;
 
 # Try to recover existing results
@@ -636,11 +656,11 @@ if ($overwrite eq 0 and (-s "$genome.TIR.intact.raw.fa" or -s "$genome.TIR.intac
 	print STDERR "Species: $species\n";
 
 	# run TIR-Learner
-	my $status = 1;
 	if ($overwrite eq 0 and -s "./TIR-Learner-Result/TIR-Learner_FinalAnn.fa"){
 		print STDERR "$date\tExisting raw result TIR-Learner_FinalAnn.fa found!\n\t\tWill use this for further analyses.\n\t\tPlease specify --overwrite 1 if you want to rerun this module.\n\n";
 		} else {
-		$status = system("$TIR_Learner -f $genome_file_real_path -s $species -p $threads -l $maxint -o $genome_file_real_path.EDTA.raw/TIR");
+		my $status = system("$TIR_Learner -f $genome_file_real_path -s $species -p $threads -l $maxint -o $genome_file_real_path.EDTA.raw/TIR");
+		die "ERROR: TIR-Learner exited with error, please test run EDTA with EDTA/test/ to make sure the installation is correct.\n\n" if $status != 0;
 		}
 
 	# clean raw predictions with flanking alignment
@@ -657,13 +677,11 @@ if ($overwrite eq 0 and (-s "$genome.TIR.intact.raw.fa" or -s "$genome.TIR.intac
 
 	# annotate and remove non-TIR candidates
 	if (-s "$genome.TIR.ext30.fa.pass.fa.dusted.cln"){
-		`${TEsorter}TEsorter $genome.TIR.ext30.fa.pass.fa.dusted.cln --disable-pass2 -p $threads 2>/dev/null`;
-		`perl $cleanup_misclas $genome.TIR.ext30.fa.pass.fa.dusted.cln.rexdb.cls.tsv`;
-	} elsif ($status == 0) {
-		print "\t\tTIR-Learner is finished without error, but no TIR is identified.\n\n";
-		`touch $genome.TIR.ext30.fa.pass.fa.dusted.cln.cln`;
+		&run_tesorter("$genome.TIR.ext30.fa.pass.fa.dusted.cln", "TIR");
+		&run_cleanup_misclas("$genome.TIR.ext30.fa.pass.fa.dusted.cln", "TIR");
 	} else {
-		print "\t\tTIR-Learner exited with error, please test run EDTA with EDTA/test/ to make sure the installation is correct.\n\n";
+		print STDERR "\t\tTIR-Learner is finished without error, but no TIR is identified.\n\n";
+		`touch $genome.TIR.ext30.fa.pass.fa.dusted.cln.cln`;
 	}
 	`mv $genome.TIR.ext30.fa.pass.fa.dusted.cln.cln $genome.TIR.intact.raw.fa`;
 	`cp $genome.TIR.ext30.fa.pass.fa.dusted.cln.cln.list $genome.TIR.intact.raw.fa.anno.list`;
@@ -703,7 +721,7 @@ chomp ($date = `date`);
 print STDERR "$date\tStart to find Helitron candidates.\n\n";
 
 # enter the working directory and create genome softlink
-chdir "$genome.EDTA.raw/Helitron";
+chdir "$genome.EDTA.raw/Helitron" or die "ERROR: cannot enter $genome.EDTA.raw/Helitron: $!\n";
 `ln -s ../../$genome $genome` unless -s $genome;
 
 # Try to recover existing results
@@ -714,12 +732,12 @@ if ($overwrite eq 0 and (-s "$genome.Helitron.intact.raw.fa" or -s "$genome.Heli
 	print STDERR "$date\tIdentify Helitron candidates from scratch.\n\n";
 
 # run HelitronScanner
-my $status = 1;
 if ($overwrite eq 0 and (-s "$genome.HelitronScanner.draw.hel.fa" and -s "$genome.HelitronScanner.draw.rc.hel.fa")){
 #cat $genome.HelitronScanner.draw.hel.fa $genome.HelitronScanner.draw.rc.hel.fa
 	print STDERR "$date\tExisting HelitronScanner result files $genome.HelitronScanner.draw.hel.fa $genome.HelitronScanner.draw.rc.hel.fa found!\n\t\tWill keep these files without rerunning HelitronScanner\n\t\tPlease specify --overwrite 1 if you want to rerun this module.\n\n";
 	} else {
-	$status = system("python3 $HelitronScanner_Runner --genome $genome --cpu $threads --hsdir \"$HelitronScanner\" 2>/dev/null");
+	my $status = system("python3 $HelitronScanner_Runner --genome $genome --cpu $threads --hsdir \"$HelitronScanner\" > helitronscanner.log 2>&1");
+	die "ERROR: HelitronScanner exited with error, please check $genome.EDTA.raw/Helitron/helitronscanner.log\n\n" if $status != 0;
 	}
 
 # filter candidates based on repeatness of flanking regions
@@ -735,13 +753,11 @@ if ($overwrite eq 0 and (-s "$genome.HelitronScanner.draw.hel.fa" and -s "$genom
 
 # annotate and remove non-Helitron candidates
 if (-s "$genome.HelitronScanner.filtered.fa.pass.fa.dusted.cln"){
-	`${TEsorter}TEsorter $genome.HelitronScanner.filtered.fa.pass.fa.dusted.cln --disable-pass2 -p $threads 2>/dev/null`;
-	`perl $cleanup_misclas $genome.HelitronScanner.filtered.fa.pass.fa.dusted.cln.rexdb.cls.tsv`;
-} elsif ($status == 0) {
-	print "\t\tHelitronScanner is finished without error, but no Helitron is identified.\n\n";
-	`touch $genome.HelitronScanner.filtered.fa.pass.fa.dusted.cln.cln`;
+	&run_tesorter("$genome.HelitronScanner.filtered.fa.pass.fa.dusted.cln", "Helitron");
+	&run_cleanup_misclas("$genome.HelitronScanner.filtered.fa.pass.fa.dusted.cln", "Helitron");
 } else {
-	print "\t\tHelitronScanner exited with error, please test run EDTA with EDTA/test/ to make sure the installation is correct.\n\n";
+	print STDERR "\t\tHelitronScanner is finished without error, but no Helitron is identified.\n\n";
+	`touch $genome.HelitronScanner.filtered.fa.pass.fa.dusted.cln.cln`;
 }
 `mv $genome.HelitronScanner.filtered.fa.pass.fa.dusted.cln.cln $genome.Helitron.intact.raw.fa`;
 `cp $genome.HelitronScanner.filtered.fa.pass.fa.dusted.cln.cln.list $genome.Helitron.intact.raw.fa.anno.list`;

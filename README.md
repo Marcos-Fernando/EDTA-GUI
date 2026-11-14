@@ -11,12 +11,21 @@
 </div>
 
 > [!NOTE]
+> **Update (November 2026), EDTA-GUI 2.0.1:**
+> * **EDTA v2.3.5** in the EDTA mode and in panEDTA (it was v2.3.3).
+>
+>   The AnnoTEP mode keeps its own version of EDTA, adapted for plants.
+> * **New libraries in `database/`:** `rice7.0.1.liban` (replaces `rice7.0.0.liban`) and `maizeTE11082026` (replaces `maizeTE02052020`). If you give one of the old names with `--curatedlib`, change it to the new one;
+> * **Files in `REPORT/`:** the TE tables are now `TEs-report-lite.tbl` and `TEs-report-complete.tbl`. In the AnnoTEP mode, the divergence plots are also saved as PNG (`divergence_plot.png`, `divergence_plot2.png` and `divergence_plot3.png`). Runs made before this update still open in the interface;
+> * **Docker image `annotep/edta-gui:v2.0.1`:** download the new `start.sh` and run `bash start.sh update`.
+
+> [!NOTE]
 > **Update (October 2026), EDTA-GUI 2.0:**
 > * **New interface:** live timeline and log, a queue for several runs, interactive report and results page. Details in [What is new in version 2.0](#what-is-new-in-version-20);
 > * **EDTA also makes charts and reports** (`REPORT/`), as AnnoTEP does, when Annotation is on;
 > * **Run test analysis** button in the interface: fills in the form with the test data and starts the run;
 > * **Automation by scripts:** `install.sh` sets up everything at once, and the `EDTA`, `AnnoTEP` and `panEDTA` commands run from any folder, without `conda activate`;
-> * **One Docker image for everything:** instead of two images, `annotep/edta-gui:v2.0` runs both the interface (started with a single script, `start.sh`) and the command line (`docker run ... AnnoTEP`, `EDTA` or `panEDTA`). If you already use it, run `bash start.sh update`.
+> * **One Docker image for everything:** instead of two images, `annotep/edta-gui:v2.0.1` runs both the interface (started with a single script, `start.sh`) and the command line (`docker run ... AnnoTEP`, `EDTA` or `panEDTA`). If you already use it, download the new `start.sh` and run `bash start.sh update`.
 
 ## Table of Contents
   - [Introduction](#introduction)
@@ -84,7 +93,7 @@ AnnoTEP --genome genome.fa --species others --step all --sensitive 1 --anno 1 --
 * **One Docker image** for the interface and the command line, started with one command (`start.sh`): the results are saved in `~/results-edtagui`, owned by you.
 * **One-command setup with conda** (`install.sh`): no `conda activate`, no `sudo` and no manual RepeatMasker edits.
 * **Command line**: type `EDTA`, `AnnoTEP` or `panEDTA` in any folder.
-* **EDTA v2.3.3** in the EDTA mode, with the **MAKER mask** option and the optional **Run name** for the results folder.
+* **EDTA v2.3.5** in the EDTA mode, with the **MAKER mask** option and the optional **Run name** for the results folder.
 * **Run test analysis** button: one click to check the installation with the test data.
 * **About** button with the user guide inside the interface.
 
@@ -112,7 +121,7 @@ Version 2.0 keeps the folder format of version 1.x (`<genome>_<date>-<time>/` wi
 Choose **one** of the two options. Docker is the simplest one: nothing is installed on your system besides Docker itself.
 
 ### Option 1 – Docker (recommended)
-You only need the `start.sh` file. It downloads the ready image `annotep/edta-gui:v2.0` from Docker Hub and opens the interface.
+You only need the `start.sh` file. It downloads the ready image `annotep/edta-gui:v2.0.1` from Docker Hub and opens the interface.
 
 **Step 1.** Allow your user to run Docker without `sudo` (only once; then log out and log in again):
 ```sh
@@ -121,7 +130,7 @@ sudo usermod -aG docker $USER
 
 **Step 2.** Download the image from Docker Hub (about 9 GB, only once):
 ```sh
-docker pull annotep/edta-gui:v2.0
+docker pull annotep/edta-gui:v2.0.1
 ```
 This step is optional: `start.sh` downloads the image by itself when it is missing. Doing it first lets you follow the download and check that Docker works.
 
@@ -330,7 +339,7 @@ In EDTA-GUI, the results folder is named `Test_genome_<date-time>`. The steps be
 
 **5.** Coding DNA sequence: `test/genome.cds.fa`.
 
-**6.** Curated library: `database/rice7.0.0.liban`.
+**6.** Curated library: `database/rice7.0.1.liban`.
 
 **7.** Exclusion of masked regions: `test/genome.exclude.bed`.
 
@@ -425,8 +434,8 @@ panEDTA: `-g` genome list (genome and, optionally, CDS per line), `-c` CDS file 
 |---|---|
 | Conda installation | After `install.sh`, the commands work in any folder |
 | Docker | Run `bash start.sh install-cli` once; then the same commands work in any folder (named `AnnoTEP-docker`, `EDTA-docker` and `panEDTA-docker` when the conda installation is also present). See [Docker commands and file paths](#docker-commands-and-file-paths) |
-| Docker, without `install-cli` | `docker run --rm -u $(id -u):$(id -g) --pids-limit 300000 --memory-swap -1 -v "$PWD":/data -w /data annotep/edta-gui:v2.0 AnnoTEP --genome genome.fa ...` |
-| Singularity | `singularity exec edta-gui_v2.0.sif AnnoTEP --genome genome.fa ...` |
+| Docker, without `install-cli` | `docker run --rm -u $(id -u):$(id -g) --pids-limit 300000 --memory-swap -1 -v "$PWD":/data -w /data annotep/edta-gui:v2.0.1 AnnoTEP --genome genome.fa ...` |
+| Singularity | `singularity exec edta-gui_v2.0.1.sif AnnoTEP --genome genome.fa ...` |
 
 📎 Return to [Table of contents](#table-of-contents)
 
@@ -441,7 +450,7 @@ docker run -d --name edta-gui --init -u $(id -u):$(id -g) \
   -p 127.0.0.1:8000:8000 \
   -v ~/results-edtagui:/usr/local/EDTA/gui/backend/results \
   -e DISPLAY_PATH_MAP=/usr/local/EDTA/gui/backend/results=$HOME/results-edtagui \
-  annotep/edta-gui:v2.0
+  annotep/edta-gui:v2.0.1
 ```
 Then open http://localhost:8000. Stop it with `docker stop edta-gui && docker rm edta-gui`.
 
@@ -466,14 +475,14 @@ Singularity (now Apptainer) can run the Docker image after converting it to a `.
 **Step 1. Convert the image** (choose one):
 ```sh
 # directly from Docker Hub
-singularity build edta-gui_v2.0.sif docker://annotep/edta-gui:v2.0
+singularity build edta-gui_v2.0.1.sif docker://annotep/edta-gui:v2.0.1
 
 # from the image already in your local Docker
-singularity build edta-gui_v2.0.sif docker-daemon://annotep/edta-gui:v2.0
+singularity build edta-gui_v2.0.1.sif docker-daemon://annotep/edta-gui:v2.0.1
 
 # from a .tar file (to take the image to a computer without internet)
-docker save annotep/edta-gui:v2.0 -o edtagui2.tar
-singularity build edta-gui_v2.0.sif docker-archive://edtagui2.tar
+docker save annotep/edta-gui:v2.0.1 -o edtagui2.tar
+singularity build edta-gui_v2.0.1.sif docker-archive://edtagui2.tar
 ```
 
 **Step 2. Start the interface:**
@@ -483,7 +492,7 @@ singularity exec --cleanenv \
   --bind $HOME/results-edtagui:/usr/local/EDTA/gui/backend/results \
   --env DISPLAY_PATH_MAP=/usr/local/EDTA/gui/backend/results=$HOME/results-edtagui \
   --pwd /usr/local/EDTA/gui/backend \
-  edta-gui_v2.0.sif \
+  edta-gui_v2.0.1.sif \
   /usr/local/miniconda3/bin/conda run --no-capture-output -n annotepgui_3_11 \
   uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```

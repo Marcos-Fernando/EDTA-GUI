@@ -38,7 +38,7 @@ EDTA mode
   Genome sequence: genome.fa
   Advanced options: Overwrite, Sensitivity, Annotation and MAKER mask on
   Coding DNA sequence: genome.cds.fa
-  Curated library: rice7.0.0.liban (folder database/ of the repository)
+  Curated library: rice7.0.1.liban (folder database/ of the repository)
   Exclusion of masked regions: genome.exclude.bed
 
 AnnoTEP mode
@@ -56,7 +56,7 @@ Command line (conda installation: bash ~/EDTA-GUI/install.sh)
 No "conda activate" is needed. Run in the work folder:
 
 # EDTA (with --anno 1, also writes the charts and reports in REPORT/)
-nohup EDTA --genome genome.fa --cds genome.cds.fa --curatedlib ~/EDTA-GUI/database/rice7.0.0.liban --exclude genome.exclude.bed --overwrite 1 --sensitive 1 --anno 1 --evaluate 1 --threads 10 > EDTA.test 2>&1 &
+nohup EDTA --genome genome.fa --cds genome.cds.fa --curatedlib ~/EDTA-GUI/database/rice7.0.1.liban --exclude genome.exclude.bed --overwrite 1 --sensitive 1 --anno 1 --evaluate 1 --threads 10 > EDTA.test 2>&1 &
 
 # AnnoTEP (also writes the charts and reports in REPORT/)
 nohup AnnoTEP --genome TAIR10_chr1.fa --species others --step all --sensitive 1 --anno 1 --threads 10 > AnnoTEP.test 2>&1 &
@@ -71,7 +71,7 @@ Command line with Docker (image annotep/edta-gui:v2.0)
 ------------------------------------------------------
 Run in the work folder (it becomes /data inside the container):
 
-docker run --rm -u $(id -u):$(id -g) --pids-limit 300000 --memory-swap -1 -v "$PWD":/data -w /data annotep/edta-gui:v2.0 EDTA --genome genome.fa --cds genome.cds.fa --curatedlib /usr/local/EDTA/database/rice7.0.0.liban --exclude genome.exclude.bed --overwrite 1 --sensitive 1 --anno 1 --evaluate 1 --threads 10 > EDTA.test 2>&1
+docker run --rm -u $(id -u):$(id -g) --pids-limit 300000 --memory-swap -1 -v "$PWD":/data -w /data annotep/edta-gui:v2.0 EDTA --genome genome.fa --cds genome.cds.fa --curatedlib /usr/local/EDTA/database/rice7.0.1.liban --exclude genome.exclude.bed --overwrite 1 --sensitive 1 --anno 1 --evaluate 1 --threads 10 > EDTA.test 2>&1
 
 docker run --rm -u $(id -u):$(id -g) --pids-limit 300000 --memory-swap -1 -v "$PWD":/data -w /data annotep/edta-gui:v2.0 AnnoTEP --genome TAIR10_chr1.fa --species others --step all --sensitive 1 --anno 1 --threads 10 > AnnoTEP.test 2>&1
 
