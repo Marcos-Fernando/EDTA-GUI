@@ -81,13 +81,13 @@ echo "Starting adapted ProcessRepeats ..."
 perl $PROCESSREPEATS/ProcessRepeats-lite.pl -species viridiplantae -nolow -noint "${genome}.mod.filtered.cat.gz"
 
 # Renames the output file to indicate that the LITE
-mv "${genome}.mod.filtered.tbl" "${genome}.mod-LITE.tbl"
+mv "${genome}.mod.filtered.tbl" "TEs-report-lite.tbl"
 
 # Perfoms processing with the Perl Script "ProcessRepeats-complete.pl"
 perl $PROCESSREPEATS/ProcessRepeats-complete.pl -species viridiplantae -nolow -noint -a "${genome}.mod.filtered.cat.gz"
 
 # Renames the output file to indicate that the COMPLETE
-mv "${genome}.mod.filtered.tbl" "${genome}.mod-COMPLETE.tbl"
+mv "${genome}.mod.filtered.tbl" "TEs-report-complete.tbl"
 
 #
 #
@@ -222,10 +222,10 @@ cd ..
 #
 echo "Starting creation of TE bar and bubble plots ..."
 #
-cat $genome.mod-LITE.tbl | grep "%"   | cut -f 2 -d":"   | awk '{print $1}' > count.txt
-cat $genome.mod-LITE.tbl | grep "%"   | cut -f 2 -d":"   | awk '{print $2}' > bp.txt
-cat $genome.mod-LITE.tbl | grep "%"   | cut -f 2 -d":"   | awk '{print $4}' > percentage.txt
-cat $genome.mod-LITE.tbl | grep "%"   | cut -f 1 -d":"   | sed 's# ##g'  | sed 's#-##g'  | sed 's#|##g' > names.txt
+cat TEs-report-lite.tbl | grep "%"   | cut -f 2 -d":"   | awk '{print $1}' > count.txt
+cat TEs-report-lite.tbl | grep "%"   | cut -f 2 -d":"   | awk '{print $2}' > bp.txt
+cat TEs-report-lite.tbl | grep "%"   | cut -f 2 -d":"   | awk '{print $4}' > percentage.txt
+cat TEs-report-lite.tbl | grep "%"   | cut -f 1 -d":"   | sed 's# ##g'  | sed 's#-##g'  | sed 's#|##g' > names.txt
 #
 #
 #

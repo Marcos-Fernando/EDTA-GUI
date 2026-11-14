@@ -159,19 +159,19 @@ tail -f AnnoTEP.log
 > - 🐳 [Docker](https://docs.docker.com/engine/install/)
 > - 📦 [Singularity](https://docs.sylabs.io/guides/3.5/user-guide/quick_start.html)
 
-The image `annotep/edta-gui:v2.0` has the interface and the command line. Nothing else needs to be installed.
+The image `annotep/edta-gui:v2.0.1` has the interface and the command line. Nothing else needs to be installed.
 
 ## Docker
 **Step 1. Download the image** (about 9 GB, only once):
 ```sh
-docker pull annotep/edta-gui:v2.0
+docker pull annotep/edta-gui:v2.0.1
 ```
 
 **Step 2. Run AnnoTEP.** As with conda, there are two ways:
 
 📌 **Traditional – full `docker run` command:** run it inside the folder that has the genome:
 ```sh
-docker run --rm -u $(id -u):$(id -g) --pids-limit 300000 --memory-swap -1 -v "$PWD":/data -w /data annotep/edta-gui:v2.0 AnnoTEP --genome At.fasta --species others --step all --sensitive 1 --anno 1 --threads 20 -u 7.0e-9
+docker run --rm -u $(id -u):$(id -g) --pids-limit 300000 --memory-swap -1 -v "$PWD":/data -w /data annotep/edta-gui:v2.0.1 AnnoTEP --genome At.fasta --species others --step all --sensitive 1 --anno 1 --threads 20 -u 7.0e-9
 ```
 
 >[!TIP]
@@ -203,22 +203,22 @@ You can use AnnoTEP with Singularity by converting the official Docker image.
 **Step 1. Obtaining the Singularity Image** (choose one):
 ```sh
 # directly from Docker Hub
-singularity build edta-gui_v2.0.sif docker://annotep/edta-gui:v2.0
+singularity build edta-gui_v2.0.1.sif docker://annotep/edta-gui:v2.0.1
 
 # from a .tar file (to take the image to a computer without internet)
-docker save annotep/edta-gui:v2.0 -o edtagui2.tar
-singularity build edta-gui_v2.0.sif docker-archive://edtagui2.tar
+docker save annotep/edta-gui:v2.0.1 -o edtagui2.tar
+singularity build edta-gui_v2.0.1.sif docker-archive://edtagui2.tar
 ```
 
 >[!TIP]
 > ### Description:
-> - ``edta-gui_v2.0.sif``: you can name the image anything you like; the extension must be ``.sif``.
+> - ``edta-gui_v2.0.1.sif``: you can name the image anything you like; the extension must be ``.sif``.
 > - ``docker://``: the image is pulled from a remote repository (e.g. Docker Hub).
 > - ``docker-archive://``: the image is built from a local ``.tar`` archive.
 
 **Step 2. Running the Image:** inside the folder that has the genome:
 ```sh
-singularity exec edta-gui_v2.0.sif AnnoTEP --genome At.fasta --species others --step all --sensitive 1 --anno 1 --threads 20 -u 7.0e-9
+singularity exec edta-gui_v2.0.1.sif AnnoTEP --genome At.fasta --species others --step all --sensitive 1 --anno 1 --threads 20 -u 7.0e-9
 ```
 
 > [!TIP]

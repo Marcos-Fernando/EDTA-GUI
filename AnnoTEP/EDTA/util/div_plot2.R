@@ -116,3 +116,6 @@ print(div_p)
 
 # Close the PDF device
 dev.off()
+
+# Same plot as PNG, next to the PDF
+ggsave(sub("\\.pdf$", ".png", output_file_name), div_p, width = 6, height = 4, dpi = 300)
